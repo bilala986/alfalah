@@ -75,13 +75,7 @@
   box-shadow: 0 0.75rem 1.5rem rgba(0, 109, 50, 0.25);
 }
 
-/* Closer spacing between text and icon */
-#mission .row > .col-md-7 {
-  margin-right: 10px;
-  margin-left: 10px;
-}
-
-/* Scroll animation */
+/* Mission row text next to icon */
 .mission-row {
   opacity: 0;
   transform: translateX(-50px);
@@ -92,12 +86,23 @@
   transform: translateX(0);
 }
 
+/* Gap between progress bar and icon */
+.mission-row > div:first-child {
+  margin-left: 20px; /* gap from progress bar */
+}
+
+/* Gap between icon and text */
+.mission-row > div:nth-child(2) {
+  margin-left: 20px;
+  flex: 1; /* text stretches to the end */
+}
+
 /* Tick circles on progress bar */
 .mission-tick {
   position: absolute;
-  left: -6px; /* align with progress bar */
-  width: 16px;
-  height: 16px;
+  left: -20px; /* next to the progress bar */
+  width: 20px;
+  height: 20px;
   background-color: #d1e7dd;
   border-radius: 50%;
   display: flex;
@@ -109,5 +114,6 @@
   transition: background-color 0.3s ease;
 }
 .mission-tick.active {
-  background-color: #198754; /* green tick */
+  background-color: #198754;
 }
+
