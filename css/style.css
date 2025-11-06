@@ -1,0 +1,79 @@
+/* css/style.css */
+
+/* HERO: base container */
+.hero-section {
+  position: relative;
+  min-height: 80vh;
+  background-color: #ffffff; /* white behind the image */
+  display: flex;
+  align-items: center;
+  overflow: hidden; /* keep the pseudo-element clipped */
+}
+
+/* The image lives in the ::after pseudo-element so we can mask only the image */
+.hero-section::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 47.5%; /* image takes up a bit more space horizontally */
+  height: 100%;
+  background-image: url('../img/hero.jpeg');
+  background-repeat: no-repeat;
+  background-position: right center;
+
+  /* Zoom out slightly (acts like a smaller background image) */
+  background-size: 110% auto;
+
+  z-index: 1;
+  pointer-events: none;
+
+  /* Fade starts further to the right now */
+  -webkit-mask-image: linear-gradient(
+    to left,
+    rgba(0, 0, 0, 1) 0%,
+    rgba(0, 0, 0, 1) 60%,
+    rgba(0, 0, 0, 0) 100%
+  );
+  mask-image: linear-gradient(
+    to left,
+    rgba(0, 0, 0, 1) 0%,
+    rgba(0, 0, 0, 1) 60%,
+    rgba(0, 0, 0, 0) 100%
+  );
+}
+
+
+/* Ensure text sits above the image */
+.hero-section .container {
+  position: relative;
+  z-index: 2;
+}
+
+/* Mobile fallback: image becomes full width and mask removed for better display on small screens */
+@media (max-width: 768px) {
+  .hero-section {
+    min-height: 60vh;
+  }
+
+  .hero-section::after {
+    left: 0;
+    right: 0;
+    width: 100%;
+    background-position: center;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+}
+
+
+#mission .rounded-circle {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+#mission .rounded-circle:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0.75rem 1.5rem rgba(0, 109, 50, 0.25);
+}
+
+
+
