@@ -125,79 +125,83 @@
         </section>
 
         <!-- Mission Section -->
-        <section id="mission" class="py-5" style="background-color: #f9fcfa;">
-          <div class="container">
+        <section id="mission" class="py-5 position-relative" style="background-color: #f9fcfa;">
+          <div class="container position-relative">
             <h2 class="text-center text-success mb-5">Our Mission</h2>
 
+            <!-- Vertical Progress Bar (left side) -->
+            <div class="position-absolute top-0 start-0 h-100 d-none d-md-block" style="width: 4px; background-color: #d1e7dd;" id="mission-bar-bg"></div>
+            <div class="position-absolute top-0 start-0 h-0 d-none d-md-block bg-success" style="width: 4px;" id="mission-bar"></div>
+
             <!-- Row 1: Text Left / Icon Right -->
-            <div class="row align-items-center mb-5">
+            <div class="row align-items-center mb-5 mission-row" data-index="0">
               <div class="col-md-7">
                 <h4 class="fw-bold text-success">Islamic Identity</h4>
                 <p class="text-muted fs-5">
-                  Our foremost mission is to nurture strong and confident Islamic identities in every student. We aim to instill
-                  pride in Islamic values, love for the Qur’an and Sunnah, and respect for our rich faith heritage. Students
-                  learn to integrate their beliefs into daily life, guided by positive role models, Islamic manners, and reflection,
-                  helping them grow into compassionate and practicing Muslims.
+                  Our foremost mission is to nurture strong and confident Islamic identities in every student. We instill
+                  pride in Islamic values, love for the Qur’an and Sunnah, and respect for our faith heritage. Students
+                  integrate their beliefs into daily life, guided by positive role models and reflection, growing into
+                  compassionate, practicing Muslims.
                 </p>
               </div>
-              <div class="col-md-5 text-center">
+              <div class="col-md-5 text-center position-relative">
                 <div class="bg-white rounded-circle shadow-sm d-inline-flex align-items-center justify-content-center"
-                     style="width: 120px; height: 120px;">
+                     style="width: 120px; height: 120px;" id="mission-icon-0">
                   <i class="bi bi-moon-stars-fill fs-1 text-success"></i>
                 </div>
               </div>
             </div>
 
-            <!-- Row 2: Icon Left / Text Right -->
-            <div class="row align-items-center flex-md-row-reverse mb-5">
+            <!-- Row 2: Text Left / Icon Right -->
+            <div class="row align-items-center mb-5 mission-row" data-index="1">
               <div class="col-md-7">
                 <h4 class="fw-bold text-success">Knowledge & Values</h4>
                 <p class="text-muted fs-5">
                   We provide authentic Islamic knowledge that empowers students intellectually and spiritually. Lessons on Fiqh,
                   Aqeedah, and Seerah are combined with practical guidance to cultivate honesty, humility, and perseverance.
-                  Students are encouraged to balance knowledge with action, applying their learning to everyday life while staying
-                  grounded in moral and ethical values.
+                  Students learn to balance knowledge with action, applying their learning to everyday life while staying
+                  grounded in ethics.
                 </p>
               </div>
-              <div class="col-md-5 text-center">
+              <div class="col-md-5 text-center position-relative">
                 <div class="bg-white rounded-circle shadow-sm d-inline-flex align-items-center justify-content-center"
-                     style="width: 120px; height: 120px;">
+                     style="width: 120px; height: 120px;" id="mission-icon-1">
                   <i class="bi bi-lightbulb-fill fs-1 text-success"></i>
                 </div>
               </div>
             </div>
 
             <!-- Row 3: Text Left / Icon Right -->
-            <div class="row align-items-center mb-5">
+            <div class="row align-items-center mb-5 mission-row" data-index="2">
               <div class="col-md-7">
                 <h4 class="fw-bold text-success">Spiritual Growth</h4>
                 <p class="text-muted fs-5">
                   We cultivate a deep spiritual connection between students and Allah (SWT) through prayer, reflection, and
-                  remembrance. By celebrating good deeds and teaching self-discipline, we help students develop taqwa, resilience,
+                  remembrance. Celebrating good deeds and teaching self-discipline helps students develop taqwa, resilience,
                   and emotional maturity, guiding them to lead with compassion and integrity in all aspects of life.
                 </p>
               </div>
-              <div class="col-md-5 text-center">
+              <div class="col-md-5 text-center position-relative">
                 <div class="bg-white rounded-circle shadow-sm d-inline-flex align-items-center justify-content-center"
-                     style="width: 120px; height: 120px;">
+                     style="width: 120px; height: 120px;" id="mission-icon-2">
                   <i class="bi bi-heart-fill fs-1 text-success"></i>
                 </div>
               </div>
             </div>
 
-            <!-- Row 4: Icon Left / Text Right -->
-            <div class="row align-items-center flex-md-row-reverse">
+            <!-- Row 4: Text Left / Icon Right -->
+            <div class="row align-items-center mission-row" data-index="3">
               <div class="col-md-7">
                 <h4 class="fw-bold text-success">Qur’anic Excellence</h4>
                 <p class="text-muted fs-5">
-                  The Qur’an is central to our approach. Students are trained to recite with precision and understand its teachings,
-                  applying them in daily life. Our Tajwid and Hifdh programmes develop discipline, focus, and a lifelong love
-                  for the Qur’an, helping students find guidance, inspiration, and comfort in its verses.
+                  The Qur’an is central to our approach. Students are trained to recite with precision and understand its teachings.
+                  Tajwid and Hifdh programmes develop discipline, focus, and a lifelong love for the Qur’an, helping students
+                  find guidance, inspiration, and comfort in its verses.
                 </p>
               </div>
-              <div class="col-md-5 text-center">
+              <div class="col-md-5 text-center position-relative">
                 <div class="bg-white rounded-circle shadow-sm d-inline-flex align-items-center justify-content-center"
-                     style="width: 120px; height: 120px;">
+                     style="width: 120px; height: 120px;" id="mission-icon-3">
                   <i class="bi bi-book-fill fs-1 text-success"></i>
                 </div>
               </div>
@@ -205,6 +209,8 @@
 
           </div>
         </section>
+
+
 
 
 
@@ -235,5 +241,6 @@
 
         <!-- Bootstrap JS -->
         <script src="bootstrap/js/bootstrap.bundle.min.js"></script>
+        <script src="js/script.js"></script>
     </body>
 </html>
