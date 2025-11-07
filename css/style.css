@@ -160,6 +160,16 @@
 }
 
 
+/* Add spacing above intensive course section */
+#intensive-course {
+  margin-top: 4rem; /* creates a clear gap from the previous section */
+}
+
+@media (max-width: 768px) {
+  #intensive-course {
+    margin-top: 3rem;
+  }
+}
 
 
 
