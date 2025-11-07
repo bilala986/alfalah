@@ -118,3 +118,15 @@
 }
 
 
+
+/* Circle fill effect when progress reaches it */
+#mission .rounded-circle.filled {
+  background-color: #198754;
+  color: #fff;
+  transition: background-color 0.4s ease, color 0.4s ease;
+}
+#mission .rounded-circle.filled i {
+  color: #fff !important;
+}
+
+
