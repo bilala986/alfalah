@@ -1,44 +1,44 @@
 document.addEventListener('DOMContentLoaded', () => {
   const rows = document.querySelectorAll('.mission-row');
   const bar = document.getElementById('mission-bar');
+  const barContainer = document.querySelector('#mission-bar-bg');
 
-  // Animate text rows on scroll
+  // Animate mission rows on scroll
   const observer = new IntersectionObserver(entries => {
     entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('animate');
-      }
+      if (entry.isIntersecting) entry.target.classList.add('animate');
     });
   }, { threshold: 0.2 });
   rows.forEach(row => observer.observe(row));
 
-  // Create tick elements for each icon
+  // Create tick markers inside the progress bar
+  const ticks = [];
   rows.forEach((row, idx) => {
     const icon = row.querySelector('.rounded-circle');
     const tick = document.createElement('div');
     tick.classList.add('mission-tick');
-    tick.style.top = `${icon.offsetTop + icon.offsetHeight / 2 - 10}px`; // center tick vertically
-    tick.innerHTML = '✔';
-    row.querySelector('div:first-child').appendChild(tick);
+    const topPos = icon.offsetTop + row.offsetTop + icon.offsetHeight / 2 - 7;
+    tick.style.top = `${topPos}px`;
+    barContainer.appendChild(tick);
+    ticks.push({ el: tick, top: topPos });
   });
 
-  const ticks = document.querySelectorAll('.mission-tick');
-
-  // Scroll bar progress & tick activation
+  // Update progress bar & tick activation on scroll
   window.addEventListener('scroll', () => {
-    const sectionTop = document.getElementById('mission').offsetTop;
-    const sectionHeight = document.getElementById('mission').offsetHeight;
+    const section = document.getElementById('mission');
+    const sectionTop = section.offsetTop;
+    const sectionHeight = section.offsetHeight;
     const scrollPos = window.scrollY + window.innerHeight / 2;
     const progress = Math.min(Math.max((scrollPos - sectionTop) / sectionHeight, 0), 1);
     bar.style.height = `${progress * 100}%`;
 
-    ticks.forEach((tick, idx) => {
-      const row = rows[idx];
-      const iconTop = row.querySelector('.rounded-circle').offsetTop + row.offsetTop;
-      if (scrollPos >= iconTop) {
-        tick.classList.add('active');
+    ticks.forEach(({ el, top }) => {
+      if (scrollPos >= top + sectionTop) {
+        el.classList.add('active');
+        el.innerHTML = '✔';
       } else {
-        tick.classList.remove('active');
+        el.classList.remove('active');
+        el.innerHTML = '';
       }
     });
   });
