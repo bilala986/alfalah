@@ -152,9 +152,18 @@
 
 
 
+
+
+
+/* MISSION SECTION */
+
+/* Base icons for desktop */
 #mission .rounded-circle {
+  width: 80px;
+  height: 80px;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
+
 #mission .rounded-circle:hover {
   transform: scale(1.1);
   box-shadow: 0 0.75rem 1.5rem rgba(0, 109, 50, 0.25);
@@ -202,8 +211,6 @@
   color: #fff;
 }
 
-
-
 /* Circle fill effect when progress reaches it */
 #mission .rounded-circle.filled {
   background-color: #198754;
@@ -224,35 +231,32 @@
   }
 }
 
-/* Apply the pulse animation smoothly */
 #mission .rounded-circle.filled {
   animation: pulse-icon 0.6s ease;
   box-shadow: 0 0.75rem 1.5rem rgba(25, 135, 84, 0.25);
 }
 
+/* Tablet adjustments: slightly smaller icons */
+@media (max-width: 1024px) and (min-width: 769px) {
+  #mission .rounded-circle {
+    width: 70px;
+    height: 70px;
+  }
 
-
-#intensive-course iframe {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-#intensive-course iframe:hover {
-  transform: scale(1.01);
-  box-shadow: 0 1rem 2rem rgba(0, 109, 50, 0.15);
-}
-
-#intensive-course h2 {
-  font-size: 2rem;
+  #mission .rounded-circle i {
+    font-size: 1.1rem;
+  }
 }
 
-
-/* Add spacing above intensive course section */
-#intensive-course {
-  margin-top: 4rem; /* creates a clear gap from the previous section */
-}
-
+/* Phone adjustments: smaller icons (reduced slightly more) */
 @media (max-width: 768px) {
-  #intensive-course {
-    margin-top: 3rem;
+  #mission .rounded-circle {
+    width: 50px;   /* reduced from 60px */
+    height: 50px;  /* reduced from 60px */
+  }
+
+  #mission .rounded-circle i {
+    font-size: 0.9rem; /* reduced from 1rem */
   }
 }
 
@@ -267,12 +271,16 @@
 
 
 
+/* INTENSIVE COURSE SECTION */
+#intensive-course iframe {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+#intensive-course iframe:hover {
+  transform: scale(1.01);
+  box-shadow: 0 1rem 2rem rgba(0, 109, 50, 0.15);
+}
 
-
-
-
-
-
-
-
+#intensive-course h2 {
+  font-size: 2rem;
+}
 
