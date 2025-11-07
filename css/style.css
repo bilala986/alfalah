@@ -1,26 +1,5 @@
 /* css/style.css */
 
-/* Smooth transition for navbar hide/show */
-.navbar {
-  position: sticky; /* keeps it in page flow */
-  top: 0;
-  width: 100%;
-  z-index: 9999;
-  transition: transform 0.4s ease; /* smooth sliding */
-}
-
-/* Hidden state */
-.navbar.hide {
-  transform: translateY(-100%); /* slides navbar up */
-}
-
-/* Visible state */
-.navbar.show {
-  transform: translateY(0);
-}
-
-
-
 /* HERO: base container */
 .hero-section {
   position: relative;

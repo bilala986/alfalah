@@ -1,26 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-    
-    let lastScrollTop = 0;
-    const navbar = document.querySelector('.navbar');
-    navbar.classList.add('show'); // initial state
-
-    window.addEventListener('scroll', () => {
-        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-
-        if (scrollTop > lastScrollTop) {
-            // Scrolling down → hide navbar
-            navbar.classList.remove('show');
-            navbar.classList.add('hide');
-        } else {
-            // Scrolling up → show navbar
-            navbar.classList.remove('hide');
-            navbar.classList.add('show');
-        }
-
-        lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
-    });
-
-    
     const rows = document.querySelectorAll('.mission-row');
     const bar = document.getElementById('mission-bar');
     const barContainer = document.querySelector('#mission-bar-bg');
