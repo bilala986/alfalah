@@ -1,0 +1,201 @@
+body {
+    background-color: #f5f7fa;
+    margin: 0;
+    padding: 0;
+}
+
+/* ---------------------- SIDEBAR ---------------------- */
+
+.sidebar {
+    width: 250px;
+    height: 100vh;
+    background-color: #ffffff;
+    color: #333;
+    position: fixed;
+    top: 0;
+    left: -250px;
+    transition: all 0.3s ease;
+    border-right: 1px solid #e6e6e6;
+    padding-top: 10px;
+    z-index: 999;
+}
+
+.sidebar.show {
+    left: 0;
+}
+
+.sidebar-header {
+    padding-bottom: 15px;
+    border-bottom: 1px solid #e6e6e6;
+}
+
+/* Sidebar Links */
+.sidebar a {
+    display: block;
+    padding: 12px 20px;
+    color: #333;
+    text-decoration: none;
+    font-size: 15px;
+    border-left: 4px solid transparent;
+    transition: all 0.25s ease;
+}
+
+.sidebar a:hover {
+    background-color: #e9f7ee;
+    border-left: 4px solid #28a745;
+    color: #28a745;
+}
+
+.sidebar a.active {
+    background-color: #e9f7ee;
+    border-left: 4px solid #28a745;
+    color: #28a745;
+}
+
+/* Logout Style */
+.sidebar a.logout:hover {
+    background-color: #fdeaea;
+    border-left: 4px solid #dc3545;
+    color: #dc3545;
+}
+
+/* Toggle Close Button */
+.toggle-btn {
+    background: none;
+    border: none;
+    font-size: 1.4rem;
+    cursor: pointer;
+    color: #333;
+}
+
+
+/* ---------------------- HEADER BAR ---------------------- */
+
+.header-bar {
+    width: 100%;
+    background: #ffffff;
+    padding: 15px 20px;
+    border-bottom: 1px solid #e6e6e6;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 900;
+}
+
+.open-sidebar-btn {
+    font-size: 1.9rem;
+    background: none;
+    border: none;
+    color: #333;
+    cursor: pointer;
+}
+
+
+/* ---------------------- CONTENT AREA ---------------------- */
+
+.content {
+    margin-left: 0;
+    padding: 100px 30px 30px 30px; /* space for fixed header */
+    transition: margin-left 0.3s ease;
+}
+
+.content.shift {
+    margin-left: 250px;
+    padding-top: 100px !important;
+}
+
+
+/* ---------------------- CARDS ---------------------- */
+
+.card {
+    border-radius: 12px;
+}
+
+.dashboard-title {
+    font-weight: 700;
+    color: #006d32;
+}
+
+
+/* ---------------------- Modern Buttons ---------------------- */
+
+.btn-success-modern {
+  position: relative;
+  display: inline-block;
+  padding: 0.45rem 1.1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(135deg, #198754, #28a745);
+  border: none;
+  border-radius: 0.4rem;
+  overflow: hidden;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+}
+
+.btn-success-modern:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(25, 135, 84, 0.35),
+              0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+.btn-success-modern::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(120deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0) 60%);
+  transform: rotate(25deg) translateX(-100%);
+  transition: transform 0.7s ease;
+  pointer-events: none;
+}
+
+.btn-success-modern:hover::before {
+  transform: rotate(25deg) translateX(100%);
+}
+
+.btn-success-modern:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+}
+
+
+/* ---------------------- MOBILE ---------------------- */
+
+@media (max-width: 768px) {
+
+    .sidebar {
+        width: 100%;
+        height: auto;
+        left: 0;
+        top: -300px;
+        border-right: none;
+        border-bottom: 1px solid #dcdcdc;
+    }
+
+    .sidebar.show {
+        top: 0;
+    }
+
+    .content {
+        margin-left: 0 !important;
+        padding-top: 100px !important;
+    }
+
+    .content.shift {
+        margin-left: 0 !important;
+    }
+
+    .sidebar a {
+        padding: 15px 22px;
+        font-size: 16px;
+    }
+
+    .toggle-btn {
+        font-size: 1.6rem;
+        padding: 5px;
+    }
+}

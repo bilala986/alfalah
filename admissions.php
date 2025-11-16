@@ -60,7 +60,7 @@
             <form action="process_admissions.php" method="POST">
 
                 <!-- CHILD DETAILS -->
-                <h3 class="section-title"><i class="bi bi-person-fill"></i> Child’s Details</h3>
+                <h3 class="section-title"><i class="bi bi-person-fill"></i> Student’s Details</h3>
 
                 <div class="mb-3">
                     <label class="form-label fw-semibold">Full Name</label>
@@ -83,7 +83,25 @@
 
                 <div class="mb-3">
                     <label class="form-label fw-semibold">School Year</label>
-                    <input type="number" class="form-control" min="1" max="13" name="child_school_year" required>
+                    <select class="form-select" name="child_school_year" required>
+                        <option disabled selected>Select school year</option>
+                        <option>Nursery</option>
+                        <option>Reception</option>
+                        <option>Year 1</option>
+                        <option>Year 2</option>
+                        <option>Year 3</option>
+                        <option>Year 4</option>
+                        <option>Year 5</option>
+                        <option>Year 6</option>
+                        <option>Year 7</option>
+                        <option>Year 8</option>
+                        <option>Year 9</option>
+                        <option>Year 10</option>
+                        <option>Year 11</option>
+                        <option>Year 12</option>
+                        <option>Year 13</option>
+                        <option>Other</option>
+                    </select>
                 </div>
 
                 <div class="mb-3">
