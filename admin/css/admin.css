@@ -1,5 +1,5 @@
 /* ----------------------------------------
-   PORTAL LANDING PAGE
+   PORTAL LANDING PAGE (Green Theme)
 ----------------------------------------- */
 
 .portal-body {
@@ -11,7 +11,7 @@
     overflow: hidden;
 }
 
-/* Subtle animated floating circles */
+/* Floating glow circles (same as parent/teacher) */
 .portal-body::before,
 .portal-body::after {
     content: "";
@@ -46,11 +46,12 @@
     border-radius: 20px;
     backdrop-filter: blur(12px);
     box-shadow: 0 10px 40px rgba(0,0,0,0.25);
-    animation: fadeIn 0.8s ease;
+    animation: slideUp 0.8s ease-out;
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(15px); }
+/* Slide up animation */
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(40px); }
     to   { opacity: 1; transform: translateY(0); }
 }
 
@@ -88,37 +89,60 @@
 }
 
 
+
+
+
+
+
 /* ----------------------------------------
-   LOGIN / SIGNUP PAGES
+   LOGIN & SIGNUP PAGES
 ----------------------------------------- */
+
 .login-body {
     background: #eef2f3;
-    padding: 50px 0;
+    padding: 60px 0;
+    min-height: 100vh;
 }
 
 .login-wrapper {
     display: flex;
     justify-content: center;
+    padding: 20px;
 }
 
 .login-glass-card {
     width: 380px;
-    background: rgba(255,255,255,0.9);
+    background: rgba(255,255,255,0.92);
     backdrop-filter: blur(12px);
-    padding: 35px 32px;
+    padding: 38px 34px;
     border-radius: 20px;
-    box-shadow: 0 10px 28px rgba(0,0,0,0.12);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+    animation: slideUp 0.8s ease-out;
 }
 
+/* Logo */
 .login-logo {
-    height: 65px;
+    height: 70px;
 }
 
+/* Title */
 .login-title {
     font-weight: 700;
     color: #066b35;
 }
 
+/* Inputs */
+.form-control {
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1px solid #cbd5e1;
+    transition: 0.25s;
+}
+
+.form-control:focus {
+    border-color: #0e8a4a;
+    box-shadow: 0 0 0 3px rgba(14,138,74,0.15);
+}
 
 
 
@@ -180,25 +204,30 @@
 
 
 
+/* ----------------------------------------
+   Dashboard
+----------------------------------------- */
 
-
-
-/* ==== PARENT DASHBOARD ==== */
 
 body {
     background-color: #f5f7fa;
+    margin: 0;
+    padding: 0;
 }
 
-/* SIDEBAR */
+/* ---------------------- SIDEBAR ---------------------- */
+
 .sidebar {
     width: 250px;
     height: 100vh;
     background-color: #ffffff;
+    color: #333;
     position: fixed;
     top: 0;
     left: -250px;
     transition: all 0.3s ease;
     border-right: 1px solid #e6e6e6;
+    padding-top: 10px;
     z-index: 999;
 }
 
@@ -211,6 +240,7 @@ body {
     border-bottom: 1px solid #e6e6e6;
 }
 
+/* Sidebar Links */
 .sidebar a {
     display: block;
     padding: 12px 20px;
@@ -218,54 +248,85 @@ body {
     text-decoration: none;
     font-size: 15px;
     border-left: 4px solid transparent;
-    transition: 0.25s;
+    transition: all 0.25s ease;
 }
 
-.sidebar a:hover,
+.sidebar a:hover {
+    background-color: #e9f7ee;
+    border-left: 4px solid #28a745;
+    color: #28a745;
+}
+
 .sidebar a.active {
     background-color: #e9f7ee;
     border-left: 4px solid #28a745;
     color: #28a745;
 }
 
+/* Logout Style */
 .sidebar a.logout:hover {
     background-color: #fdeaea;
     border-left: 4px solid #dc3545;
     color: #dc3545;
 }
 
-/* HEADER */
+/* Toggle Close Button */
+.toggle-btn {
+    background: none;
+    border: none;
+    font-size: 1.4rem;
+    cursor: pointer;
+    color: #333;
+}
+
+
+/* ---------------------- HEADER BAR ---------------------- */
+
 .header-bar {
-    height: 55px;
+    width: 100%;
     background: #ffffff;
+    padding: 15px 20px;
     border-bottom: 1px solid #e6e6e6;
-    padding: 0 15px;
     position: fixed;
     top: 0;
     left: 0;
-    width: 100%;
     z-index: 900;
 }
 
 .open-sidebar-btn {
-    border: none;
-    background: none;
     font-size: 1.9rem;
+    background: none;
+    border: none;
+    color: #333;
     cursor: pointer;
 }
 
-/* CONTENT */
+
+/* ---------------------- CONTENT AREA ---------------------- */
+
 .content {
-    margin-top: 70px;
-    padding: 30px;
-    transition: 0.3s;
+    margin-left: 0;
+    padding: 100px 30px 30px 30px; /* space for fixed header */
+    transition: margin-left 0.3s ease;
+}
+
+.content.shift {
+    margin-left: 250px;
+    padding-top: 100px !important;
+}
+
+
+/* ---------------------- CARDS ---------------------- */
+
+.card {
+    border-radius: 12px;
 }
 
 .dashboard-title {
     font-weight: 700;
     color: #006d32;
-    text-align: center;
 }
+
 
 /* ---------------------- Modern Buttons ---------------------- */
 
@@ -313,19 +374,15 @@ body {
 }
 
 
+/* ---------------------- MOBILE ---------------------- */
 
-/* Cards */
-.card {
-    border-radius: 12px;
-}
-
-/* MOBILE */
 @media (max-width: 768px) {
+
     .sidebar {
         width: 100%;
         height: auto;
-        top: -300px;
         left: 0;
+        top: -300px;
         border-right: none;
         border-bottom: 1px solid #dcdcdc;
     }
@@ -336,5 +393,20 @@ body {
 
     .content {
         margin-left: 0 !important;
+        padding-top: 100px !important;
+    }
+
+    .content.shift {
+        margin-left: 0 !important;
+    }
+
+    .sidebar a {
+        padding: 15px 22px;
+        font-size: 16px;
+    }
+
+    .toggle-btn {
+        font-size: 1.6rem;
+        padding: 5px;
     }
 }
