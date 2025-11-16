@@ -1,0 +1,114 @@
+/* ====== PAGE HEADER SECTION ====== */
+.admissions-header {
+    position: relative;
+    color: white;
+    padding: 90px 0;
+    text-align: center;
+    background: linear-gradient(135deg, #0e8a4a, #066b35);
+    overflow: hidden;
+}
+
+/* --- Decorative Islamic geometric pattern overlay --- */
+.admissions-header::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: url('https://www.toptal.com/designers/subtlepatterns/uploads/moroccan-flower-dark.png');
+    opacity: 0.13;
+    mix-blend-mode: overlay;
+    pointer-events: none;
+}
+
+/* --- Soft glow vignette for luxury feel --- */
+.admissions-header::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at center, rgba(255,255,255,0.15), transparent 70%);
+    pointer-events: none;
+}
+
+/* --- Elegant text styling --- */
+.admissions-header h1 {
+    font-size: 3.2rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-shadow: 0 3px 8px rgba(0,0,0,0.25);
+    margin-bottom: 10px;
+}
+
+.admissions-header p {
+    font-size: 1.25rem;
+    opacity: 0.95;
+    max-width: 750px;
+    margin: 0 auto;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+/* --- Decorative wave at bottom --- */
+.admissions-header .wave {
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 100%;
+    height: 80px;
+    background: url('https://raw.githubusercontent.com/emmabostian/wave-component/master/wave.svg');
+    background-size: cover;
+    opacity: 0.55;
+}
+
+/* ====== FORM CARD ====== */
+.form-card {
+    background: white;
+    border-radius: 18px;
+    padding: 40px 35px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.10);
+}
+    
+.section-title {
+    font-weight: 700;
+    font-size: 1.4rem;
+    color: #0b7d41;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+    
+.section-title i {
+    font-size: 1.5rem;
+}
+    
+/* ====== INPUTS ====== */
+.form-control, .form-select {
+    border-radius: 8px;
+    padding: 12px 14px;
+    border: 2px solid #d9e6df;
+    transition: 0.25s;
+}
+.form-control:focus, .form-select:focus {
+    border-color: #0b7d41;
+    box-shadow: 0 0 5px rgba(11, 125, 65, 0.4);
+}
+
+/* ====== SUBMIT BUTTON ====== */
+.btn-submit {
+    font-size: 1.2rem;
+    font-weight: 600;
+    padding: 14px 35px;
+    border-radius: 50px;
+    background: linear-gradient(135deg, #0e8a4a, #066b35);
+    border: none;
+    transition: 0.3s;
+}
+.btn-submit:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+}
+    
+/* ====== DIVIDER ====== */
+.form-divider {
+    margin: 40px 0;
+    height: 2px;
+    background: linear-gradient(to right, transparent, #0e8a4a, transparent);
+}
