@@ -1,0 +1,115 @@
+body {
+    background-color: #f5f7fa;
+}
+
+/* SIDEBAR */
+.sidebar {
+    width: 250px;
+    height: 100vh;
+    background-color: #ffffff;
+    position: fixed;
+    top: 0;
+    left: -250px;
+    transition: 0.3s ease;
+    border-right: 1px solid #e6e6e6;
+    z-index: 999;
+}
+
+.sidebar.show { left: 0; }
+
+.sidebar-header {
+    padding-bottom: 15px;
+    border-bottom: 1px solid #e6e6e6;
+}
+
+.sidebar a {
+    padding: 12px 20px;
+    display: block;
+    color: #333;
+    text-decoration: none;
+    border-left: 4px solid transparent;
+    transition: 0.25s;
+}
+
+.sidebar a:hover,
+.sidebar a.active {
+    background: #e9f7ee;
+    border-left: 4px solid #28a745;
+    color: #28a745;
+}
+
+.sidebar a.logout:hover {
+    background: #fdeaea;
+    border-left: 4px solid #dc3545;
+    color: #dc3545;
+}
+
+/* HEADER */
+.header-bar {
+    height: 55px;
+    background: #ffffff;
+    border-bottom: 1px solid #e6e6e6;
+    padding: 0 15px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 900;
+}
+
+.open-sidebar-btn {
+    background: none;
+    border: none;
+    font-size: 1.9rem;
+    cursor: pointer;
+}
+
+/* CONTENT */
+.content {
+    margin-top: 70px;
+    padding: 30px;
+}
+
+.dashboard-title {
+    font-weight: 700;
+    color: #006d32;
+    text-align: center;
+}
+
+/* Cards */
+.card {
+    border-radius: 12px;
+}
+
+/* Buttons */
+.btn-success-modern {
+    padding: 0.45rem 1.1rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: white;
+    border: none;
+    border-radius: 0.4rem;
+    background: linear-gradient(135deg, #198754, #28a745);
+    transition: 0.25s;
+}
+
+.btn-success-modern:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(25,135,84,0.35);
+}
+
+/* MOBILE */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 100%;
+        height: auto;
+        top: -300px;
+        left: 0;
+        border-right: none;
+        border-bottom: 1px solid #dcdcdc;
+    }
+
+    .sidebar.show { top: 0; }
+
+    .content { margin-left: 0 !important; }
+}
