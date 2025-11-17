@@ -80,6 +80,7 @@
                                     placeholder="First Name"
                                     required
                                 />
+                                <div class="invalid-feedback">Please enter the student's first name.</div>
                             </div>
 
                             <div class="col-md-4 mb-3">
@@ -90,15 +91,17 @@
                                     placeholder="Last Name"
                                     required
                                 />
+                                <div class="invalid-feedback">Please enter the student's last name.</div>
                             </div>
 
                             <div class="col-md-4 mb-3">
                                 <select class="form-select" name="student_gender" required>
-                                    <option disabled selected>Gender</option>
+                                    <option value="" disabled selected>Gender</option>
                                     <option>Male</option>
                                     <option>Female</option>
                                     <option>Prefer not to say</option>
                                 </select>
+                                <div class="invalid-feedback">Please select the student's gender.</div>
                             </div>
                         </div>
 
@@ -112,6 +115,7 @@
                                     name="student_dob"
                                     required
                                 />
+                                <div class="invalid-feedback">Please select the student's date of birth.</div>
                             </div>
 
                             <div class="col-md-4 mb-3">
@@ -128,7 +132,7 @@
 
                             <div class="col-md-4 mb-3">
                                 <select class="form-select" name="year_group" id="year_group_select" required>
-                                    <option disabled selected>Select Year Group / Education Level</option>
+                                    <option value="" disabled selected>Select Year Group / Education Level</option>
                                     <option>Nursery</option>
                                     <option>Reception</option>
                                     <option>Year 1</option>
@@ -146,6 +150,7 @@
                                     <option>University</option>
                                     <option value="Other">Other</option>
                                 </select>
+                                <div class="invalid-feedback">Please select a year group.</div>
                             </div>
 
                             <!-- Hidden text input for "Other" -->
@@ -157,8 +162,8 @@
                                     id="year_group_other"
                                     placeholder="Please specify"
                                 />
+                                <div class="invalid-feedback">Please specify the year group.</div>
                             </div>
-
                         </div>
 
                         <div class="row">
@@ -173,13 +178,14 @@
 
                             <div class="col-md-4 mb-3">
                                 <select class="form-select" name="interested_program" required>
-                                    <option disabled selected>Interested Program</option>
+                                    <option value="" disabled selected>Interested Program</option>
                                     <option>Weekday Morning Hifdh</option>
                                     <option>Weekday Evening Hifdh</option>
                                     <option>Weekday Evening Islamic Studies</option>
                                     <option>Weekend Hifdh</option>
                                     <option>Weekend Islamic Studies</option>
                                 </select>
+                                <div class="invalid-feedback">Please select an interested program.</div>
                             </div>
                         </div>
 
@@ -194,29 +200,19 @@
                         <!-- Main Parent -->
                         <div class="row">
                             <div class="col-md-4 mb-3">
-                                <input
-                                    type="text"
-                                    class="form-control"
-                                    name="parent1_first_name"
-                                    placeholder="Parent First Name"
-                                    required
-                                />
+                                <input type="text" class="form-control" name="parent1_first_name" placeholder="Parent First Name" required />
+                                <div class="invalid-feedback">Please enter the first name of the primary parent/guardian.</div>
                             </div>
 
                             <div class="col-md-4 mb-3">
-                                <input
-                                    type="text"
-                                    class="form-control"
-                                    name="parent1_last_name"
-                                    placeholder="Parent Last Name"
-                                    required
-                                />
+                                <input type="text" class="form-control" name="parent1_last_name" placeholder="Parent Last Name" required />
+                                <div class="invalid-feedback">Please enter the last name of the primary parent/guardian.</div>
                             </div>
 
                             <!-- Main Parent Relationship -->
                             <div class="col-md-4 mb-3">
                                 <select class="form-select" id="parent1_relationship_select" name="parent1_relationship" required>
-                                    <option disabled selected>Relationship</option>
+                                    <option value="" disabled selected>Relationship</option>
                                     <option>Mother</option>
                                     <option>Father</option>
                                     <option>Grandparent</option>
@@ -226,74 +222,51 @@
                                     <option>Sister</option>
                                     <option>Other</option>
                                 </select>
+                                <div class="invalid-feedback">Please select the relationship of the primary parent/guardian.</div>
 
                                 <!-- Hidden inputs -->
                                 <input type="text" id="parent1_relationship_other" name="parent1_relationship_other" class="form-control mt-2 d-none" placeholder="Please specify relationship">
+                                <div class="invalid-feedback" id="parent1_other_feedback">Please specify the relationship.</div>
+
                                 <input type="number" id="parent1_sibling_age" name="parent1_sibling_age" class="form-control mt-2 d-none" placeholder="Sibling age" min="0">
+                                <div class="invalid-feedback" id="parent1_sibling_feedback">Sibling is under 18. Please select another guardian.</div>
                             </div>
                         </div>
 
                         <div class="row">
                             <div class="col-md-4 mb-3">
-                                <input
-                                    type="text"
-                                    class="form-control"
-                                    name="parent1_mobile"
-                                    placeholder="Mobile Number (Primary Contact)"
-                                    required
-                                />
+                                <input type="text" class="form-control" name="parent1_mobile" placeholder="Mobile Number (Primary Contact)" required />
+                                <div class="invalid-feedback">Please enter the mobile number of the primary parent/guardian.</div>
                             </div>
 
                             <div class="col-md-4 mb-3">
-                                <input
-                                    type="email"
-                                    class="form-control"
-                                    name="parent1_email"
-                                    placeholder="Email ID (Used for DD Mandate)"
-                                    required
-                                />
+                                <input type="email" class="form-control" name="parent1_email" placeholder="Email ID (Used for DD Mandate)" required />
+                                <div class="invalid-feedback">Please enter a valid email for the primary parent/guardian.</div>
                                 <small class="text-muted d-block mb-3">Use the same email when signing the DD mandate for monthly fees.</small>
                             </div>
 
                             <div class="col-md-4 mb-3">
-                                <input
-                                    type="text"
-                                    class="form-control"
-                                    name="emergency_contact"
-                                    placeholder="Emergency Phone Number"
-                                    required
-                                />
+                                <input type="text" class="form-control" name="emergency_contact" placeholder="Emergency Phone Number" required />
+                                <div class="invalid-feedback">Please enter an emergency contact number.</div>
                             </div>
                         </div>
 
-                        
-
-                        <!-- Additional Parent -->
+                        <!-- Additional Parent (Optional) -->
                         <h5 class="fw-bold mt-2">Additional Parent / Guardian (Optional)</h5>
 
                         <div class="row">
                             <div class="col-md-4 mb-3">
-                                <input
-                                    type="text"
-                                    class="form-control"
-                                    name="parent2_first_name"
-                                    placeholder="Additional First Name"
-                                />
+                                <input type="text" class="form-control" name="parent2_first_name" placeholder="Additional First Name" />
                             </div>
 
                             <div class="col-md-4 mb-3">
-                                <input
-                                    type="text"
-                                    class="form-control"
-                                    name="parent2_last_name"
-                                    placeholder="Additional Last Name"
-                                />
+                                <input type="text" class="form-control" name="parent2_last_name" placeholder="Additional Last Name" />
                             </div>
 
                             <!-- Additional Parent Relationship -->
                             <div class="col-md-4 mb-3">
                                 <select class="form-select" id="parent2_relationship_select" name="parent2_relationship">
-                                    <option disabled selected>Relationship</option>
+                                    <option value="" disabled selected>Relationship</option>
                                     <option>Mother</option>
                                     <option>Father</option>
                                     <option>Grandparent</option>
@@ -306,31 +279,26 @@
 
                                 <!-- Hidden inputs -->
                                 <input type="text" id="parent2_relationship_other" name="parent2_relationship_other" class="form-control mt-2 d-none" placeholder="Please specify relationship">
+                                <div class="invalid-feedback" id="parent2_other_feedback">Please specify the relationship.</div>
+
                                 <input type="number" id="parent2_sibling_age" name="parent2_sibling_age" class="form-control mt-2 d-none" placeholder="Sibling age" min="0">
+                                <div class="invalid-feedback" id="parent2_sibling_feedback">Sibling is under 18. Please select another guardian.</div>
                             </div>
                         </div>
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <input
-                                    type="text"
-                                    class="form-control"
-                                    name="parent2_mobile"
-                                    placeholder="Additional Mobile Number"
-                                />
+                                <input type="text" class="form-control" name="parent2_mobile" placeholder="Additional Mobile Number" />
                             </div>
 
                             <div class="col-md-6 mb-3">
-                                <input
-                                    type="email"
-                                    class="form-control"
-                                    name="parent2_email"
-                                    placeholder="Additional Email Address"
-                                />
+                                <input type="email" class="form-control" name="parent2_email" placeholder="Additional Email Address" />
                             </div>
                         </div>
 
                         <div class="form-divider"></div>
+
+
 
 
                         <!-- ========================= -->
@@ -346,6 +314,7 @@
                                 placeholder="Address"
                                 required
                             />
+                            <div class="invalid-feedback">Please enter the address.</div>
                         </div>
 
                         <div class="row">
@@ -357,6 +326,7 @@
                                     placeholder="City"
                                     required
                                 />
+                                <div class="invalid-feedback">Please enter the city.</div>
                             </div>
 
                             <div class="col-md-4 mb-3">
@@ -366,6 +336,7 @@
                                     name="county"
                                     placeholder="County"
                                 />
+                                <!-- Optional, no invalid-feedback needed -->
                             </div>
 
                             <div class="col-md-4 mb-3">
@@ -376,10 +347,12 @@
                                     placeholder="Postal Code"
                                     required
                                 />
+                                <div class="invalid-feedback">Please enter the postal code.</div>
                             </div>
                         </div>
 
                         <div class="form-divider"></div>
+
 
                         <!-- ========================= -->
                         <!-- MEDICAL INFORMATION -->
@@ -391,9 +364,11 @@
                             <div class="col-md-4">
                                 <label class="form-label fw-semibold">Serious / long-term illness?</label>
                                 <select class="form-select" id="illness_select" name="illness" required>
-                                    <option value="No" selected>No</option>
+                                    <option value="" disabled selected>Select an option</option>
+                                    <option value="No">No</option>
                                     <option value="Yes">Yes</option>
                                 </select>
+                                <div class="invalid-feedback">Please indicate if the student has any serious/long-term illness.</div>
                             </div>
 
                             <div class="col-md-8 d-none" id="illness_details_wrapper">
@@ -402,7 +377,9 @@
                                     name="illness_details"
                                     rows="2"
                                     placeholder="If yes, please provide details (e.g. epilepsy, bronchitis, medication)..."
+                                    required
                                 ></textarea>
+                                <div class="invalid-feedback">Please provide details about the illness.</div>
                             </div>
                         </div>
 
@@ -411,9 +388,11 @@
                             <div class="col-md-4">
                                 <label class="form-label fw-semibold">Special educational / other needs?</label>
                                 <select class="form-select" id="special_needs_select" name="special_needs" required>
-                                    <option value="No" selected>No</option>
+                                    <option value="" disabled selected>Select an option</option>
+                                    <option value="No">No</option>
                                     <option value="Yes">Yes</option>
                                 </select>
+                                <div class="invalid-feedback">Please indicate if the student has any special educational/other needs.</div>
                             </div>
 
                             <div class="col-md-8 d-none" id="special_needs_details_wrapper">
@@ -422,7 +401,9 @@
                                     name="special_needs_details"
                                     rows="2"
                                     placeholder="If yes, please provide details (e.g. support, SEN statements)..."
+                                    required
                                 ></textarea>
+                                <div class="invalid-feedback">Please provide details about special needs.</div>
                             </div>
                         </div>
 
@@ -431,9 +412,11 @@
                             <div class="col-md-4">
                                 <label class="form-label fw-semibold">Any allergies?</label>
                                 <select class="form-select" id="allergies_select" name="allergies" required>
-                                    <option value="No" selected>No</option>
+                                    <option value="" disabled selected>Select an option</option>
+                                    <option value="No">No</option>
                                     <option value="Yes">Yes</option>
                                 </select>
+                                <div class="invalid-feedback">Please indicate if the student has any allergies.</div>
                             </div>
 
                             <div class="col-md-8 d-none" id="allergies_details_wrapper">
@@ -442,11 +425,14 @@
                                     name="allergies_details"
                                     rows="2"
                                     placeholder="If yes, please list allergies and reactions..."
+                                    required
                                 ></textarea>
+                                <div class="invalid-feedback">Please provide details of allergies.</div>
                             </div>
                         </div>
 
                         <div class="form-divider"></div>
+
 
                         <!-- ========================= -->
                         <!-- ADDITIONAL PERMISSIONS (two-column grid) -->

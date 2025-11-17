@@ -8,14 +8,14 @@
 <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
 
 <style>
-    /* Fullscreen gradient background */
+    /* Fullscreen green gradient background */
     body {
         margin: 0;
         height: 100vh;
         display: flex;
         justify-content: center;
         align-items: center;
-        background: linear-gradient(135deg, #f6d365, #fda085);
+        background: linear-gradient(135deg, #0eb26d, #064d2a);
         font-family: 'Poppins', sans-serif;
     }
 
@@ -26,7 +26,7 @@
         padding: 50px 40px;
         max-width: 600px;
         width: 90%;
-        box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+        box-shadow: 0 20px 50px rgba(0,0,0,0.25);
         text-align: center;
         position: relative;
         overflow: hidden;
@@ -38,7 +38,7 @@
         content: '';
         position: absolute;
         border-radius: 50%;
-        background: rgba(253,160,133,0.3);
+        background: rgba(14,178,109,0.3);
         width: 200px;
         height: 200px;
         z-index: 0;
@@ -63,7 +63,7 @@
     .success-container h1 {
         font-size: 2.5rem;
         font-weight: 700;
-        color: #ff6f61;
+        color: #0eb26d; /* Green accent */
         margin-bottom: 20px;
         z-index: 1;
         position: relative;
@@ -80,7 +80,7 @@
 
     .success-container a.btn-return {
         padding: 12px 35px;
-        background: #ff6f61;
+        background: #0eb26d;
         color: white;
         border-radius: 50px;
         font-weight: 600;
@@ -92,11 +92,11 @@
     }
 
     .success-container a.btn-return:hover {
-        background: #ff4c3b;
+        background: #064d2a;
         transform: scale(1.05);
     }
 
-    /* Confetti effect (optional, fun enhancement) */
+    /* Confetti effect */
     @keyframes floatConfetti {
         0% { transform: translateY(0) rotate(0deg); }
         100% { transform: translateY(500px) rotate(360deg); }
@@ -106,7 +106,7 @@
         position: absolute;
         width: 10px;
         height: 10px;
-        background: #ff6f61;
+        background: #0eb26d;
         top: -10px;
         left: 50%;
         animation: floatConfetti 2s linear infinite;
@@ -130,7 +130,7 @@
     <a href="index.html" class="btn-return">Return to Homepage</a>
 </div>
 
-<!-- Optional: small confetti elements for a fun effect -->
+<!-- Confetti -->
 <div class="confetti" style="left:10%; animation-delay: 0s;"></div>
 <div class="confetti" style="left:30%; animation-delay: 0.5s;"></div>
 <div class="confetti" style="left:60%; animation-delay: 1s;"></div>
