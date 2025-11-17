@@ -20,6 +20,40 @@ document.addEventListener("DOMContentLoaded", function () {
         updateVisibility();
         select.addEventListener("change", updateVisibility);
     }
+    
+    // ==========================
+    // PARENT RELATIONSHIP "OTHER" OR SIBLING AGE
+    // ==========================
+    function setupRelationshipDropdown(selectId, otherInputId, siblingAgeId) {
+        const select = document.getElementById(selectId);
+        const otherInput = document.getElementById(otherInputId);
+        const siblingAgeInput = document.getElementById(siblingAgeId);
+
+        if (!select || !otherInput || !siblingAgeInput) return;
+
+        function updateRelationshipFields() {
+            const value = select.value;
+
+            if (value === "Other") {
+                otherInput.classList.remove("d-none");
+                siblingAgeInput.classList.add("d-none");
+            } else if (value === "Brother" || value === "Sister") {
+                siblingAgeInput.classList.remove("d-none");
+                otherInput.classList.add("d-none");
+            } else {
+                otherInput.classList.add("d-none");
+                siblingAgeInput.classList.add("d-none");
+            }
+        }
+
+        updateRelationshipFields();
+        select.addEventListener("change", updateRelationshipFields);
+    }
+
+    // Apply to both parents
+    setupRelationshipDropdown("parent1_relationship_select", "parent1_relationship_other", "parent1_sibling_age");
+    setupRelationshipDropdown("parent2_relationship_select", "parent2_relationship_other", "parent2_sibling_age");
+
 
     // ==========================
     // APPLY TO MEDICAL SECTIONS

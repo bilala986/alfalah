@@ -48,17 +48,18 @@
 
         <!-- HEADER SECTION -->
         <section class="admissions-header">
-            <div class="container">
+            <div class="header-card">
                 <h1>Madrasah Admissions</h1>
                 <p>
-                    Submit your application below. A member of our staff will contact you shortly.<br />
+                    Submit your application below. A member of our staff will contact you shortly.<br>
                     <strong class="text-warning">
                         Please note: Submitting this form does NOT guarantee admission.
                     </strong>
                 </p>
             </div>
-            <div class="wave"></div>
         </section>
+
+
 
         <!-- ADMISSIONS FORM -->
         <section class="py-5">
@@ -212,14 +213,23 @@
                                 />
                             </div>
 
+                            <!-- Main Parent Relationship -->
                             <div class="col-md-4 mb-3">
-                                <input
-                                    type="text"
-                                    class="form-control"
-                                    name="parent1_relationship"
-                                    placeholder="Relationship (e.g. Mother / Father / Guardian)"
-                                    required
-                                />
+                                <select class="form-select" id="parent1_relationship_select" name="parent1_relationship" required>
+                                    <option disabled selected>Relationship</option>
+                                    <option>Mother</option>
+                                    <option>Father</option>
+                                    <option>Grandparent</option>
+                                    <option>Aunt</option>
+                                    <option>Uncle</option>
+                                    <option>Brother</option>
+                                    <option>Sister</option>
+                                    <option>Other</option>
+                                </select>
+
+                                <!-- Hidden inputs -->
+                                <input type="text" id="parent1_relationship_other" name="parent1_relationship_other" class="form-control mt-2 d-none" placeholder="Please specify relationship">
+                                <input type="number" id="parent1_sibling_age" name="parent1_sibling_age" class="form-control mt-2 d-none" placeholder="Sibling age" min="0">
                             </div>
                         </div>
 
@@ -280,13 +290,23 @@
                                 />
                             </div>
 
+                            <!-- Additional Parent Relationship -->
                             <div class="col-md-4 mb-3">
-                                <input
-                                    type="text"
-                                    class="form-control"
-                                    name="parent2_relationship"
-                                    placeholder="Relationship"
-                                />
+                                <select class="form-select" id="parent2_relationship_select" name="parent2_relationship">
+                                    <option disabled selected>Relationship</option>
+                                    <option>Mother</option>
+                                    <option>Father</option>
+                                    <option>Grandparent</option>
+                                    <option>Aunt</option>
+                                    <option>Uncle</option>
+                                    <option>Brother</option>
+                                    <option>Sister</option>
+                                    <option>Other</option>
+                                </select>
+
+                                <!-- Hidden inputs -->
+                                <input type="text" id="parent2_relationship_other" name="parent2_relationship_other" class="form-control mt-2 d-none" placeholder="Please specify relationship">
+                                <input type="number" id="parent2_sibling_age" name="parent2_sibling_age" class="form-control mt-2 d-none" placeholder="Sibling age" min="0">
                             </div>
                         </div>
 
