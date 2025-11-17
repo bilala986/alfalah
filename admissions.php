@@ -65,7 +65,7 @@
         <section class="py-5">
             <div class="container">
                 <div class="col-lg-10 mx-auto form-card">
-                    <form action="process_admissions.php" method="POST" novalidate>
+                    <form action="php/process_admissions.php" method="POST" novalidate>
                         <!-- ========================= -->
                         <!-- STUDENT DETAILS (3-col) -->
                         <!-- ========================= -->

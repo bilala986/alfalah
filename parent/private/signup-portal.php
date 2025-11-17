@@ -18,7 +18,16 @@
         <img src="../../img/logo.png" class="portal-logo" alt="Al Falah Logo">
 
         <h1 class="portal-title">Parent Signup</h1>
-        <p class="portal-subtitle">Create a secure account to access your child's progress, diary, and updates.</p>
+        <p class="portal-subtitle">
+            Please read the instructions carefully. To complete your registration, you must
+            create a Parent Portal account using the <strong>same parent email address</strong>
+            you entered on the admissions form. This ensures your details link correctly
+            to your child's application.
+        </p>
+        <p class="portal-subtitle" style="font-size: 0.95rem; opacity: 0.9;">
+            Once your account is created, you will be able to securely access updates,
+            progress reports, communication, and more.
+        </p>
 
         <a href="signup.php" class="btn portal-btn">Sign Up</a>
 
