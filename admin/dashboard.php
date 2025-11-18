@@ -1,3 +1,11 @@
+<?php
+// At the very top of admin/dashboard.php
+require_once '../php/admin_protect.php';
+// ADD THIS LINE:
+$adminData = $adminAuth->getAdminData();
+?>
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -30,7 +38,9 @@
 
     <hr>
 
-    <a href="#" class="logout"><i class="bi bi-box-arrow-right"></i> Logout</a>
+    <a href="../php/admin_auth.php?action=logout" class="logout" onclick="return confirm('Are you sure you want to logout?')">
+        <i class="bi bi-box-arrow-right"></i> Logout
+    </a>
 </div>
 
 
