@@ -173,9 +173,10 @@
                                     class="form-control"
                                     name="student_school"
                                     placeholder="School"
+                                    required
                                 />
+                                <div class="invalid-feedback">Please enter the student's school.</div>
                             </div>
-
                             <div class="col-md-4 mb-3">
                                 <select class="form-select" name="interested_program" required>
                                     <option value="" disabled selected>Interested Program</option>
@@ -442,47 +443,58 @@
                         <div class="row gy-3 mb-3">
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold">Does student know swimming?</label>
-                                <select class="form-select" name="knows_swimming">
+                                <select class="form-select" name="knows_swimming" required>
+                                    <option value="" disabled selected>Select an option</option>
                                     <option>No</option>
                                     <option>Yes</option>
                                 </select>
+                                <div class="invalid-feedback">Please indicate if the student knows swimming.</div>
                             </div>
 
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold">Travel sickness</label>
-                                <select class="form-select" name="travel_sickness">
+                                <select class="form-select" name="travel_sickness" required>
+                                    <option value="" disabled selected>Select an option</option>
                                     <option>No</option>
                                     <option>Yes</option>
                                 </select>
+                                <div class="invalid-feedback">Please indicate if the student has travel sickness.</div>
                             </div>
 
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold">Travel permission</label>
-                                <select class="form-select" name="travel_permission">
+                                <select class="form-select" name="travel_permission" required>
+                                    <option value="" disabled selected>Select an option</option>
                                     <option>No</option>
                                     <option>Yes</option>
                                 </select>
+                                <div class="invalid-feedback">Please indicate travel permission.</div>
                             </div>
 
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold">Photo permission</label>
-                                <select class="form-select" name="photo_permission">
+                                <select class="form-select" name="photo_permission" required>
+                                    <option value="" disabled selected>Select an option</option>
                                     <option>No</option>
                                     <option>Yes</option>
                                 </select>
+                                <div class="invalid-feedback">Please indicate photo permission.</div>
                             </div>
 
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold">Mode of transport to/from Madrasah</label>
-                                <input type="text" class="form-control" name="transport_mode" placeholder="e.g. Walk / Car / Bus" />
+                                <input type="text" class="form-control" name="transport_mode" placeholder="e.g. Walk / Car / Bus" required />
+                                <div class="invalid-feedback">Please specify the mode of transport.</div>
                             </div>
 
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold">Do you permit your child to go home alone?</label>
-                                <select class="form-select" name="go_home_alone">
+                                <select class="form-select" name="go_home_alone" required>
+                                    <option value="" disabled selected>Select an option</option>
                                     <option>No</option>
                                     <option>Yes</option>
                                 </select>
+                                <div class="invalid-feedback">Please indicate if the child can go home alone.</div>
                             </div>
                         </div>
 
@@ -496,31 +508,36 @@
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold">Already attended Islamic education?</label>
-                                <select class="form-select" id="islamic_select" name="attended_islamic_education">
+                                <select class="form-select" id="islamic_select" name="attended_islamic_education" required>
+                                    <option value="" disabled selected>Select an option</option>
                                     <option>No</option>
                                     <option>Yes</option>
                                 </select>
+                                <div class="invalid-feedback">Please indicate if the student has attended Islamic education.</div>
                             </div>
 
                             <div class="col-md-6 d-none" id="islamic_years_wrapper">
                                 <label class="form-label fw-semibold">If yes, approximate years attended</label>
                                 <input type="text" class="form-control" name="islamic_years" placeholder="e.g. 2 years" />
+                                <div class="invalid-feedback">Please specify approximate years attended.</div>
                             </div>
                         </div>
 
                         <div class="mb-4 d-none" id="islamic_details_wrapper">
                             <textarea class="form-control" name="islamic_education_details" rows="3" placeholder="If yes, please provide details (e.g. institute, syllabus, level)"></textarea>
+                            <div class="invalid-feedback">Please provide details about Islamic education history.</div>
                         </div>
 
                         <!-- PRIVACY POLICY -->
                         <div class="mb-4 form-check">
-                            <input class="form-check-input" type="checkbox" id="privacyPolicy" />
+                            <input class="form-check-input" type="checkbox" id="privacyPolicy" required />
                             <label class="form-check-label" for="privacyPolicy">
                                 I agree to the
                                 <a href="alfalah-privacy-policy.html" target="_blank" class="text-decoration-underline text-success">
                                     Terms and Conditions
                                 </a>
                             </label>
+                            <div class="invalid-feedback">You must agree to the terms and conditions before submitting.</div>
                         </div>
 
                         <div class="text-center mt-4">

@@ -68,22 +68,56 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 
-    // ==========================
-    // ISLAMIC EDUCATION HISTORY
-    // ==========================
-    const islamicSelect = document.getElementById("islamic_select");
-    const islamicYears = document.getElementById("islamic_years_wrapper");
-    const islamicDetails = document.getElementById("islamic_details_wrapper");
+        // ==========================
+        // ISLAMIC EDUCATION HISTORY (ENHANCED)
+        // ==========================
+        const islamicSelect = document.getElementById("islamic_select");
+        const islamicYears = document.getElementById("islamic_years_wrapper");
+        const islamicYearsInput = document.querySelector('input[name="islamic_years"]');
+        const islamicDetails = document.getElementById("islamic_details_wrapper");
+        const islamicDetailsTextarea = document.querySelector('textarea[name="islamic_education_details"]');
 
-    function updateIslamicFields() {
-        if (islamicSelect.value === "Yes") {
-            islamicYears.classList.remove("d-none");
-            islamicDetails.classList.remove("d-none");
-        } else {
-            islamicYears.classList.add("d-none");
-            islamicDetails.classList.add("d-none");
+        function updateIslamicFields() {
+            if (islamicSelect.value === "Yes") {
+                islamicYears.classList.remove("d-none");
+                islamicDetails.classList.remove("d-none");
+                islamicYearsInput.setAttribute("required", "required");
+                islamicDetailsTextarea.setAttribute("required", "required");
+            } else {
+                islamicYears.classList.add("d-none");
+                islamicDetails.classList.add("d-none");
+                islamicYearsInput.removeAttribute("required");
+                islamicDetailsTextarea.removeAttribute("required");
+                islamicYearsInput.value = "";
+                islamicDetailsTextarea.value = "";
+            }
         }
-    }
+
+        updateIslamicFields();
+        islamicSelect.addEventListener("change", updateIslamicFields);
+
+        // ==========================
+        // PRIVACY POLICY VALIDATION
+        // ==========================
+        const privacyPolicyCheckbox = document.getElementById("privacyPolicy");
+
+        // Custom validation for checkbox
+        privacyPolicyCheckbox.addEventListener("change", function() {
+            if (!this.checked) {
+                this.setCustomValidity("You must agree to the terms and conditions before submitting.");
+            } else {
+                this.setCustomValidity("");
+            }
+        });
+
+        // Ensure checkbox validation runs on form submit
+        document.querySelector('form').addEventListener('submit', function() {
+            if (!privacyPolicyCheckbox.checked) {
+                privacyPolicyCheckbox.setCustomValidity("You must agree to the terms and conditions before submitting.");
+            } else {
+                privacyPolicyCheckbox.setCustomValidity("");
+            }
+        });
 
     updateIslamicFields();
     islamicSelect.addEventListener("change", updateIslamicFields);
