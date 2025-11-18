@@ -15,9 +15,11 @@
                 <img src="../img/logo.png" class="login-logo mb-2" alt="Al Falah Logo">
                 <h3 class="login-title mb-4">Admin Login</h3>
 
-                <!-- In admin/login.php - update the form -->
-                <form action="../php/admin_auth.php" method="POST" id="loginForm">
-                    <input type="hidden" name="action" value="login">
+                <!-- Alert area -->
+                <div id="alertBox"></div>
+
+                <!-- Updated form action -->
+                <form action="php/admin_login.php" method="POST" id="loginForm">
                     <div class="mb-3">
                         <input type="email" class="form-control" name="email" placeholder="Email" required>
                     </div>
@@ -25,15 +27,11 @@
                         <input type="password" class="form-control" name="password" placeholder="Password" required>
                     </div>
                     <button type="submit" class="btn btn-login w-100">Login</button>
-                    <!-- Error message container -->
-                    <div class="alert alert-danger mt-3 d-none" id="errorMessage"></div>
                 </form>
             </div>
         </div>
 
         <script src="../bootstrap/js/bootstrap.bundle.min.js"></script>
-        <script src="js/admin.js"></script>
         <script src="js/login.js"></script>
-
     </body>
 </html>

@@ -1,4 +1,4 @@
-// admin/js/signup.js - SIMPLIFIED WORKING VERSION
+// admin/js/signup.js - WITH IMMEDIATE REDIRECT
 
 document.addEventListener("DOMContentLoaded", () => {
     const form = document.getElementById("signupForm");
@@ -33,10 +33,8 @@ document.addEventListener("DOMContentLoaded", () => {
             const data = await response.json();
 
             if (data.success) {
-                showAlert(data.message + " Redirecting to login...", "success");
-                setTimeout(() => {
-                    window.location.href = "../login.php";
-                }, 2000);
+                // ✅ IMMEDIATE redirect to dashboard (no delay)
+                window.location.href = "../dashboard.php";
             } else {
                 showAlert(data.message, "danger");
             }
