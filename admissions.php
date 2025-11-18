@@ -542,6 +542,12 @@
 
                         <div class="text-center mt-4">
                             <button type="submit" class="btn-submit">Submit Application</button>
+
+                            <!-- ADD THIS GENERAL ERROR MESSAGE -->
+                            <div class="alert alert-danger mt-3 d-none" id="generalError" role="alert">
+                                <i class="bi bi-exclamation-triangle-fill"></i>
+                                Please fix the errors highlighted in red above before submitting.
+                            </div>
                         </div>
                     </form>
                 </div>

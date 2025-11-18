@@ -293,5 +293,63 @@ document.addEventListener("DOMContentLoaded", function () {
         "parent2_sibling_feedback"
     );
 
+    
+    
+    
+    
+    
+    
+    
+    
+        // ==========================
+    // GENERAL ERROR MESSAGE
+    // ==========================
+    (function () {
+        'use strict';
+        const forms = document.querySelectorAll('form');
+        const generalError = document.getElementById('generalError');
+
+        forms.forEach(form => {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    
+                    // Show general error message
+                    if (generalError) {
+                        generalError.classList.remove('d-none');
+                        
+                        // Scroll to the general error message
+                        setTimeout(() => {
+                            generalError.scrollIntoView({ 
+                                behavior: 'smooth', 
+                                block: 'center' 
+                            });
+                        }, 100);
+                    }
+                } else {
+                    // Hide general error if form is valid
+                    if (generalError) {
+                        generalError.classList.add('d-none');
+                    }
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+
+        // Hide general error when user starts correcting fields
+        form.addEventListener('input', function () {
+            if (generalError) {
+                generalError.classList.add('d-none');
+            }
+        });
+
+        // Also hide on change events for select elements
+        form.addEventListener('change', function () {
+            if (generalError) {
+                generalError.classList.add('d-none');
+            }
+        });
+    })();
 
 });
