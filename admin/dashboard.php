@@ -63,6 +63,8 @@ require_once 'php/admin_protect.php';
     </div>
     <?php endif; ?>
 
+    <!-- DASHBOARD CARDS (Only show if approved) -->
+    <?php if (!isset($_SESSION['pending_approval']) || !$_SESSION['pending_approval']): ?>
     <div class="row mt-4">
 
         <!-- ADMISSIONS CARD -->
@@ -70,11 +72,7 @@ require_once 'php/admin_protect.php';
             <div class="card shadow-sm p-3">
                 <h5><i class="bi bi-file-earmark-text text-success"></i> Admissions</h5>
                 <p class="text-muted">View new applications.</p>
-                <?php if (isset($_SESSION['pending_approval']) && $_SESSION['pending_approval']): ?>
-                    <button class="btn btn-secondary btn-sm" disabled>Pending Approval</button>
-                <?php else: ?>
-                    <a href="#" class="btn btn-success-modern btn-sm">Open</a>
-                <?php endif; ?>
+                <a href="#" class="btn btn-success-modern btn-sm">Open</a>
             </div>
         </div>
 
@@ -83,11 +81,7 @@ require_once 'php/admin_protect.php';
             <div class="card shadow-sm p-3">
                 <h5><i class="bi bi-people-fill text-success"></i> Students</h5>
                 <p class="text-muted">Manage all registered students.</p>
-                <?php if (isset($_SESSION['pending_approval']) && $_SESSION['pending_approval']): ?>
-                    <button class="btn btn-secondary btn-sm" disabled>Pending Approval</button>
-                <?php else: ?>
-                    <a href="#" class="btn btn-success-modern btn-sm">View</a>
-                <?php endif; ?>
+                <a href="#" class="btn btn-success-modern btn-sm">View</a>
             </div>
         </div>
 
@@ -96,11 +90,7 @@ require_once 'php/admin_protect.php';
             <div class="card shadow-sm p-3">
                 <h5><i class="bi bi-people text-success"></i> Teachers</h5>
                 <p class="text-muted">Manage teacher accounts.</p>
-                <?php if (isset($_SESSION['pending_approval']) && $_SESSION['pending_approval']): ?>
-                    <button class="btn btn-secondary btn-sm" disabled>Pending Approval</button>
-                <?php else: ?>
-                    <a href="#" class="btn btn-success-modern btn-sm">Manage</a>
-                <?php endif; ?>
+                <a href="#" class="btn btn-success-modern btn-sm">Manage</a>
             </div>
         </div>
 
@@ -109,15 +99,29 @@ require_once 'php/admin_protect.php';
             <div class="card shadow-sm p-3">
                 <h5><i class="bi bi-person-heart text-success"></i> Parents</h5>
                 <p class="text-muted">View parent profiles.</p>
-                <?php if (isset($_SESSION['pending_approval']) && $_SESSION['pending_approval']): ?>
-                    <button class="btn btn-secondary btn-sm" disabled>Pending Approval</button>
-                <?php else: ?>
-                    <a href="#" class="btn btn-success-modern btn-sm">Open</a>
-                <?php endif; ?>
+                <a href="#" class="btn btn-success-modern btn-sm">Open</a>
+            </div>
+        </div>
+        
+        <!-- ADMIN ACCOUNTS CARD -->
+        <div class="col-md-4 mb-3">
+            <div class="card shadow-sm p-3">
+                <h5><i class="bi bi-shield-check text-success"></i> Admin Accounts</h5>
+                <p class="text-muted">Manage admin users and approvals.</p>
+                <a href="private/admin-accounts.php" class="btn btn-success-modern btn-sm">Manage</a>
             </div>
         </div>
 
     </div>
+    <?php else: ?>
+    <!-- Pending Approval Message (No Cards) -->
+    <div class="text-center mt-5 py-5">
+        <i class="bi bi-clock display-1 text-warning"></i>
+        <h3 class="mt-3 text-muted">Account Pending Approval</h3>
+        <p class="text-muted">Your admin account is currently under review. You will receive access to all dashboard features once approved.</p>
+    </div>
+    <?php endif; ?>
+
 </div>
 
 <script src="../bootstrap/js/bootstrap.bundle.min.js"></script>
