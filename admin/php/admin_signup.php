@@ -22,8 +22,24 @@ if ($admin_password !== $admin_confirm_password) {
     exit;
 }
 
-if (strlen($admin_password) < 6) {
-    echo json_encode(["success" => false, "message" => "Password must be at least 6 characters long."]);
+// Enhanced password validation
+if (strlen($admin_password) < 8) {
+    echo json_encode(["success" => false, "message" => "Password must be at least 8 characters long."]);
+    exit;
+}
+
+if (!preg_match('/[A-Z]/', $admin_password)) {
+    echo json_encode(["success" => false, "message" => "Password must contain at least one uppercase letter."]);
+    exit;
+}
+
+if (!preg_match('/[0-9]/', $admin_password)) {
+    echo json_encode(["success" => false, "message" => "Password must contain at least one number."]);
+    exit;
+}
+
+if (!preg_match('/[!@#$%^&*()_+\-=\[\]{};\':"\\\\|,.<>\/?]/', $admin_password)) {
+    echo json_encode(["success" => false, "message" => "Password must contain at least one special character."]);
     exit;
 }
 
@@ -42,7 +58,7 @@ try {
     $stmt = $pdo->prepare("INSERT INTO admin_users (name, email, password_hash) VALUES (?, ?, ?)");
     
     if ($stmt->execute([$admin_name, $admin_email, $hashedPassword])) {
-        // ✅ ADD THIS: Set session variables after successful signup
+        // Set session variables after successful signup
         $admin_id = $pdo->lastInsertId();
         $_SESSION['admin_id'] = $admin_id;
         $_SESSION['admin_name'] = $admin_name;

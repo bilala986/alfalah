@@ -27,7 +27,32 @@
                         <input type="email" class="form-control" name="admin_email" placeholder="Email Address" required>
                     </div>
                     <div class="mb-3">
-                        <input type="password" class="form-control" name="admin_password" placeholder="Password" required minlength="6">
+                        <input type="password" class="form-control" name="admin_password" placeholder="Password" required>
+                        
+                        <!-- Password Strength Meter -->
+                        <div id="passwordStrength" class="mt-2" style="display: none;">
+                            <div class="progress" style="height: 6px;">
+                                <div id="passwordProgress" class="progress-bar" role="progressbar" style="width: 0%"></div>
+                            </div>
+                            <div id="passwordRequirements" class="mt-2 small">
+                                <div class="requirement" data-requirement="length">
+                                    <span class="requirement-icon">❌</span>
+                                    At least 8 characters
+                                </div>
+                                <div class="requirement" data-requirement="uppercase">
+                                    <span class="requirement-icon">❌</span>
+                                    One uppercase letter (A-Z)
+                                </div>
+                                <div class="requirement" data-requirement="number">
+                                    <span class="requirement-icon">❌</span>
+                                    One number (0-9)
+                                </div>
+                                <div class="requirement" data-requirement="special">
+                                    <span class="requirement-icon">❌</span>
+                                    One special character (!@#$% etc.)
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div class="mb-4">
                         <input type="password" class="form-control" name="admin_confirm_password" placeholder="Confirm Password" required>
