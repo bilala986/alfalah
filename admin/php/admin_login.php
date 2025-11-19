@@ -16,8 +16,8 @@ if (empty($email) || empty($password)) {
 }
 
 try {
-    // Check if admin exists and is active
-    $stmt = $pdo->prepare("SELECT id, name, email, password_hash FROM admin_users WHERE email = ? AND is_active = 1");
+    // Check if admin exists and is active - now including is_approved
+    $stmt = $pdo->prepare("SELECT id, name, email, password_hash, is_approved FROM admin_users WHERE email = ? AND is_active = 1");
     $stmt->execute([$email]);
     $admin = $stmt->fetch();
     
@@ -31,6 +31,7 @@ try {
         $_SESSION['admin_name'] = $admin['name'];
         $_SESSION['admin_email'] = $admin['email'];
         $_SESSION['admin_logged_in'] = true;
+        $_SESSION['pending_approval'] = ($admin['is_approved'] == 0); // Set approval status
         
         echo json_encode(["success" => true, "message" => "Login successful!"]);
     } else {

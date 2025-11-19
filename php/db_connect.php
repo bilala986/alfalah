@@ -3,6 +3,8 @@
 // SECURE DATABASE CONNECTION (db_connect.php)
 // =============================================
 
+// Path: alfalah/php/db_connect.php
+
 $host = "localhost";
 $dbname = "bilazqnw_alfalah";
 $username = "bilazqnw_alfalah-admin";

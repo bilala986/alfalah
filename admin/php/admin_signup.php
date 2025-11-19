@@ -1,5 +1,5 @@
 <?php
-// admin/php/admin_signup.php
+// admin/php/admin_signup.php - FINAL VERSION WITH APPROVAL
 session_start();
 header('Content-Type: application/json');
 
@@ -53,9 +53,9 @@ try {
         exit;
     }
 
-    // Hash and insert admin
+    // Hash and insert admin - set is_approved to 0 (pending)
     $hashedPassword = password_hash($admin_password, PASSWORD_DEFAULT);
-    $stmt = $pdo->prepare("INSERT INTO admin_users (name, email, password_hash) VALUES (?, ?, ?)");
+    $stmt = $pdo->prepare("INSERT INTO admin_users (name, email, password_hash, is_approved) VALUES (?, ?, ?, 0)");
     
     if ($stmt->execute([$admin_name, $admin_email, $hashedPassword])) {
         // Set session variables after successful signup
@@ -64,8 +64,9 @@ try {
         $_SESSION['admin_name'] = $admin_name;
         $_SESSION['admin_email'] = $admin_email;
         $_SESSION['admin_logged_in'] = true;
+        $_SESSION['pending_approval'] = true; // New admin needs approval
         
-        echo json_encode(["success" => true, "message" => "Admin account created successfully!"]);
+        echo json_encode(["success" => true, "message" => "Admin account created successfully! Awaiting approval."]);
     } else {
         echo json_encode(["success" => false, "message" => "Database error occurred."]);
     }

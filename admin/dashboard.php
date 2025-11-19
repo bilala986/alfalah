@@ -36,7 +36,6 @@ require_once 'php/admin_protect.php';
 
     <hr>
 
-    <!-- REMOVE THE ONCLICK CONFIRMATION -->
     <a href="php/logout.php" class="logout">
         <i class="bi bi-box-arrow-right"></i> Logout
     </a>
@@ -54,6 +53,16 @@ require_once 'php/admin_protect.php';
     
     <h2 class="dashboard-title m-0 text-center">Admin Dashboard Overview</h2>
 
+    <!-- Approval Status Banner -->
+    <?php if (isset($_SESSION['pending_approval']) && $_SESSION['pending_approval']): ?>
+    <div class="alert alert-warning alert-dismissible fade show mt-3" role="alert">
+        <i class="bi bi-clock-history me-2"></i>
+        <strong>Account Pending Approval</strong> - Your admin account is awaiting verification. 
+        You will gain full access once approved by a system administrator.
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <?php endif; ?>
+
     <div class="row mt-4">
 
         <!-- ADMISSIONS CARD -->
@@ -61,7 +70,11 @@ require_once 'php/admin_protect.php';
             <div class="card shadow-sm p-3">
                 <h5><i class="bi bi-file-earmark-text text-success"></i> Admissions</h5>
                 <p class="text-muted">View new applications.</p>
-                <a href="#" class="btn btn-success-modern btn-sm">Open</a>
+                <?php if (isset($_SESSION['pending_approval']) && $_SESSION['pending_approval']): ?>
+                    <button class="btn btn-secondary btn-sm" disabled>Pending Approval</button>
+                <?php else: ?>
+                    <a href="#" class="btn btn-success-modern btn-sm">Open</a>
+                <?php endif; ?>
             </div>
         </div>
 
@@ -70,7 +83,11 @@ require_once 'php/admin_protect.php';
             <div class="card shadow-sm p-3">
                 <h5><i class="bi bi-people-fill text-success"></i> Students</h5>
                 <p class="text-muted">Manage all registered students.</p>
-                <a href="#" class="btn btn-success-modern btn-sm">View</a>
+                <?php if (isset($_SESSION['pending_approval']) && $_SESSION['pending_approval']): ?>
+                    <button class="btn btn-secondary btn-sm" disabled>Pending Approval</button>
+                <?php else: ?>
+                    <a href="#" class="btn btn-success-modern btn-sm">View</a>
+                <?php endif; ?>
             </div>
         </div>
 
@@ -79,7 +96,11 @@ require_once 'php/admin_protect.php';
             <div class="card shadow-sm p-3">
                 <h5><i class="bi bi-people text-success"></i> Teachers</h5>
                 <p class="text-muted">Manage teacher accounts.</p>
-                <a href="#" class="btn btn-success-modern btn-sm">Manage</a>
+                <?php if (isset($_SESSION['pending_approval']) && $_SESSION['pending_approval']): ?>
+                    <button class="btn btn-secondary btn-sm" disabled>Pending Approval</button>
+                <?php else: ?>
+                    <a href="#" class="btn btn-success-modern btn-sm">Manage</a>
+                <?php endif; ?>
             </div>
         </div>
 
@@ -88,7 +109,11 @@ require_once 'php/admin_protect.php';
             <div class="card shadow-sm p-3">
                 <h5><i class="bi bi-person-heart text-success"></i> Parents</h5>
                 <p class="text-muted">View parent profiles.</p>
-                <a href="#" class="btn btn-success-modern btn-sm">Open</a>
+                <?php if (isset($_SESSION['pending_approval']) && $_SESSION['pending_approval']): ?>
+                    <button class="btn btn-secondary btn-sm" disabled>Pending Approval</button>
+                <?php else: ?>
+                    <a href="#" class="btn btn-success-modern btn-sm">Open</a>
+                <?php endif; ?>
             </div>
         </div>
 
