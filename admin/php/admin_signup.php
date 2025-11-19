@@ -1,5 +1,5 @@
 <?php
-// admin/php/admin_signup.php - FINAL VERSION WITH APPROVAL
+// admin/php/admin_signup.php - PROPER TAB ISOLATION
 session_start();
 header('Content-Type: application/json');
 
@@ -58,13 +58,25 @@ try {
     $stmt = $pdo->prepare("INSERT INTO admin_users (name, email, password_hash, is_approved) VALUES (?, ?, ?, 0)");
     
     if ($stmt->execute([$admin_name, $admin_email, $hashedPassword])) {
-        // Set session variables after successful signup
         $admin_id = $pdo->lastInsertId();
+        
+        // Generate unique session identifier for this browser tab
+        $tab_identifier = bin2hex(random_bytes(16));
+        
+        // Completely destroy old session and create new one
+        session_destroy();
+        session_id($tab_identifier);
+        session_start();
+        
+        // Set session variables with tab isolation
         $_SESSION['admin_id'] = $admin_id;
         $_SESSION['admin_name'] = $admin_name;
         $_SESSION['admin_email'] = $admin_email;
         $_SESSION['admin_logged_in'] = true;
-        $_SESSION['pending_approval'] = true; // New admin needs approval
+        $_SESSION['pending_approval'] = true;
+        $_SESSION['login_token'] = bin2hex(random_bytes(16));
+        $_SESSION['tab_identifier'] = $tab_identifier;
+        $_SESSION['login_time'] = time();
         
         echo json_encode(["success" => true, "message" => "Admin account created successfully! Awaiting approval."]);
     } else {

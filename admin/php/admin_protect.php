@@ -1,8 +1,26 @@
 <?php
-// admin/php/admin_protect.php
+// admin/php/admin_protect.php - TAB-SPECIFIC SESSION VALIDATION
 session_start();
 
-if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
+// Function to safely destroy and restart session
+function safeSessionRestart() {
+    session_destroy();
+    session_start();
+    $_SESSION = array();
+}
+
+// Check if we need to recover from session corruption
+if (session_status() !== PHP_SESSION_ACTIVE) {
+    safeSessionRestart();
+    header('Location: login.php');
+    exit;
+}
+
+// Validate session exists and is valid
+if (!isset($_SESSION['admin_logged_in']) || 
+    $_SESSION['admin_logged_in'] !== true || 
+    !isset($_SESSION['tab_identifier']) ||
+    !isset($_SESSION['login_token'])) {
     header('Location: login.php');
     exit;
 }
@@ -15,14 +33,15 @@ try {
     $stmt->execute([$_SESSION['admin_id']]);
     $admin = $stmt->fetch();
     
-    if (!$admin || $admin['is_approved'] == 0) {
-        $_SESSION['pending_approval'] = true;
-    } else {
-        $_SESSION['pending_approval'] = false;
+    if (!$admin) {
+        safeSessionRestart();
+        header('Location: login.php');
+        exit;
     }
     
+    $_SESSION['pending_approval'] = ($admin['is_approved'] == 0);
+    
 } catch (PDOException $e) {
-    // If there's a database error, assume not approved for security
     $_SESSION['pending_approval'] = true;
 }
 ?>

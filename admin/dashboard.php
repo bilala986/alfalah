@@ -45,6 +45,20 @@ require_once 'php/admin_protect.php';
 <!-- HEADER (always at top) -->
 <div class="header-bar d-flex align-items-center justify-content-between">
     <button class="open-sidebar-btn" id="openSidebar"><i class="bi bi-list"></i></button>
+    
+    <!-- Welcome Message with Admin Name -->
+    <div class="d-flex align-items-center">
+        <span class="me-3 d-none d-md-block">
+            <i class="bi bi-person-circle me-2"></i>
+            Welcome, <strong><?php echo htmlspecialchars($_SESSION['admin_name'] ?? 'Admin'); ?></strong>
+        </span>
+        
+        <!-- Mobile-friendly version -->
+        <span class="d-block d-md-none">
+            <i class="bi bi-person-circle me-1"></i>
+            <strong><?php echo htmlspecialchars(explode(' ', $_SESSION['admin_name'] ?? 'Admin')[0]); ?></strong>
+        </span>
+    </div>
 </div>
 
 
