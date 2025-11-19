@@ -42,6 +42,13 @@ try {
     $stmt = $pdo->prepare("INSERT INTO admin_users (name, email, password_hash) VALUES (?, ?, ?)");
     
     if ($stmt->execute([$admin_name, $admin_email, $hashedPassword])) {
+        // ✅ ADD THIS: Set session variables after successful signup
+        $admin_id = $pdo->lastInsertId();
+        $_SESSION['admin_id'] = $admin_id;
+        $_SESSION['admin_name'] = $admin_name;
+        $_SESSION['admin_email'] = $admin_email;
+        $_SESSION['admin_logged_in'] = true;
+        
         echo json_encode(["success" => true, "message" => "Admin account created successfully!"]);
     } else {
         echo json_encode(["success" => false, "message" => "Database error occurred."]);
