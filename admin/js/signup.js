@@ -1,4 +1,4 @@
-// admin/js/signup.js - WITH TAB ISOLATION & PASSWORD STRENGTH METER
+// admin/js/signup.js - WITH TAB ISOLATION, PASSWORD STRENGTH METER & CSRF
 
 document.addEventListener("DOMContentLoaded", () => {
     const form = document.getElementById("signupForm");
@@ -7,6 +7,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const passwordStrength = document.getElementById('passwordStrength');
     const passwordProgress = document.getElementById('passwordProgress');
     const passwordRequirements = document.getElementById('passwordRequirements');
+    const csrfTokenInput = document.getElementById('csrf_token');
 
     // Remove browser validation
     form.setAttribute('novalidate', '');
@@ -31,6 +32,28 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         return instanceId;
     }
+
+    // Generate CSRF token for this tab
+    function generateCsrfToken() {
+        const token = 'csrf_' + Math.random().toString(36).substr(2, 16) + '_' + Date.now();
+        sessionStorage.setItem('admin_csrf_token', token);
+        return token;
+    }
+
+    // Set CSRF token in form
+    function setCsrfToken() {
+        let token = sessionStorage.getItem('admin_csrf_token');
+        if (!token) {
+            token = generateCsrfToken();
+        }
+        if (csrfTokenInput) {
+            csrfTokenInput.value = token;
+        }
+        return token;
+    }
+
+    // Initialize CSRF token
+    setCsrfToken();
 
     function showAlert(message, type = "danger") {
         alertBox.innerHTML = `
@@ -65,8 +88,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function validatePassword(password) {
         const requirements = {
-            length: password.length >= 8,
+            length: password.length >= 12, // Changed from 8 to 12
             uppercase: /[A-Z]/.test(password),
+            lowercase: /[a-z]/.test(password), // Added lowercase requirement
             number: /[0-9]/.test(password),
             special: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)
         };
@@ -115,8 +139,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function getPasswordErrorMessage(requirements) {
         const missing = [];
-        if (!requirements.length) missing.push('at least 8 characters');
+        if (!requirements.length) missing.push('at least 12 characters');
         if (!requirements.uppercase) missing.push('one uppercase letter');
+        if (!requirements.lowercase) missing.push('one lowercase letter');
         if (!requirements.number) missing.push('one number');
         if (!requirements.special) missing.push('one special character');
 
@@ -137,6 +162,9 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!adminName.value.trim()) {
             showFieldError(adminName, 'Please enter your full name');
             isValid = false;
+        } else if (!/^[a-zA-Z\s\.\-\']{2,100}$/.test(adminName.value)) {
+            showFieldError(adminName, 'Name can only contain letters, spaces, hyphens, apostrophes, and periods');
+            isValid = false;
         }
 
         // Validate Email
@@ -155,7 +183,7 @@ document.addEventListener("DOMContentLoaded", () => {
         } else {
             const passwordRequirements = validatePassword(adminPassword.value);
             if (!passwordRequirements.length || !passwordRequirements.uppercase || 
-                !passwordRequirements.number || !passwordRequirements.special) {
+                !passwordRequirements.lowercase || !passwordRequirements.number || !passwordRequirements.special) {
                 showFieldError(adminPassword, getPasswordErrorMessage(passwordRequirements));
                 isValid = false;
             }
@@ -250,6 +278,11 @@ document.addEventListener("DOMContentLoaded", () => {
         
         // Add browser instance ID to form data (tab-specific)
         formData.append('browser_instance_id', getBrowserInstanceId());
+        
+        // Ensure CSRF token is included
+        if (!formData.get('csrf_token')) {
+            formData.append('csrf_token', setCsrfToken());
+        }
 
         try {
             const response = await fetch(form.action, {

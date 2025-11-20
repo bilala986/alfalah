@@ -4,7 +4,7 @@ require_once '../php/admin_protect.php';
 
 // Only allow approved admins to access this page
 if ($_SESSION['pending_approval']) {
-    header('Location: ../dashboard.php');
+    header('Location: ../dashboard.php?bid=' . ($_SESSION['browser_instance_id'] ?? ''));
     exit;
 }
 
@@ -14,6 +14,7 @@ require_once $_SERVER['DOCUMENT_ROOT'] . '/alfalah/php/db_connect.php';
 // Handle actions
 if (isset($_GET['action']) && isset($_GET['id'])) {
     $admin_id = intval($_GET['id']);
+    $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
     
     if ($_GET['action'] === 'approve') {
         $stmt = $pdo->prepare("UPDATE admin_users SET is_approved = 1 WHERE id = ?");
@@ -23,8 +24,8 @@ if (isset($_GET['action']) && isset($_GET['id'])) {
         $stmt->execute([$admin_id]);
     }
     
-    // Redirect to refresh the page
-    header('Location: admin-accounts.php');
+    // Redirect to refresh the page with proper session ID
+    header('Location: admin-accounts.php?bid=' . $browser_instance_id);
     exit;
 }
 
@@ -32,6 +33,8 @@ if (isset($_GET['action']) && isset($_GET['id'])) {
 $stmt = $pdo->prepare("SELECT id, name, email, created_at, last_login, is_approved FROM admin_users ORDER BY created_at DESC");
 $stmt->execute();
 $admins = $stmt->fetchAll();
+
+$browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
 ?>
 
 <!DOCTYPE html>
@@ -58,19 +61,12 @@ $admins = $stmt->fetchAll();
         <button class="toggle-btn" id="closeSidebar"><i class="bi bi-x-lg"></i></button>
     </div>
 
-    <!-- In sidebar navigation -->
-    <a href="../dashboard.php?bid=<?= $browser_instance_id ?>" class="active">
-        <i class="bi bi-speedometer2"></i> Dashboard
-    </a>
-    <a href="private/admin-accounts.php?bid=<?= $browser_instance_id ?>">
-        <i class="bi bi-shield-check"></i> Admin Accounts
-    </a>
-    <a href="#"><i class="bi bi-gear"></i> Settings</a>
+    <a href="../dashboard.php?bid=<?= $browser_instance_id ?>"><i class="bi bi-speedometer2"></i> Dashboard</a>
+    <a href="admin-accounts.php?bid=<?= $browser_instance_id ?>" class="active"><i class="bi bi-shield-check"></i> Admin Accounts</a>
+    <a href="#?bid=<?= $browser_instance_id ?>"><i class="bi bi-gear"></i> Settings</a>
 
     <hr>
-    <a href="php/logout.php?bid=<?= $browser_instance_id ?>" class="logout">
-        <i class="bi bi-box-arrow-right"></i> Logout
-    </a>
+    <a href="../php/logout.php?bid=<?= $browser_instance_id ?>" class="logout"><i class="bi bi-box-arrow-right"></i> Logout</a>
 </div>
 
 <!-- HEADER -->
@@ -121,13 +117,13 @@ $admins = $stmt->fetchAll();
                                     <?php if ($admin['is_approved']): ?>
                                         <span class="badge bg-success">Approved</span>
                                     <?php else: ?>
-                                        <span class="badge bg-danger">Pending</span>
+                                        <span class="badge bg-warning">Pending</span>
                                     <?php endif; ?>
                                 </td>
                                 <td>
                                     <div class="btn-group btn-group-sm">
                                         <?php if (!$admin['is_approved']): ?>
-                                            <a href="?action=approve&id=<?= $admin['id'] ?>" 
+                                            <a href="?action=approve&id=<?= $admin['id'] ?>&bid=<?= $browser_instance_id ?>" 
                                                class="btn btn-outline-success" 
                                                title="Approve Admin">
                                                 <i class="bi bi-check-lg"></i> Approve
@@ -136,7 +132,7 @@ $admins = $stmt->fetchAll();
                                         
                                         <!-- Don't allow deleting your own account -->
                                         <?php if ($admin['id'] != $_SESSION['admin_id']): ?>
-                                            <a href="?action=delete&id=<?= $admin['id'] ?>" 
+                                            <a href="?action=delete&id=<?= $admin['id'] ?>&bid=<?= $browser_instance_id ?>" 
                                                class="btn btn-outline-danger" 
                                                title="Delete Account"
                                                onclick="return confirm('Are you sure you want to delete this admin account? This action cannot be undone.')">

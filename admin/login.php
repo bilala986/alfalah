@@ -18,13 +18,18 @@
                 <!-- Alert area -->
                 <div id="alertBox"></div>
 
-                <!-- Updated form action -->
+                <!-- Updated form with CSRF protection -->
                 <form action="php/admin_login.php" method="POST" id="loginForm">
+                    <!-- CSRF Token -->
+                    <input type="hidden" name="csrf_token" id="csrf_token">
+                    
                     <div class="mb-3">
-                        <input type="email" class="form-control" name="email" placeholder="Email" required>
+                        <input type="email" class="form-control" name="email" placeholder="Email" required 
+                               maxlength="150" autocomplete="email">
                     </div>
                     <div class="mb-3">
-                        <input type="password" class="form-control" name="password" placeholder="Password" required>
+                        <input type="password" class="form-control" name="password" placeholder="Password" required 
+                               maxlength="255" autocomplete="current-password">
                     </div>
                     <button type="submit" class="btn btn-login w-100">Login</button>
                 </form>

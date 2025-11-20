@@ -1,9 +1,10 @@
-// admin/js/login.js - TAB-SPECIFIC SESSION ISOLATION
+// admin/js/login.js - TAB-SPECIFIC SESSION ISOLATION WITH CSRF
 
 document.addEventListener("DOMContentLoaded", () => {
     const form = document.getElementById("loginForm");
     const alertBox = document.getElementById("alertBox") || createAlertBox();
     const inputs = form.querySelectorAll('input[required]');
+    const csrfTokenInput = document.getElementById('csrf_token');
 
     // Remove browser validation
     form.setAttribute('novalidate', '');
@@ -28,9 +29,29 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         return instanceId;
     }
-    
-    
 
+    // Generate CSRF token for this tab
+    function generateCsrfToken() {
+        const token = 'csrf_' + Math.random().toString(36).substr(2, 16) + '_' + Date.now();
+        sessionStorage.setItem('admin_csrf_token', token);
+        return token;
+    }
+
+    // Set CSRF token in form
+    function setCsrfToken() {
+        let token = sessionStorage.getItem('admin_csrf_token');
+        if (!token) {
+            token = generateCsrfToken();
+        }
+        if (csrfTokenInput) {
+            csrfTokenInput.value = token;
+        }
+        return token;
+    }
+
+    // Initialize CSRF token
+    setCsrfToken();
+    
     // Create alert box if it doesn't exist
     function createAlertBox() {
         const alertDiv = document.createElement('div');
@@ -147,6 +168,11 @@ document.addEventListener("DOMContentLoaded", () => {
         
         // Add browser instance ID to form data (tab-specific)
         formData.append('browser_instance_id', getBrowserInstanceId());
+        
+        // Ensure CSRF token is included
+        if (!formData.get('csrf_token')) {
+            formData.append('csrf_token', setCsrfToken());
+        }
 
         try {
             const response = await fetch("php/admin_login.php", {

@@ -1,16 +1,31 @@
 <?php
-// admin/php/admin_signup.php - FORCE NEW SESSIONS PER TAB
+// admin/php/admin_signup.php - SECURITY HARDENED
 session_start();
 header('Content-Type: application/json');
 
+// Security headers
+header("X-Frame-Options: DENY");
+header("X-Content-Type-Options: nosniff");
+
 // Include database connection
 require_once '../../php/db_connect.php';
+
+// Include security functions
+require_once '../../php/security_functions.php';
 
 $admin_name = trim($_POST['admin_name'] ?? '');
 $admin_email = trim($_POST['admin_email'] ?? '');
 $admin_password = $_POST['admin_password'] ?? '';
 $admin_confirm_password = $_POST['admin_confirm_password'] ?? '';
 $browser_instance_id = $_POST['browser_instance_id'] ?? '';
+$csrf_token = $_POST['csrf_token'] ?? '';
+
+// Validate CSRF token
+if (!validateCsrfToken($csrf_token)) {
+    error_log("CSRF token validation failed for admin signup from IP: " . getClientIP());
+    echo json_encode(["success" => false, "message" => "Security validation failed. Please refresh the page."]);
+    exit;
+}
 
 // Basic validation
 if (empty($admin_name) || empty($admin_email) || empty($admin_password) || empty($admin_confirm_password)) {
@@ -18,52 +33,96 @@ if (empty($admin_name) || empty($admin_email) || empty($admin_password) || empty
     exit;
 }
 
-// ... (keep your existing validation code) ...
+// Validate name (only letters, spaces, and basic punctuation)
+if (!preg_match('/^[a-zA-Z\s\.\-\']{2,100}$/', $admin_name)) {
+    echo json_encode(["success" => false, "message" => "Name can only contain letters, spaces, hyphens, apostrophes, and periods."]);
+    exit;
+}
 
+// Validate email format
+if (!filter_var($admin_email, FILTER_VALIDATE_EMAIL)) {
+    echo json_encode(["success" => false, "message" => "Invalid email format."]);
+    exit;
+}
+
+// Sanitize inputs
+$admin_name = htmlspecialchars($admin_name, ENT_QUOTES, 'UTF-8');
+$admin_email = filter_var($admin_email, FILTER_SANITIZE_EMAIL);
+
+// Validate password strength
+$password_errors = validatePasswordStrength($admin_password);
+if (!empty($password_errors)) {
+    echo json_encode(["success" => false, "message" => implode(' ', $password_errors)]);
+    exit;
+}
+
+// Check if passwords match
+if ($admin_password !== $admin_confirm_password) {
+    echo json_encode(["success" => false, "message" => "Passwords do not match."]);
+    exit;
+}
+
+// Check for existing email
 try {
-    // Check if email exists
     $stmt = $pdo->prepare("SELECT id FROM admin_users WHERE email = ?");
     $stmt->execute([$admin_email]);
     
     if ($stmt->rowCount() > 0) {
-        echo json_encode(["success" => false, "message" => "This email is already registered."]);
+        // Use generic message to prevent user enumeration
+        echo json_encode(["success" => false, "message" => "An account with this email already exists."]);
         exit;
     }
 
-    // Hash and insert admin - set is_approved to 0 (pending)
-    $hashedPassword = password_hash($admin_password, PASSWORD_DEFAULT);
-    $stmt = $pdo->prepare("INSERT INTO admin_users (name, email, password_hash, is_approved) VALUES (?, ?, ?, 0)");
+    // Hash password with strong algorithm
+    $hashedPassword = password_hash($admin_password, PASSWORD_DEFAULT, ['cost' => 12]);
+    
+    if ($hashedPassword === false) {
+        throw new Exception("Password hashing failed");
+    }
+
+    // Insert admin with additional security fields
+    $stmt = $pdo->prepare("INSERT INTO admin_users (name, email, password_hash, is_approved, created_at, login_attempts) VALUES (?, ?, ?, 0, NOW(), 0)");
     
     if ($stmt->execute([$admin_name, $admin_email, $hashedPassword])) {
         $admin_id = $pdo->lastInsertId();
         
-        // ALWAYS generate a NEW session ID for signup
-        $browser_instance_id = 'a' . bin2hex(random_bytes(16)); // Always new ID on signup
+        // Generate a NEW session ID for signup
+        $new_browser_instance_id = 'a' . bin2hex(random_bytes(16));
         
         // Use the browser instance ID as session ID
         session_write_close();
-        session_id($browser_instance_id);
+        session_id($new_browser_instance_id);
         session_start();
         
-        // Set session variables
+        // Regenerate session ID
+        session_regenerate_id(true);
+        
+        // Set session variables with sanitized data
         $_SESSION['admin_id'] = $admin_id;
         $_SESSION['admin_name'] = $admin_name;
         $_SESSION['admin_email'] = $admin_email;
         $_SESSION['admin_logged_in'] = true;
         $_SESSION['pending_approval'] = true;
         $_SESSION['login_time'] = time();
-        $_SESSION['browser_instance_id'] = $browser_instance_id;
+        $_SESSION['browser_instance_id'] = $new_browser_instance_id;
+        $_SESSION['user_agent'] = $_SERVER['HTTP_USER_AGENT'] ?? '';
+        $_SESSION['ip_address'] = getClientIP();
+        $_SESSION['last_activity'] = time();
         
         echo json_encode([
             "success" => true, 
             "message" => "Admin account created successfully! Awaiting approval.",
-            "browser_instance_id" => $browser_instance_id
+            "browser_instance_id" => $new_browser_instance_id
         ]);
     } else {
-        echo json_encode(["success" => false, "message" => "Database error occurred."]);
+        throw new Exception("Database insertion failed");
     }
     
 } catch (PDOException $e) {
-    echo json_encode(["success" => false, "message" => "Database error: " . $e->getMessage()]);
+    error_log("Database error in admin_signup.php: " . $e->getMessage());
+    echo json_encode(["success" => false, "message" => "A system error occurred. Please try again later."]);
+} catch (Exception $e) {
+    error_log("Error in admin_signup.php: " . $e->getMessage());
+    echo json_encode(["success" => false, "message" => "A system error occurred. Please try again later."]);
 }
 ?>

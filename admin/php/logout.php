@@ -1,6 +1,9 @@
 <?php
-// admin/php/logout.php - TAB-SPECIFIC LOGOUT
+// admin/php/logout.php - IMPROVED TAB-SPECIFIC LOGOUT
 session_start();
+
+// Get the browser instance ID before destroying session
+$browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
 
 // Only destroy this specific session (not all sessions)
 session_destroy();
@@ -14,6 +17,11 @@ if (ini_get("session.use_cookies")) {
     );
 }
 
-header('Location: ../login.php');
+// Redirect to login with the bid parameter to maintain context
+$redirect_url = "../login.php";
+if (!empty($browser_instance_id)) {
+    $redirect_url .= "?bid=" . urlencode($browser_instance_id);
+}
+header('Location: ' . $redirect_url);
 exit;
 ?>

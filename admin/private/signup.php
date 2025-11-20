@@ -18,16 +18,25 @@
                 <!-- Alert area -->
                 <div id="alertBox"></div>
 
-                <!-- Updated form action -->
+                <!-- Updated form with CSRF protection -->
                 <form action="../php/admin_signup.php" method="POST" id="signupForm">
+                    <!-- CSRF Token -->
+                    <input type="hidden" name="csrf_token" id="csrf_token">
+                    
                     <div class="mb-3">
-                        <input type="text" class="form-control" name="admin_name" placeholder="Full Name" required>
+                        <input type="text" class="form-control" name="admin_name" placeholder="Full Name" required 
+                               maxlength="100" pattern="[a-zA-Z\s\.\-\']{2,100}" 
+                               title="Name can only contain letters, spaces, hyphens, apostrophes, and periods">
                     </div>
                     <div class="mb-3">
-                        <input type="email" class="form-control" name="admin_email" placeholder="Email Address" required>
+                        <input type="email" class="form-control" name="admin_email" placeholder="Email Address" required 
+                               maxlength="150" autocomplete="email">
                     </div>
                     <div class="mb-3">
-                        <input type="password" class="form-control" name="admin_password" placeholder="Password" required>
+                        <input type="password" class="form-control" name="admin_password" placeholder="Password" required 
+                               maxlength="255" autocomplete="new-password" 
+                               pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()\-_=+{};:,<.>]).{12,}$"
+                               title="Password must be at least 12 characters with uppercase, lowercase, number, and special character">
                         
                         <!-- Password Strength Meter -->
                         <div id="passwordStrength" class="mt-2" style="display: none;">
@@ -37,7 +46,7 @@
                             <div id="passwordRequirements" class="mt-2 small">
                                 <div class="requirement" data-requirement="length">
                                     <span class="requirement-icon">❌</span>
-                                    At least 8 characters
+                                    At least 12 characters
                                 </div>
                                 <div class="requirement" data-requirement="uppercase">
                                     <span class="requirement-icon">❌</span>
@@ -55,7 +64,8 @@
                         </div>
                     </div>
                     <div class="mb-4">
-                        <input type="password" class="form-control" name="admin_confirm_password" placeholder="Confirm Password" required>
+                        <input type="password" class="form-control" name="admin_confirm_password" placeholder="Confirm Password" required 
+                               maxlength="255" autocomplete="new-password">
                     </div>
                     <button type="submit" class="btn btn-login w-100">Create Account</button>
                 </form>
