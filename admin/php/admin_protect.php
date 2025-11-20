@@ -1,31 +1,34 @@
 <?php
-// admin/php/admin_protect.php - TAB-SPECIFIC SESSION VALIDATION
+// admin/php/admin_protect.php - TAB-ISOLATED SESSION PROTECTION
 session_start();
 
-// Function to safely destroy and restart session
-function safeSessionRestart() {
-    session_destroy();
-    session_start();
-    $_SESSION = array();
-}
+// Check if we have a browser instance ID from localStorage (passed via GET)
+$browser_instance_id = $_GET['bid'] ?? '';
 
-// Check if we need to recover from session corruption
-if (session_status() !== PHP_SESSION_ACTIVE) {
-    safeSessionRestart();
-    header('Location: login.php');
-    exit;
+if (!empty($browser_instance_id)) {
+    // Validate and sanitize the session ID
+    $browser_instance_id = preg_replace('/[^a-zA-Z0-9]/', '', $browser_instance_id);
+    
+    if (!empty($browser_instance_id) && strlen($browser_instance_id) === 33) {
+        // Use the browser instance ID as session ID ONLY if it matches our format
+        session_write_close();
+        session_id($browser_instance_id);
+        session_start();
+    }
 }
 
 // Validate session exists and is valid
-if (!isset($_SESSION['admin_logged_in']) || 
-    $_SESSION['admin_logged_in'] !== true || 
-    !isset($_SESSION['tab_identifier']) ||
-    !isset($_SESSION['login_token'])) {
-    header('Location: login.php');
+if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
+    // Redirect with current bid to maintain tab context
+    $redirect_url = "login.php";
+    if (!empty($browser_instance_id)) {
+        $redirect_url .= "?bid=" . urlencode($browser_instance_id);
+    }
+    header('Location: ' . $redirect_url);
     exit;
 }
 
-// Check if admin is approved
+// Verify session belongs to actual admin and get current approval status
 require_once $_SERVER['DOCUMENT_ROOT'] . '/alfalah/php/db_connect.php';
 
 try {
@@ -34,7 +37,7 @@ try {
     $admin = $stmt->fetch();
     
     if (!$admin) {
-        safeSessionRestart();
+        session_destroy();
         header('Location: login.php');
         exit;
     }

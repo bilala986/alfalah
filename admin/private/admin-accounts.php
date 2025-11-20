@@ -58,12 +58,19 @@ $admins = $stmt->fetchAll();
         <button class="toggle-btn" id="closeSidebar"><i class="bi bi-x-lg"></i></button>
     </div>
 
-    <a href="../dashboard.php"><i class="bi bi-speedometer2"></i> Dashboard</a>
-    <a href="admin-accounts.php" class="active"><i class="bi bi-shield-check"></i> Admin Accounts</a>
+    <!-- In sidebar navigation -->
+    <a href="../dashboard.php?bid=<?= $browser_instance_id ?>" class="active">
+        <i class="bi bi-speedometer2"></i> Dashboard
+    </a>
+    <a href="private/admin-accounts.php?bid=<?= $browser_instance_id ?>">
+        <i class="bi bi-shield-check"></i> Admin Accounts
+    </a>
     <a href="#"><i class="bi bi-gear"></i> Settings</a>
 
     <hr>
-    <a href="../php/logout.php" class="logout"><i class="bi bi-box-arrow-right"></i> Logout</a>
+    <a href="php/logout.php?bid=<?= $browser_instance_id ?>" class="logout">
+        <i class="bi bi-box-arrow-right"></i> Logout
+    </a>
 </div>
 
 <!-- HEADER -->

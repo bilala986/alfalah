@@ -1,5 +1,5 @@
 <?php
-// admin/php/admin_login.php - PROPER TAB ISOLATION
+// admin/php/admin_login.php - ENHANCED TAB ISOLATION
 session_start();
 header('Content-Type: application/json');
 
@@ -8,6 +8,7 @@ require_once '../../php/db_connect.php';
 
 $email = trim($_POST['email'] ?? '');
 $password = $_POST['password'] ?? '';
+$browser_instance_id = $_POST['browser_instance_id'] ?? '';
 
 // Basic validation
 if (empty($email) || empty($password)) {
@@ -22,35 +23,37 @@ try {
     $admin = $stmt->fetch();
     
     if ($admin && password_verify($password, $admin['password_hash'])) {
-        // Generate unique session identifier for this browser tab
-        $tab_identifier = bin2hex(random_bytes(16));
+        // Generate a NEW session ID for login
+        $new_browser_instance_id = 'a' . bin2hex(random_bytes(16));
         
-        // Store the current session data before regenerating
-        $old_session_data = $_SESSION;
+        // Close any existing session completely
+        session_write_close();
         
-        // Completely destroy old session and create new one
-        session_destroy();
-        
-        // Set new session ID with tab identifier
-        session_id($tab_identifier);
+        // Set the new session ID
+        session_id($new_browser_instance_id);
         session_start();
         
-        // Restore basic session settings and add new login data
+        // Clear any existing session data
         $_SESSION = [];
+        
+        // Set fresh session data
         $_SESSION['admin_id'] = $admin['id'];
         $_SESSION['admin_name'] = $admin['name'];
         $_SESSION['admin_email'] = $admin['email'];
         $_SESSION['admin_logged_in'] = true;
         $_SESSION['pending_approval'] = ($admin['is_approved'] == 0);
-        $_SESSION['login_token'] = bin2hex(random_bytes(16));
-        $_SESSION['tab_identifier'] = $tab_identifier;
         $_SESSION['login_time'] = time();
+        $_SESSION['browser_instance_id'] = $new_browser_instance_id;
         
         // Update last login
         $updateStmt = $pdo->prepare("UPDATE admin_users SET last_login = NOW() WHERE id = ?");
         $updateStmt->execute([$admin['id']]);
         
-        echo json_encode(["success" => true, "message" => "Login successful!"]);
+        echo json_encode([
+            "success" => true, 
+            "message" => "Login successful!",
+            "browser_instance_id" => $new_browser_instance_id
+        ]);
     } else {
         echo json_encode(["success" => false, "message" => "Invalid email or password."]);
     }

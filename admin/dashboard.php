@@ -1,8 +1,18 @@
 <?php
 // At the very top of admin/dashboard.php
 require_once 'php/admin_protect.php';
-?>
 
+// Get the browser instance ID for this session
+$browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
+
+// Verify the session ID in URL matches the one in session
+if (isset($_GET['bid']) && $_GET['bid'] !== $browser_instance_id) {
+    // Session ID mismatch - possible tab mixing, redirect to login
+    session_destroy();
+    header('Location: login.php');
+    exit;
+}
+?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -31,12 +41,12 @@ require_once 'php/admin_protect.php';
         <button class="toggle-btn" id="closeSidebar"><i class="bi bi-x-lg"></i></button>
     </div>
 
-    <a href="dashboard.php" class="active"><i class="bi bi-speedometer2"></i> Dashboard</a>
-    <a href="#"><i class="bi bi-gear"></i> Settings</a>
+    <a href="dashboard.php?bid=<?= $browser_instance_id ?>" class="active"><i class="bi bi-speedometer2"></i> Dashboard</a>
+    <a href="#?bid=<?= $browser_instance_id ?>"><i class="bi bi-gear"></i> Settings</a>
 
     <hr>
 
-    <a href="php/logout.php" class="logout">
+    <a href="php/logout.php?bid=<?= $browser_instance_id ?>" class="logout">
         <i class="bi bi-box-arrow-right"></i> Logout
     </a>
 </div>
@@ -86,7 +96,7 @@ require_once 'php/admin_protect.php';
             <div class="card shadow-sm p-3">
                 <h5><i class="bi bi-file-earmark-text text-success"></i> Admissions</h5>
                 <p class="text-muted">View new applications.</p>
-                <a href="#" class="btn btn-success-modern btn-sm">Open</a>
+                <a href="#?bid=<?= $browser_instance_id ?>" class="btn btn-success-modern btn-sm">Open</a>
             </div>
         </div>
 
@@ -95,7 +105,7 @@ require_once 'php/admin_protect.php';
             <div class="card shadow-sm p-3">
                 <h5><i class="bi bi-people-fill text-success"></i> Students</h5>
                 <p class="text-muted">Manage all registered students.</p>
-                <a href="#" class="btn btn-success-modern btn-sm">View</a>
+                <a href="#?bid=<?= $browser_instance_id ?>" class="btn btn-success-modern btn-sm">View</a>
             </div>
         </div>
 
@@ -104,7 +114,7 @@ require_once 'php/admin_protect.php';
             <div class="card shadow-sm p-3">
                 <h5><i class="bi bi-people text-success"></i> Teachers</h5>
                 <p class="text-muted">Manage teacher accounts.</p>
-                <a href="#" class="btn btn-success-modern btn-sm">Manage</a>
+                <a href="#?bid=<?= $browser_instance_id ?>" class="btn btn-success-modern btn-sm">Manage</a>
             </div>
         </div>
 
@@ -113,7 +123,7 @@ require_once 'php/admin_protect.php';
             <div class="card shadow-sm p-3">
                 <h5><i class="bi bi-person-heart text-success"></i> Parents</h5>
                 <p class="text-muted">View parent profiles.</p>
-                <a href="#" class="btn btn-success-modern btn-sm">Open</a>
+                <a href="#?bid=<?= $browser_instance_id ?>" class="btn btn-success-modern btn-sm">Open</a>
             </div>
         </div>
         
@@ -122,7 +132,7 @@ require_once 'php/admin_protect.php';
             <div class="card shadow-sm p-3">
                 <h5><i class="bi bi-shield-check text-success"></i> Admin Accounts</h5>
                 <p class="text-muted">Manage admin users and approvals.</p>
-                <a href="private/admin-accounts.php" class="btn btn-success-modern btn-sm">Manage</a>
+                <a href="private/admin-accounts.php?bid=<?= $browser_instance_id ?>" class="btn btn-success-modern btn-sm">Manage</a>
             </div>
         </div>
 

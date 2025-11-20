@@ -1,5 +1,5 @@
 <?php
-// admin/php/admin_signup.php - PROPER TAB ISOLATION
+// admin/php/admin_signup.php - FORCE NEW SESSIONS PER TAB
 session_start();
 header('Content-Type: application/json');
 
@@ -10,6 +10,7 @@ $admin_name = trim($_POST['admin_name'] ?? '');
 $admin_email = trim($_POST['admin_email'] ?? '');
 $admin_password = $_POST['admin_password'] ?? '';
 $admin_confirm_password = $_POST['admin_confirm_password'] ?? '';
+$browser_instance_id = $_POST['browser_instance_id'] ?? '';
 
 // Basic validation
 if (empty($admin_name) || empty($admin_email) || empty($admin_password) || empty($admin_confirm_password)) {
@@ -17,31 +18,7 @@ if (empty($admin_name) || empty($admin_email) || empty($admin_password) || empty
     exit;
 }
 
-if ($admin_password !== $admin_confirm_password) {
-    echo json_encode(["success" => false, "message" => "Passwords do not match."]);
-    exit;
-}
-
-// Enhanced password validation
-if (strlen($admin_password) < 8) {
-    echo json_encode(["success" => false, "message" => "Password must be at least 8 characters long."]);
-    exit;
-}
-
-if (!preg_match('/[A-Z]/', $admin_password)) {
-    echo json_encode(["success" => false, "message" => "Password must contain at least one uppercase letter."]);
-    exit;
-}
-
-if (!preg_match('/[0-9]/', $admin_password)) {
-    echo json_encode(["success" => false, "message" => "Password must contain at least one number."]);
-    exit;
-}
-
-if (!preg_match('/[!@#$%^&*()_+\-=\[\]{};\':"\\\\|,.<>\/?]/', $admin_password)) {
-    echo json_encode(["success" => false, "message" => "Password must contain at least one special character."]);
-    exit;
-}
+// ... (keep your existing validation code) ...
 
 try {
     // Check if email exists
@@ -60,25 +37,28 @@ try {
     if ($stmt->execute([$admin_name, $admin_email, $hashedPassword])) {
         $admin_id = $pdo->lastInsertId();
         
-        // Generate unique session identifier for this browser tab
-        $tab_identifier = bin2hex(random_bytes(16));
+        // ALWAYS generate a NEW session ID for signup
+        $browser_instance_id = 'a' . bin2hex(random_bytes(16)); // Always new ID on signup
         
-        // Completely destroy old session and create new one
-        session_destroy();
-        session_id($tab_identifier);
+        // Use the browser instance ID as session ID
+        session_write_close();
+        session_id($browser_instance_id);
         session_start();
         
-        // Set session variables with tab isolation
+        // Set session variables
         $_SESSION['admin_id'] = $admin_id;
         $_SESSION['admin_name'] = $admin_name;
         $_SESSION['admin_email'] = $admin_email;
         $_SESSION['admin_logged_in'] = true;
         $_SESSION['pending_approval'] = true;
-        $_SESSION['login_token'] = bin2hex(random_bytes(16));
-        $_SESSION['tab_identifier'] = $tab_identifier;
         $_SESSION['login_time'] = time();
+        $_SESSION['browser_instance_id'] = $browser_instance_id;
         
-        echo json_encode(["success" => true, "message" => "Admin account created successfully! Awaiting approval."]);
+        echo json_encode([
+            "success" => true, 
+            "message" => "Admin account created successfully! Awaiting approval.",
+            "browser_instance_id" => $browser_instance_id
+        ]);
     } else {
         echo json_encode(["success" => false, "message" => "Database error occurred."]);
     }
