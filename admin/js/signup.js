@@ -87,13 +87,20 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function validatePassword(password) {
+        console.log("Testing password:", password); // Debug line
+
         const requirements = {
-            length: password.length >= 12, // Changed from 8 to 12
+            length: password.length >= 12,
             uppercase: /[A-Z]/.test(password),
-            lowercase: /[a-z]/.test(password), // Added lowercase requirement
-            number: /[0-9]/.test(password),
-            special: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)
+            lowercase: /[a-z]/.test(password),
+            number: /[0-9]/.test(password), // More explicit number check
+            special: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password) // More comprehensive special chars
         };
+
+        // Debug output
+        console.log("Password requirements:", requirements);
+        console.log("Has number:", /[0-9]/.test(password), "Test result:", requirements.number);
+        console.log("Has special:", /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password), "Test result:", requirements.special);
 
         return requirements;
     }
@@ -210,13 +217,20 @@ document.addEventListener("DOMContentLoaded", () => {
     const passwordInput = form.querySelector('[name="admin_password"]');
     passwordInput.addEventListener('input', function() {
         hideFieldError(this);
-        
+
         if (this.value.length > 0) {
             // Show password strength meter
             passwordStrength.style.display = 'block';
-            
+
             // Update strength meter
-            updatePasswordStrength(this.value);
+            const requirements = updatePasswordStrength(this.value);
+
+            // Debug: Check if elements exist
+            const numberElement = passwordRequirements.querySelector('[data-requirement="number"]');
+            const specialElement = passwordRequirements.querySelector('[data-requirement="special"]');
+            console.log("Number element found:", !!numberElement);
+            console.log("Special element found:", !!specialElement);
+
         } else {
             // Hide password strength meter when empty
             passwordStrength.style.display = 'none';
@@ -264,10 +278,16 @@ document.addEventListener("DOMContentLoaded", () => {
         e.preventDefault();
         alertBox.innerHTML = "";
 
+        console.log("=== FORM SUBMISSION DEBUG ===");
+        console.log("Form validation starting...");
+
         // Validate form before submission
         if (!validateForm()) {
+            console.log("Form validation failed");
             return;
         }
+
+        console.log("Form validation passed");
 
         const submitBtn = form.querySelector('button[type="submit"]');
         const originalText = submitBtn.textContent;
@@ -275,32 +295,40 @@ document.addEventListener("DOMContentLoaded", () => {
         submitBtn.disabled = true;
 
         const formData = new FormData(form);
-        
+
         // Add browser instance ID to form data (tab-specific)
-        formData.append('browser_instance_id', getBrowserInstanceId());
-        
+        const browserId = getBrowserInstanceId();
+        formData.append('browser_instance_id', browserId);
+        console.log("Browser instance ID:", browserId);
+
         // Ensure CSRF token is included
         if (!formData.get('csrf_token')) {
             formData.append('csrf_token', setCsrfToken());
         }
 
         try {
+            console.log("Sending request to:", form.action);
             const response = await fetch(form.action, {
                 method: "POST",
                 body: formData,
             });
 
+            console.log("Response status:", response.status);
             const data = await response.json();
+            console.log("Server response:", data);
 
             if (data.success) {
                 // Store the browser instance ID for this session in sessionStorage
                 if (data.browser_instance_id) {
                     sessionStorage.setItem('admin_current_session_id', data.browser_instance_id);
+                    console.log("Stored session ID:", data.browser_instance_id);
                 }
-                
+
+                console.log("Redirecting to dashboard...");
                 // Redirect with browser instance ID
                 window.location.href = "../dashboard.php?bid=" + (data.browser_instance_id || getBrowserInstanceId());
             } else {
+                console.log("Server returned error:", data.message);
                 showAlert(data.message, "danger");
             }
         } catch (error) {

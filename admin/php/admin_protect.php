@@ -1,17 +1,19 @@
 <?php
-// admin/php/admin_protect.php - IMPROVED SESSION PROTECTION
+// admin/php/admin_protect.php - FIXED VERSION
 
 // Security headers
 header("X-Frame-Options: DENY");
 header("X-Content-Type-Options: nosniff");
 
-// Start session first to access session functions
-session_start();
+// Start session first
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 // Check if we have a browser instance ID from localStorage (passed via GET)
 $browser_instance_id = $_GET['bid'] ?? '';
 
-// Only switch sessions if we have a valid browser instance ID AND it's different from current session
+// Only switch sessions if we have a valid browser instance ID
 if (!empty($browser_instance_id)) {
     // Validate and sanitize the session ID
     $browser_instance_id = preg_replace('/[^a-zA-Z0-9]/', '', $browser_instance_id);
@@ -19,7 +21,7 @@ if (!empty($browser_instance_id)) {
     $current_session_id = session_id();
     
     // Only switch if it's a valid format AND different from current session
-    if (!empty($browser_instance_id) && strlen($browser_instance_id) === 33 && $browser_instance_id !== $current_session_id) {
+    if (!empty($browser_instance_id) && $browser_instance_id !== $current_session_id) {
         // Use the browser instance ID as session ID
         session_write_close();
         session_id($browser_instance_id);

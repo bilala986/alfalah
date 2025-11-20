@@ -52,6 +52,10 @@
                                     <span class="requirement-icon">❌</span>
                                     One uppercase letter (A-Z)
                                 </div>
+                                <div class="requirement" data-requirement="lowercase">
+                                    <span class="requirement-icon">❌</span>
+                                    One lowercase letter (a-z)
+                                </div>
                                 <div class="requirement" data-requirement="number">
                                     <span class="requirement-icon">❌</span>
                                     One number (0-9)

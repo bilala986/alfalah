@@ -1,5 +1,5 @@
 <?php
-// admin/php/admin_login.php - SECURITY HARDENED WITH FALLBACKS
+// admin/php/admin_login.php - FINAL CLEAN VERSION
 session_start();
 header('Content-Type: application/json');
 
@@ -18,9 +18,6 @@ $email = trim($_POST['email'] ?? '');
 $password = $_POST['password'] ?? '';
 $browser_instance_id = $_POST['browser_instance_id'] ?? '';
 $csrf_token = $_POST['csrf_token'] ?? '';
-
-// Debug logging
-error_log("Admin Login Attempt - Email: $email, Browser Instance ID: $browser_instance_id");
 
 // Validate CSRF token
 if (!validateCsrfToken($csrf_token)) {
@@ -91,9 +88,6 @@ try {
             session_id($new_browser_instance_id);
             session_start();
             
-            // Don't regenerate ID - we already set a new one
-            // session_regenerate_id(true);
-            
             // Clear any existing session data
             $_SESSION = [];
             
@@ -110,9 +104,6 @@ try {
             
             // Set session timeout (1 hour)
             $_SESSION['last_activity'] = time();
-            
-            // Debug logging
-            error_log("Admin Login Success - New Session ID: $new_browser_instance_id, Admin ID: " . $admin['id']);
             
             echo json_encode([
                 "success" => true, 
