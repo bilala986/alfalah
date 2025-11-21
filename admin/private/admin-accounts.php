@@ -11,24 +11,6 @@ if ($_SESSION['pending_approval']) {
 // Include database connection
 require_once $_SERVER['DOCUMENT_ROOT'] . '/alfalah/php/db_connect.php';
 
-// Handle actions
-if (isset($_GET['action']) && isset($_GET['id'])) {
-    $admin_id = intval($_GET['id']);
-    $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
-    
-    if ($_GET['action'] === 'approve') {
-        $stmt = $pdo->prepare("UPDATE admin_users SET is_approved = 1 WHERE id = ?");
-        $stmt->execute([$admin_id]);
-    } elseif ($_GET['action'] === 'delete') {
-        $stmt = $pdo->prepare("DELETE FROM admin_users WHERE id = ?");
-        $stmt->execute([$admin_id]);
-    }
-    
-    // Redirect to refresh the page with proper session ID
-    header('Location: admin-accounts.php?bid=' . $browser_instance_id);
-    exit;
-}
-
 // Fetch all admin users
 $stmt = $pdo->prepare("SELECT id, name, email, created_at, last_login, is_approved FROM admin_users ORDER BY created_at DESC");
 $stmt->execute();
@@ -83,6 +65,63 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
             .save-btn:disabled {
                 opacity: 0.6;
                 cursor: not-allowed;
+            }
+            
+            /* Toast positioning */
+            .toast-container {
+                z-index: 9999;
+            }
+            
+            /* Desktop - bottom right */
+            @media (min-width: 768px) {
+                .toast-container {
+                    bottom: 20px;
+                    right: 20px;
+                }
+            }
+            
+            /* Mobile - center */
+            @media (max-width: 767.98px) {
+                .toast-container {
+                    bottom: 50%;
+                    left: 50%;
+                    transform: translate(-50%, 50%);
+                    width: 90%;
+                    max-width: 400px;
+                }
+            }
+            
+            /* Success toast styling */
+            .toast.bg-success .toast-header {
+                background-color: #198754 !important;
+                color: white;
+            }
+            
+            /* Error toast styling */
+            .toast.bg-danger .toast-header {
+                background-color: #dc3545 !important;
+                color: white;
+            }
+            
+            /* Green theme for modals */
+            .modal-green .modal-header {
+                background-color: #198754;
+                color: white;
+                border-bottom: none;
+            }
+            
+            .modal-green .modal-header .btn-close {
+                filter: invert(1);
+            }
+            
+            .modal-green .btn-primary {
+                background-color: #198754;
+                border-color: #198754;
+            }
+            
+            .modal-green .btn-primary:hover {
+                background-color: #157347;
+                border-color: #146c43;
             }
         </style>
     </head>
@@ -190,7 +229,8 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                                     <?php foreach ($admins as $admin): ?>
                                     <tr data-name="<?= htmlspecialchars(strtolower($admin['name'])) ?>" 
                                         data-email="<?= htmlspecialchars(strtolower($admin['email'])) ?>" 
-                                        data-status="<?= $admin['is_approved'] ? 'approved' : 'pending' ?>">
+                                        data-status="<?= $admin['is_approved'] ? 'approved' : 'pending' ?>"
+                                        data-admin-id="<?= $admin['id'] ?>">
                                         <td class="fw-semibold"><?= htmlspecialchars($admin['name']) ?></td>
                                         <td><?= htmlspecialchars($admin['email']) ?></td>
                                         <td class="mobile-hide"><?= $admin['created_at'] ? date('M j, Y g:i A', strtotime($admin['created_at'])) : 'N/A' ?></td>
@@ -256,7 +296,7 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
         </div>
 
         <!-- Edit Admin Modal -->
-        <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+        <div class="modal fade modal-green" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -289,7 +329,7 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
         </div>
 
         <!-- Filter Modal -->
-        <div class="modal fade" id="filterModal" tabindex="-1" aria-labelledby="filterModalLabel" aria-hidden="true">
+        <div class="modal fade modal-green" id="filterModal" tabindex="-1" aria-labelledby="filterModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -328,7 +368,7 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <a href="#" id="confirmApprove" class="btn btn-success">Approve</a>
+                        <button type="button" id="confirmApprove" class="btn btn-success">Approve</button>
                     </div>
                 </div>
             </div>
@@ -348,8 +388,20 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <a href="#" id="confirmRemove" class="btn btn-danger">Remove</a>
+                        <button type="button" id="confirmRemove" class="btn btn-danger">Remove</button>
                     </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Toast Notification Container -->
+        <div class="toast-container position-fixed p-3">
+            <div id="liveToast" class="toast align-items-center" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        Operation completed successfully!
+                    </div>
+                    <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
                 </div>
             </div>
         </div>
@@ -357,9 +409,11 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
         <script src="../../bootstrap/js/bootstrap.bundle.min.js"></script>
         <script src="../js/dashboard.js"></script>
         <script>
-            // Pass PHP variable to JavaScript
+            // Pass PHP variables to JavaScript
             const browserInstanceId = '<?= $browser_instance_id ?>';
+            const currentAdminId = <?= $_SESSION['admin_id'] ?>;
         </script>
+        
         <script src="../js/admin-accounts.js"></script>
     </body>
 </html>

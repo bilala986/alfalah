@@ -482,3 +482,108 @@ body {
     font-size: 0.875em;
     color: #dc3545;
 }
+
+
+
+.table-controls {
+                padding: 1rem 0;
+                border-bottom: 1px solid #dee2e6;
+                margin-bottom: 1rem;
+            }
+            .refresh-spin {
+                animation: refreshSpin 0.6s ease;
+            }
+            @keyframes refreshSpin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+            
+            /* Mobile responsive adjustments */
+            @media (max-width: 768px) {
+                .table-controls .btn-group {
+                    justify-content: center;
+                    width: 100%;
+                    margin-top: 10px;
+                }
+                .table-controls .col-md-6.text-end {
+                    text-align: center !important;
+                }
+            }
+            
+            /* Hide columns on mobile */
+            @media (max-width: 576px) {
+                .mobile-hide {
+                    display: none;
+                }
+            }
+            
+            .save-btn:disabled {
+                opacity: 0.6;
+                cursor: not-allowed;
+            }
+            
+            /* Toast positioning */
+.toast-container {
+    z-index: 9999;
+}
+
+/* Desktop - bottom right */
+@media (min-width: 768px) {
+    .toast-container {
+        bottom: 20px;
+        right: 20px;
+    }
+}
+
+/* Mobile - center */
+@media (max-width: 767.98px) {
+    .toast-container {
+        bottom: 50%;
+        left: 50%;
+        transform: translate(-50%, 50%);
+        width: 90%;
+        max-width: 400px;
+    }
+}
+
+/* Toast styling */
+.toast {
+    background-color: white;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 0.375rem;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.toast.success {
+    border-left: 4px solid #198754;
+}
+
+.toast.danger {
+    border-left: 4px solid #dc3545;
+}
+
+.toast-body {
+    padding: 0.75rem;
+    color: #212529;
+}
+            
+            /* Green theme for modals */
+            .modal-green .modal-header {
+                background-color: #198754;
+                color: white;
+                border-bottom: none;
+            }
+            
+            .modal-green .modal-header .btn-close {
+                filter: invert(1);
+            }
+            
+            .modal-green .btn-primary {
+                background-color: #198754;
+                border-color: #198754;
+            }
+            
+            .modal-green .btn-primary:hover {
+                background-color: #157347;
+                border-color: #146c43;
+            }
