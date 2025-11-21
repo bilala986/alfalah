@@ -161,4 +161,158 @@ function validatePasswordStrength($password) {
 function sanitizeOutput($data) {
     return htmlspecialchars($data, ENT_QUOTES, 'UTF-8');
 }
+
+/**
+ * Sanitize input data - NEW FUNCTION
+ */
+function sanitize_input($data) {
+    if (is_array($data)) {
+        return array_map('sanitize_input', $data);
+    }
+    
+    $data = trim($data);
+    $data = stripslashes($data);
+    $data = htmlspecialchars($data, ENT_QUOTES, 'UTF-8');
+    return $data;
+}
+
+/**
+ * Validate email format - NEW FUNCTION
+ */
+function validate_email($email) {
+    return filter_var($email, FILTER_VALIDATE_EMAIL) !== false;
+}
+
+/**
+ * Validate name format - NEW FUNCTION
+ */
+function validate_name($name) {
+    // Allow letters, spaces, hyphens, and apostrophes
+    return preg_match('/^[a-zA-Z\s\-\']+$/', $name) && strlen($name) >= 2 && strlen($name) <= 100;
+}
+
+/**
+ * Generate random string - NEW FUNCTION
+ */
+function generateRandomString($length = 32) {
+    return bin2hex(random_bytes($length / 2));
+}
+
+/**
+ * Hash password - NEW FUNCTION
+ */
+function hashPassword($password) {
+    return password_hash($password, PASSWORD_DEFAULT);
+}
+
+/**
+ * Verify password - NEW FUNCTION
+ */
+function verifyPassword($password, $hash) {
+    return password_verify($password, $hash);
+}
+
+/**
+ * Check if user is locked out - NEW FUNCTION
+ */
+function isUserLockedOut($pdo, $admin_id) {
+    try {
+        $stmt = $pdo->prepare("SELECT lockout_until FROM admin_users WHERE id = ?");
+        $stmt->execute([$admin_id]);
+        $result = $stmt->fetch();
+        
+        if ($result && $result['lockout_until']) {
+            $lockout_time = strtotime($result['lockout_until']);
+            $current_time = time();
+            return $lockout_time > $current_time;
+        }
+        
+        return false;
+    } catch (PDOException $e) {
+        error_log("Lockout check error: " . $e->getMessage());
+        return false;
+    }
+}
+
+/**
+ * Clear login attempts - NEW FUNCTION
+ */
+function clearLoginAttempts($pdo, $admin_id) {
+    try {
+        // Reset login attempts in admin_users table
+        $columnExists = $pdo->query("SHOW COLUMNS FROM admin_users LIKE 'login_attempts'")->rowCount() > 0;
+        
+        if ($columnExists) {
+            $stmt = $pdo->prepare("UPDATE admin_users SET login_attempts = 0, lockout_until = NULL WHERE id = ?");
+            $stmt->execute([$admin_id]);
+        }
+        
+        // Clear login attempts from attempts table if it exists
+        $tableExists = $pdo->query("SHOW TABLES LIKE 'admin_login_attempts'")->rowCount() > 0;
+        
+        if ($tableExists) {
+            $stmt = $pdo->prepare("DELETE FROM admin_login_attempts WHERE admin_id = ?");
+            $stmt->execute([$admin_id]);
+        }
+    } catch (PDOException $e) {
+        error_log("Clear login attempts error: " . $e->getMessage());
+    }
+}
+
+/**
+ * Validate and sanitize file upload - NEW FUNCTION
+ */
+function validateFileUpload($file, $allowed_types = ['image/jpeg', 'image/png', 'image/gif'], $max_size = 2097152) {
+    $errors = [];
+    
+    // Check for upload errors
+    if ($file['error'] !== UPLOAD_ERR_OK) {
+        $errors[] = "File upload error: " . $file['error'];
+        return $errors;
+    }
+    
+    // Check file size
+    if ($file['size'] > $max_size) {
+        $errors[] = "File size must be less than " . ($max_size / 1024 / 1024) . "MB";
+    }
+    
+    // Check file type
+    $finfo = finfo_open(FILEINFO_MIME_TYPE);
+    $mime_type = finfo_file($finfo, $file['tmp_name']);
+    finfo_close($finfo);
+    
+    if (!in_array($mime_type, $allowed_types)) {
+        $errors[] = "Invalid file type. Allowed types: " . implode(', ', $allowed_types);
+    }
+    
+    return $errors;
+}
+
+/**
+ * Escape SQL wildcards for LIKE queries - NEW FUNCTION
+ */
+function escapeSqlWildcards($string) {
+    return str_replace(['%', '_'], ['\%', '\_'], $string);
+}
+
+/**
+ * Generate secure token for password reset - NEW FUNCTION
+ */
+function generateSecureToken($length = 32) {
+    return bin2hex(random_bytes($length));
+}
+
+/**
+ * Validate URL - NEW FUNCTION
+ */
+function validateUrl($url) {
+    return filter_var($url, FILTER_VALIDATE_URL) !== false;
+}
+
+/**
+ * Sanitize HTML content (allow some basic tags) - NEW FUNCTION
+ */
+function sanitizeHtml($html, $allowed_tags = '<p><br><strong><em><ul><ol><li><a>') {
+    return strip_tags($html, $allowed_tags);
+}
 ?>
