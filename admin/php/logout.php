@@ -1,14 +1,29 @@
 <?php
 // admin/php/logout.php - IMPROVED TAB-SPECIFIC LOGOUT
+
+// Get browser instance ID from GET parameter first (for redirect)
+$browser_instance_id = $_GET['bid'] ?? '';
+
+// Start session with the specific ID if provided
+if (!empty($browser_instance_id)) {
+    $browser_instance_id = preg_replace('/[^a-zA-Z0-9]/', '', $browser_instance_id);
+    if (!empty($browser_instance_id) && preg_match('/^a[a-f0-9]{32}$/', $browser_instance_id)) {
+        session_id($browser_instance_id);
+    }
+}
+
 session_start();
 
-// Get the browser instance ID before destroying session
-$browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
+// Get the browser instance ID from session as well (for verification)
+$session_browser_id = $_SESSION['browser_instance_id'] ?? '';
 
-// Only destroy this specific session (not all sessions)
+// Clear all session data
+$_SESSION = [];
+
+// Destroy this specific session
 session_destroy();
 
-// Clear the session cookie for this domain/path
+// Clear the session cookie for this specific session
 if (ini_get("session.use_cookies")) {
     $params = session_get_cookie_params();
     setcookie(session_name(), '', time() - 42000,

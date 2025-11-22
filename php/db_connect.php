@@ -5,6 +5,9 @@
 
 // Path: alfalah/php/db_connect.php
 
+// Set UK timezone with automatic DST handling
+date_default_timezone_set('Europe/London');
+
 $host = "localhost";
 $dbname = "bilazqnw_alfalah";
 $username = "bilazqnw_alfalah-admin";
@@ -23,6 +26,7 @@ try {
             PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci"
         ]
     );
+    
 } catch (PDOException $e) {
     // Log error instead of displaying it
     error_log("Database connection failed: " . $e->getMessage());

@@ -80,6 +80,26 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
     }
+    
+    function formatUKDateTime(dateTimeString) {
+        const date = new Date(dateTimeString);
+
+        // Convert to UK timezone string
+        const ukTimeString = date.toLocaleString('en-GB', {
+            timeZone: 'Europe/London',
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true
+        });
+
+        // Debug: Check what we're getting
+        console.log('Original:', dateTimeString, 'UK Time:', ukTimeString);
+
+        return ukTimeString;
+    }
 
     // Update table with new data - FIXED VERSION
     function updateTable(admins) {
@@ -98,6 +118,11 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         admins.forEach(admin => {
+            console.log('Admin:', admin.name);
+            console.log('Created (raw):', admin.created_at);
+            console.log('Created (UK):', admin.created_at ? formatUKDateTime(admin.created_at) : 'N/A');
+            console.log('Last Login (raw):', admin.last_login);
+            console.log('Last Login (UK):', admin.last_login ? formatUKDateTime(admin.last_login) : 'Never');
             const row = document.createElement('tr');
             row.setAttribute('data-name', admin.name.toLowerCase());
             row.setAttribute('data-email', admin.email.toLowerCase());
@@ -135,12 +160,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     <i class="bi bi-trash"></i> Remove
                 </button>`;
             
+            // In the updateTable function, replace these lines:
             row.innerHTML = `
                 <td class="fw-semibold">${admin.name}</td>
                 <td>${admin.email}</td>
-                <td class="mobile-hide">${admin.created_at ? new Date(admin.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true }) : 'N/A'}</td>
+                <td class="mobile-hide">${admin.created_at ? formatUKDateTime(admin.created_at) : 'N/A'}</td>
                 <td class="mobile-hide">
-                    ${admin.last_login ? new Date(admin.last_login).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true }) : '<span class="text-muted">Never</span>'}
+                    ${admin.last_login ? formatUKDateTime(admin.last_login) : '<span class="text-muted">Never</span>'}
                 </td>
                 <td>${statusBadge}</td>
                 <td>

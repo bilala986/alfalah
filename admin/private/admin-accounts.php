@@ -226,6 +226,10 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                                         <td colspan="6" class="text-center text-muted py-4">No admin accounts found.</td>
                                     </tr>
                                 <?php else: ?>
+                                    <?php 
+                                    // Set UK timezone with automatic DST
+                                    $ukTimezone = new DateTimeZone('Europe/London');
+                                    ?>
                                     <?php foreach ($admins as $admin): ?>
                                     <tr data-name="<?= htmlspecialchars(strtolower($admin['name'])) ?>" 
                                         data-email="<?= htmlspecialchars(strtolower($admin['email'])) ?>" 
@@ -233,10 +237,26 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                                         data-admin-id="<?= $admin['id'] ?>">
                                         <td class="fw-semibold"><?= htmlspecialchars($admin['name']) ?></td>
                                         <td><?= htmlspecialchars($admin['email']) ?></td>
-                                        <td class="mobile-hide"><?= $admin['created_at'] ? date('M j, Y g:i A', strtotime($admin['created_at'])) : 'N/A' ?></td>
+                                        <td class="mobile-hide">
+                                            <?php if ($admin['created_at']): ?>
+                                                <?php 
+                                                // EXPLICITLY convert from UTC to UK time
+                                                $createdDate = new DateTime($admin['created_at'], new DateTimeZone('UTC'));
+                                                $createdDate->setTimezone(new DateTimeZone('Europe/London'));
+                                                echo $createdDate->format('M j, Y g:i A');
+                                                ?>
+                                            <?php else: ?>
+                                                N/A
+                                            <?php endif; ?>
+                                        </td>
                                         <td class="mobile-hide">
                                             <?php if ($admin['last_login']): ?>
-                                                <?= date('M j, Y g:i A', strtotime($admin['last_login'])) ?>
+                                                <?php 
+                                                // EXPLICITLY convert from UTC to UK time
+                                                $loginDate = new DateTime($admin['last_login'], new DateTimeZone('UTC'));
+                                                $loginDate->setTimezone(new DateTimeZone('Europe/London'));
+                                                echo $loginDate->format('M j, Y g:i A');
+                                                ?>
                                             <?php else: ?>
                                                 <span class="text-muted">Never</span>
                                             <?php endif; ?>
@@ -347,8 +367,8 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" id="clearFilterBtn" class="btn btn-outline-secondary">Clear Filter</button>
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" id="clearFilterBtn" class="btn btn-outline-danger">Clear Filter</button>
                         <button type="button" id="applyFilterBtn" class="btn btn-primary">Apply Filter</button>
                     </div>
                 </div>
