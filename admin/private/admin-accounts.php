@@ -347,6 +347,7 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                         </div>
                     </div>
                     <div class="modal-footer">
+                        <button type="button" id="clearFilterBtn" class="btn btn-outline-secondary">Clear Filter</button>
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                         <button type="button" id="applyFilterBtn" class="btn btn-primary">Apply Filter</button>
                     </div>

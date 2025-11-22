@@ -177,19 +177,21 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Filter function
+    // Replace the entire filterTable function with this fixed version:
     function filterTable() {
         const searchTerm = searchInput.value.toLowerCase();
         let visibleRows = 0;
+        let totalRows = 0;
 
         rows.forEach(row => {
+            totalRows++;
             const name = row.getAttribute('data-name');
             const email = row.getAttribute('data-email');
             const status = row.getAttribute('data-status');
-            
+
             const matchesSearch = name.includes(searchTerm) || email.includes(searchTerm);
             const matchesStatus = currentStatusFilter === 'all' || status === currentStatusFilter;
-            
+
             if (matchesSearch && matchesStatus) {
                 row.style.display = '';
                 visibleRows++;
@@ -198,8 +200,15 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
+        // Update both numbers - visible count and total count
         visibleCount.textContent = visibleRows;
-        
+
+        // Update the total count in the text
+        const countText = visibleCount.parentElement;
+        if (countText) {
+            countText.textContent = `Showing ${visibleRows} of ${totalRows} admins`;
+        }
+
         // Update filter button appearance based on active filter
         if (currentStatusFilter === 'all') {
             filterBtn.classList.remove('btn-success');
