@@ -1,5 +1,19 @@
-// admin/js/admin-accounts.js
+// admin/js/admin-accounts.js - FIXED VERSION
 document.addEventListener('DOMContentLoaded', function() {
+    // Toast notification function - MOVED TO TOP
+    function showToast(message, type = 'success') {
+        const toastEl = document.getElementById('liveToast');
+        const toastBody = toastEl.querySelector('.toast-body');
+
+        // Set toast type and message
+        toastEl.className = `toast align-items-center ${type === 'success' ? 'bg-success' : 'bg-danger'}`;
+        toastBody.textContent = message;
+
+        // Show toast
+        const toast = new bootstrap.Toast(toastEl);
+        toast.show();
+    }
+
     // Elements
     const searchInput = document.getElementById('searchInput');
     const refreshBtn = document.getElementById('refreshBtn');
@@ -37,41 +51,38 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Get all rows (will be updated on refresh)
     let rows = adminTableBody.querySelectorAll('tr[data-name]');
-    
-    // Toast notification function
-    function showToast(message, type = 'success') {
-        const toastEl = document.getElementById('liveToast');
-        const toastBody = toastEl.querySelector('.toast-body');
-
-        // Set toast type and message
-        toastEl.className = `toast align-items-center ${type === 'success' ? 'success' : 'danger'}`;
-        toastBody.textContent = message;
-
-        // Show toast
-        const toast = new bootstrap.Toast(toastEl);
-        toast.show();
-    }
 
     // Refresh table data
-    function refreshTableData() {
+    function refreshTableData(shouldShowToast = false) {
+        console.log('Refreshing table data...');
+        console.log('Current Admin ID:', currentAdminId);
+        
         fetch(`../php/get_admins.php?bid=${browserInstanceId}`)
             .then(response => response.json())
             .then(data => {
+                console.log('Received data from server:', data);
                 if (data.success) {
                     updateTable(data.admins);
-                    showToast('Table refreshed successfully!', 'success');
+                    if (shouldShowToast) {
+                        showToast('Table refreshed successfully!', 'success');
+                    }
                 } else {
-                    showToast('Error refreshing table', 'error');
+                    if (shouldShowToast) {
+                        showToast('Error refreshing table', 'error');
+                    }
                 }
             })
             .catch(error => {
                 console.error('Error refreshing table:', error);
-                showToast('Error refreshing table', 'error');
+                if (shouldShowToast) {
+                    showToast('Error refreshing table', 'error');
+                }
             });
     }
 
-    // Update table with new data
+    // Update table with new data - FIXED VERSION
     function updateTable(admins) {
+        console.log('Updating table with admins:', admins);
         adminTableBody.innerHTML = '';
         
         if (admins.length === 0) {
@@ -88,16 +99,29 @@ document.addEventListener('DOMContentLoaded', function() {
             row.setAttribute('data-status', admin.is_approved ? 'approved' : 'pending');
             row.setAttribute('data-admin-id', admin.id);
             
-            const statusBadge = admin.is_approved ? 
+            // Debug logging
+            console.log('Processing admin:', admin.name, 'ID:', admin.id, 'Approved:', admin.is_approved);
+            console.log('Current Admin ID for comparison:', currentAdminId);
+            console.log('Type of admin.id:', typeof admin.id, 'Type of currentAdminId:', typeof currentAdminId);
+            
+            const statusBadge = admin.is_approved == 1 ? 
                 '<span class="badge bg-success">Approved</span>' : 
                 '<span class="badge bg-danger">Pending</span>';
             
-            const approveButton = !admin.is_approved ? 
+            // FIX: Use == for comparison to handle string vs number
+            const approveButton = admin.is_approved == 0 ? 
                 `<button type="button" class="btn btn-outline-success approve-btn" data-admin-id="${admin.id}" data-admin-name="${admin.name}" data-admin-email="${admin.email}">
                     <i class="bi bi-check-lg"></i> Approve
                 </button>` : '';
             
-            const removeButton = admin.id != window.currentAdminId ? 
+            // FIX: Use explicit comparison with parseInt
+            const adminIdInt = parseInt(admin.id);
+            const currentAdminIdInt = parseInt(currentAdminId);
+            const isCurrentUser = adminIdInt === currentAdminIdInt;
+            
+            console.log('Is current user?', isCurrentUser, 'Admin ID:', adminIdInt, 'Current ID:', currentAdminIdInt);
+            
+            const removeButton = !isCurrentUser ? 
                 `<button type="button" class="btn btn-outline-danger remove-btn" data-admin-id="${admin.id}" data-admin-name="${admin.name}" data-admin-email="${admin.email}">
                     <i class="bi bi-trash"></i> Remove
                 </button>` : 
@@ -193,7 +217,7 @@ document.addEventListener('DOMContentLoaded', function() {
     refreshBtn.addEventListener('click', function() {
         const refreshIcon = this.querySelector('i');
         refreshIcon.classList.add('refresh-spin');
-        refreshTableData();
+        refreshTableData(true); // true = show toast
         setTimeout(() => refreshIcon.classList.remove('refresh-spin'), 600);
     });
     
@@ -209,29 +233,50 @@ document.addEventListener('DOMContentLoaded', function() {
         filterModal.hide();
     });
 
-    // Edit modal functionality
+    // Edit modal functionality - WITH DEBUG LOGGING
     function handleEditClick() {
         const adminId = this.getAttribute('data-admin-id');
         const adminName = this.getAttribute('data-admin-name');
         const adminEmail = this.getAttribute('data-admin-email');
         const adminApproved = this.getAttribute('data-admin-approved');
-        
+
+        // DEBUG LOGGING - CRITICAL
+        console.log('=== EDIT MODAL DEBUG ===');
+        console.log('Admin ID:', adminId);
+        console.log('Admin Name:', adminName);
+        console.log('Admin Email:', adminEmail);
+        console.log('Admin Approved (raw from data attribute):', adminApproved);
+        console.log('Type of adminApproved:', typeof adminApproved);
+        console.log('adminApproved === "1":', adminApproved === '1');
+        console.log('adminApproved === "0":', adminApproved === '0');
+        console.log('adminApproved == 1:', adminApproved == 1);
+        console.log('adminApproved == 0:', adminApproved == 0);
+
         // Populate form
         editAdminId.value = adminId;
         editName.value = adminName;
         editEmail.value = adminEmail;
-        editApproved.checked = adminApproved === '1';
-        
+
+        // Check what the checkbox state will be
+        const checkboxWillBeChecked = adminApproved === '1';
+        console.log('Checkbox will be set to:', checkboxWillBeChecked ? 'CHECKED' : 'UNCHECKED');
+
+        editApproved.checked = checkboxWillBeChecked;
+
+        // Verify the actual checkbox state
+        console.log('Actual checkbox state after setting:', editApproved.checked);
+        console.log('=== END DEBUG ===');
+
         // Store original data for comparison
         originalFormData = {
             name: adminName,
             email: adminEmail,
-            is_approved: adminApproved === '1'
+            is_approved: checkboxWillBeChecked
         };
-        
+
         // Reset save button
         saveChangesBtn.disabled = true;
-        
+
         editModal.show();
     }
 
@@ -255,13 +300,24 @@ document.addEventListener('DOMContentLoaded', function() {
         saveChangesBtn.disabled = !hasChanges;
     }
 
-    // Save changes functionality
+    // Save changes functionality - WITH DEBUG LOGGING
     saveChangesBtn.addEventListener('click', function() {
         const formData = new FormData();
+        const isApproved = editApproved.checked ? '1' : '0';
+
+        // DEBUG: What are we sending to the server?
+        console.log('=== SAVE DEBUG ===');
+        console.log('Admin ID:', editAdminId.value);
+        console.log('Name:', editName.value);
+        console.log('Email:', editEmail.value);
+        console.log('Is Approved (checkbox checked):', editApproved.checked);
+        console.log('Is Approved (value being sent):', isApproved);
+        console.log('=== END SAVE DEBUG ===');
+
         formData.append('admin_id', editAdminId.value);
         formData.append('name', editName.value);
         formData.append('email', editEmail.value);
-        formData.append('is_approved', editApproved.checked ? '1' : '0');
+        formData.append('is_approved', isApproved);
 
         // Show loading state
         saveChangesBtn.disabled = true;
@@ -273,10 +329,11 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(response => response.json())
         .then(data => {
+            console.log('Server response:', data); // Debug server response
             if (data.success) {
                 editModal.hide();
                 showToast('Admin updated successfully!', 'success');
-                refreshTableData();
+                refreshTableData(false);
             } else {
                 showToast('Error: ' + data.message, 'error');
             }
@@ -321,7 +378,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (data.success) {
                 approveModal.hide();
                 showToast('Admin approved successfully!', 'success');
-                refreshTableData();
+                refreshTableData(false);
             } else {
                 showToast('Error: ' + data.message, 'error');
             }
@@ -367,7 +424,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (data.success) {
                 removeModal.hide();
                 showToast('Admin removed successfully!', 'success');
-                refreshTableData();
+                refreshTableData(false);
             } else {
                 showToast('Error: ' + data.message, 'error');
             }
@@ -386,4 +443,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize
     attachEventListeners();
     filterTable();
+    
+    // Debug: Check if variables are properly set
+    console.log('Initialization complete - Browser Instance ID:', browserInstanceId);
+    console.log('Initialization complete - Current Admin ID:', currentAdminId);
 });

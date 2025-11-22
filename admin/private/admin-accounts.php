@@ -409,9 +409,10 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
         <script src="../../bootstrap/js/bootstrap.bundle.min.js"></script>
         <script src="../js/dashboard.js"></script>
         <script>
-            // Pass PHP variables to JavaScript
+            // Pass PHP variables to JavaScript - FIXED VERSION
             const browserInstanceId = '<?= $browser_instance_id ?>';
-            const currentAdminId = <?= $_SESSION['admin_id'] ?>;
+            const currentAdminId = <?= json_encode($_SESSION['admin_id'] ?? 0) ?>;
+            console.log('Current Admin ID from PHP:', currentAdminId); // Debug line
         </script>
         
         <script src="../js/admin-accounts.js"></script>

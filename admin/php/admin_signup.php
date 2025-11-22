@@ -1,5 +1,5 @@
 <?php
-// admin/php/admin_signup.php - CORRECTED VERSION
+// admin/php/admin_signup.php - FIXED VERSION
 session_start();
 header('Content-Type: application/json');
 
@@ -76,8 +76,8 @@ try {
         throw new Exception("Password hashing failed");
     }
 
-    // Insert admin
-    $stmt = $pdo->prepare("INSERT INTO admin_users (name, email, password_hash, is_approved, created_at, login_attempts) VALUES (?, ?, ?, 0, NOW(), 0)");
+    // Insert admin - FIX: Set is_approved = 0 (pending)
+    $stmt = $pdo->prepare("INSERT INTO admin_users (name, email, password_hash, is_approved, is_active, created_at, login_attempts) VALUES (?, ?, ?, 0, 1, NOW(), 0)");
     
     if ($stmt->execute([$admin_name, $admin_email, $hashedPassword])) {
         $admin_id = $pdo->lastInsertId();
@@ -92,12 +92,12 @@ try {
         session_id($new_browser_instance_id);
         session_start();
         
-        // Set session variables
+        // Set session variables - FIX: Set pending_approval to true
         $_SESSION['admin_id'] = $admin_id;
         $_SESSION['admin_name'] = $admin_name;
         $_SESSION['admin_email'] = $admin_email;
         $_SESSION['admin_logged_in'] = true;
-        $_SESSION['pending_approval'] = true;
+        $_SESSION['pending_approval'] = true; // This should be TRUE for new accounts
         $_SESSION['login_time'] = time();
         $_SESSION['browser_instance_id'] = $new_browser_instance_id;
         $_SESSION['user_agent'] = $_SERVER['HTTP_USER_AGENT'] ?? '';
