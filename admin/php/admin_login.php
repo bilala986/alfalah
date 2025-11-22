@@ -1,5 +1,5 @@
 <?php
-// admin/php/admin_login.php - FINAL CLEAN VERSION
+// admin/php/admin_login.php - FIXED VERSION WITH LAST LOGIN UPDATE
 session_start();
 header('Content-Type: application/json');
 
@@ -70,7 +70,7 @@ try {
         }
         
         if (password_verify($password, $admin['password_hash'])) {
-            // Successful login - reset attempt counter if column exists
+            // FIX: Successful login - ALWAYS update last_login timestamp
             if ($columnExists) {
                 $updateStmt = $pdo->prepare("UPDATE admin_users SET login_attempts = 0, lockout_until = NULL, last_login = NOW() WHERE id = ?");
             } else {

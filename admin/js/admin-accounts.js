@@ -1,6 +1,6 @@
-// admin/js/admin-accounts.js - FIXED VERSION
+// admin/js/admin-accounts.js - FIXED VERSION WITH ALL UPDATES
 document.addEventListener('DOMContentLoaded', function() {
-    // Toast notification function - MOVED TO TOP
+    // Toast notification function
     function showToast(message, type = 'success') {
         const toastEl = document.getElementById('liveToast');
         const toastBody = toastEl.querySelector('.toast-body');
@@ -25,6 +25,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const filterModal = new bootstrap.Modal(document.getElementById('filterModal'));
     const statusSelect = document.getElementById('statusSelect');
     const applyFilterBtn = document.getElementById('applyFilterBtn');
+    const clearFilterBtn = document.getElementById('clearFilterBtn');
     
     // Edit modal elements
     const editModal = new bootstrap.Modal(document.getElementById('editModal'));
@@ -87,7 +88,11 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (admins.length === 0) {
             adminTableBody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">No admin accounts found.</td></tr>';
-            visibleCount.textContent = '0';
+            // Update the full count text
+            const countText = visibleCount.parentElement;
+            if (countText) {
+                countText.textContent = 'Showing 0 of 0 admins';
+            }
             rows = [];
             return;
         }
@@ -96,13 +101,14 @@ document.addEventListener('DOMContentLoaded', function() {
             const row = document.createElement('tr');
             row.setAttribute('data-name', admin.name.toLowerCase());
             row.setAttribute('data-email', admin.email.toLowerCase());
-            row.setAttribute('data-status', admin.is_approved ? 'approved' : 'pending');
+            // FIX: Use proper status value based on is_approved
+            const statusValue = admin.is_approved == 1 ? 'approved' : 'pending';
+            row.setAttribute('data-status', statusValue);
             row.setAttribute('data-admin-id', admin.id);
             
             // Debug logging
-            console.log('Processing admin:', admin.name, 'ID:', admin.id, 'Approved:', admin.is_approved);
+            console.log('Processing admin:', admin.name, 'ID:', admin.id, 'Approved:', admin.is_approved, 'Status:', statusValue);
             console.log('Current Admin ID for comparison:', currentAdminId);
-            console.log('Type of admin.id:', typeof admin.id, 'Type of currentAdminId:', typeof currentAdminId);
             
             const statusBadge = admin.is_approved == 1 ? 
                 '<span class="badge bg-success">Approved</span>' : 
@@ -156,6 +162,13 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Update rows and filter
         rows = adminTableBody.querySelectorAll('tr[data-name]');
+        
+        // Update the total count display
+        const countText = visibleCount.parentElement;
+        if (countText) {
+            countText.textContent = `Showing ${rows.length} of ${rows.length} admins`;
+        }
+        
         filterTable();
     }
 
@@ -177,7 +190,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Replace the entire filterTable function with this fixed version:
+    // Filter function - FIXED VERSION
     function filterTable() {
         const searchTerm = searchInput.value.toLowerCase();
         let visibleRows = 0;
@@ -188,10 +201,10 @@ document.addEventListener('DOMContentLoaded', function() {
             const name = row.getAttribute('data-name');
             const email = row.getAttribute('data-email');
             const status = row.getAttribute('data-status');
-
+            
             const matchesSearch = name.includes(searchTerm) || email.includes(searchTerm);
             const matchesStatus = currentStatusFilter === 'all' || status === currentStatusFilter;
-
+            
             if (matchesSearch && matchesStatus) {
                 row.style.display = '';
                 visibleRows++;
@@ -202,13 +215,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Update both numbers - visible count and total count
         visibleCount.textContent = visibleRows;
-
+        
         // Update the total count in the text
         const countText = visibleCount.parentElement;
         if (countText) {
             countText.textContent = `Showing ${visibleRows} of ${totalRows} admins`;
         }
-
+        
         // Update filter button appearance based on active filter
         if (currentStatusFilter === 'all') {
             filterBtn.classList.remove('btn-success');
@@ -238,6 +251,14 @@ document.addEventListener('DOMContentLoaded', function() {
     
     applyFilterBtn.addEventListener('click', function() {
         currentStatusFilter = statusSelect.value;
+        filterTable();
+        filterModal.hide();
+    });
+
+    // Clear filter functionality
+    clearFilterBtn.addEventListener('click', function() {
+        currentStatusFilter = 'all';
+        statusSelect.value = 'all';
         filterTable();
         filterModal.hide();
     });
