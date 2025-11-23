@@ -202,7 +202,7 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                         <div class="row mt-2">
                             <div class="col-12">
                                 <small class="text-muted">
-                                    Showing <span id="visibleCount"><?= count($admins) ?></span> of <?= count($admins) ?> admins
+                                    Showing <span id="visibleCount"><?= count($admins) ?></span> of <span id="totalCount"><?= count($admins) ?></span> admins
                                 </small>
                             </div>
                         </div>

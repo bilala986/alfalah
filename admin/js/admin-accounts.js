@@ -105,24 +105,26 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateTable(admins) {
         console.log('Updating table with admins:', admins);
         adminTableBody.innerHTML = '';
-        
+
         if (admins.length === 0) {
             adminTableBody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">No admin accounts found.</td></tr>';
-            // Update the full count text
-            const countText = visibleCount.parentElement;
-            if (countText) {
-                countText.textContent = 'Showing 0 of 0 admins';
+            // Update the counts
+            visibleCount.textContent = '0';
+            const totalCount = document.getElementById('totalCount');
+            if (totalCount) {
+                totalCount.textContent = '0';
             }
             rows = [];
             return;
         }
-        
+
         admins.forEach(admin => {
             console.log('Admin:', admin.name);
             console.log('Created (raw):', admin.created_at);
             console.log('Created (UK):', admin.created_at ? formatUKDateTime(admin.created_at) : 'N/A');
             console.log('Last Login (raw):', admin.last_login);
             console.log('Last Login (UK):', admin.last_login ? formatUKDateTime(admin.last_login) : 'Never');
+
             const row = document.createElement('tr');
             row.setAttribute('data-name', admin.name.toLowerCase());
             row.setAttribute('data-email', admin.email.toLowerCase());
@@ -130,28 +132,20 @@ document.addEventListener('DOMContentLoaded', function() {
             const statusValue = admin.is_approved == 1 ? 'approved' : 'pending';
             row.setAttribute('data-status', statusValue);
             row.setAttribute('data-admin-id', admin.id);
-            
-            // Debug logging
-            console.log('Processing admin:', admin.name, 'ID:', admin.id, 'Approved:', admin.is_approved, 'Status:', statusValue);
-            console.log('Current Admin ID for comparison:', currentAdminId);
-            
+
             const statusBadge = admin.is_approved == 1 ? 
                 '<span class="badge bg-success">Approved</span>' : 
                 '<span class="badge bg-danger">Pending</span>';
-            
-            // FIX: Use == for comparison to handle string vs number
+
             const approveButton = admin.is_approved == 0 ? 
                 `<button type="button" class="btn btn-outline-success approve-btn" data-admin-id="${admin.id}" data-admin-name="${admin.name}" data-admin-email="${admin.email}">
                     <i class="bi bi-check-lg"></i> Approve
                 </button>` : '';
-            
-            // FIX: Use explicit comparison with parseInt
+
             const adminIdInt = parseInt(admin.id);
             const currentAdminIdInt = parseInt(currentAdminId);
             const isCurrentUser = adminIdInt === currentAdminIdInt;
-            
-            console.log('Is current user?', isCurrentUser, 'Admin ID:', adminIdInt, 'Current ID:', currentAdminIdInt);
-            
+
             const removeButton = !isCurrentUser ? 
                 `<button type="button" class="btn btn-outline-danger remove-btn" data-admin-id="${admin.id}" data-admin-name="${admin.name}" data-admin-email="${admin.email}">
                     <i class="bi bi-trash"></i> Remove
@@ -159,8 +153,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 `<button class="btn btn-outline-secondary" disabled title="Cannot delete your own account">
                     <i class="bi bi-trash"></i> Remove
                 </button>`;
-            
-            // In the updateTable function, replace these lines:
+
             row.innerHTML = `
                 <td class="fw-semibold">${admin.name}</td>
                 <td>${admin.email}</td>
@@ -179,22 +172,17 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                 </td>
             `;
-            
+
             adminTableBody.appendChild(row);
         });
-        
+
         // Reattach event listeners to new buttons
         attachEventListeners();
-        
+
         // Update rows and filter
         rows = adminTableBody.querySelectorAll('tr[data-name]');
-        
-        // Update the total count display
-        const countText = visibleCount.parentElement;
-        if (countText) {
-            countText.textContent = `Showing ${rows.length} of ${rows.length} admins`;
-        }
-        
+
+        // Call filterTable to update the counts properly
         filterTable();
     }
 
@@ -227,10 +215,10 @@ document.addEventListener('DOMContentLoaded', function() {
             const name = row.getAttribute('data-name');
             const email = row.getAttribute('data-email');
             const status = row.getAttribute('data-status');
-            
+
             const matchesSearch = name.includes(searchTerm) || email.includes(searchTerm);
             const matchesStatus = currentStatusFilter === 'all' || status === currentStatusFilter;
-            
+
             if (matchesSearch && matchesStatus) {
                 row.style.display = '';
                 visibleRows++;
@@ -239,15 +227,15 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
-        // Update both numbers - visible count and total count
+        // Update visible count
         visibleCount.textContent = visibleRows;
-        
-        // Update the total count in the text
-        const countText = visibleCount.parentElement;
-        if (countText) {
-            countText.textContent = `Showing ${visibleRows} of ${totalRows} admins`;
+
+        // Update total count
+        const totalCount = document.getElementById('totalCount');
+        if (totalCount) {
+            totalCount.textContent = totalRows;
         }
-        
+
         // Update filter button appearance based on active filter
         if (currentStatusFilter === 'all') {
             filterBtn.classList.remove('btn-success');
