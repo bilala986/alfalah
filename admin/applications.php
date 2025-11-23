@@ -208,10 +208,41 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                             <div class="col-md-6">
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="bi bi-search"></i></span>
-                                    <input type="text" id="searchInput" class="form-control" placeholder="Search student or parent names...">
+                                    <input type="text" id="searchInput" class="form-control" placeholder="Search applications...">
+
+                                    <!-- Search Options Dropdown -->
+                                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="bi bi-filter"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end p-2" style="min-width: 200px;">
+                                        <li class="mb-2">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="searchStudent" checked>
+                                                <label class="form-check-label small" for="searchStudent">
+                                                    Student Names
+                                                </label>
+                                            </div>
+                                        </li>
+                                        <li class="mb-2">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="searchParent" checked>
+                                                <label class="form-check-label small" for="searchParent">
+                                                    Parent Names
+                                                </label>
+                                            </div>
+                                        </li>
+                                        <li>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="searchEmail">
+                                                <label class="form-check-label small" for="searchEmail">
+                                                    Email Addresses
+                                                </label>
+                                            </div>
+                                        </li>
+                                    </ul>
                                 </div>
                             </div>
-                            
+
                             <!-- Refresh and Filter buttons on the right -->
                             <div class="col-md-6 text-end">
                                 <div class="btn-group">
@@ -224,7 +255,7 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                                 </div>
                             </div>
                         </div>
-                        
+
                         <!-- Results count -->
                         <div class="row mt-2">
                             <div class="col-12">
@@ -308,19 +339,23 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                                             </div>
                                         </td>
                                     </tr>
-                                <!-- Application Details Row - ENHANCED DESIGN -->
+                                    <!-- Application Details Row - PROFESSIONAL COMPACT DESIGN -->
                                     <tr class="application-details-row" style="display: none;">
                                         <td colspan="6">
                                             <div class="application-details" id="details-<?= $app['id'] ?>">
-                                                <!-- Student & Program Header -->
+                                                <!-- Student & Program Header - More Compact -->
                                                 <div class="detail-section">
-                                                    <div class="row align-items-center">
+                                                    <div class="row compact-layout">
                                                         <div class="col-md-8">
-                                                            <h5 class="detail-label mb-2">
+                                                            <h5 class="detail-label">
                                                                 <i class="bi bi-person-badge"></i>
-                                                                <?= htmlspecialchars($app['student_first_name'] . ' ' . $app['student_last_name']) ?>
+                                                                Student Information - <?= htmlspecialchars($app['student_first_name'] . ' ' . $app['student_last_name']) ?>
                                                             </h5>
                                                             <div class="detail-grid">
+                                                                <div class="detail-item">
+                                                                    <strong>Full Name</strong>
+                                                                    <span><?= htmlspecialchars($app['student_first_name'] . ' ' . $app['student_last_name']) ?></span>
+                                                                </div>
                                                                 <div class="detail-item">
                                                                     <strong>Age</strong>
                                                                     <span><?= $app['student_age'] ?? 'N/A' ?></span>
@@ -363,13 +398,13 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                                                     </div>
                                                 </div>
 
-                                                <!-- Parent Information -->
+                                                <!-- Parent Information - More Compact -->
                                                 <div class="detail-section">
                                                     <h6 class="detail-label"><i class="bi bi-people"></i> Parent/Guardian Information</h6>
                                                     <div class="row">
                                                         <div class="col-md-6">
                                                             <div class="parent-card">
-                                                                <h6>Primary Parent</h6>
+                                                                <h6><i class="bi bi-person-check"></i> Primary Parent</h6>
                                                                 <div class="contact-info">
                                                                     <div class="contact-item">
                                                                         <i class="bi bi-person"></i>
@@ -377,14 +412,11 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                                                                     </div>
                                                                     <div class="contact-item">
                                                                         <i class="bi bi-diagram-3"></i>
-                                                                        <span><strong>Relationship:</strong> <?= htmlspecialchars($app['parent1_relationship']) ?></span>
+                                                                        <span><?= htmlspecialchars($app['parent1_relationship']) ?></span>
+                                                                        <?php if (!empty($app['parent1_relationship_other'])): ?>
+                                                                        <br><small class="text-muted">(<?= htmlspecialchars($app['parent1_relationship_other']) ?>)</small>
+                                                                        <?php endif; ?>
                                                                     </div>
-                                                                    <?php if (!empty($app['parent1_relationship_other'])): ?>
-                                                                    <div class="contact-item">
-                                                                        <i class="bi bi-tag"></i>
-                                                                        <span><strong>Other:</strong> <?= htmlspecialchars($app['parent1_relationship_other']) ?></span>
-                                                                    </div>
-                                                                    <?php endif; ?>
                                                                     <div class="contact-item">
                                                                         <i class="bi bi-phone"></i>
                                                                         <span><?= htmlspecialchars($app['parent1_mobile']) ?></span>
@@ -399,7 +431,7 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                                                         <?php if (!empty($app['parent2_first_name'])): ?>
                                                         <div class="col-md-6">
                                                             <div class="parent-card">
-                                                                <h6>Additional Parent</h6>
+                                                                <h6><i class="bi bi-person-plus"></i> Additional Parent</h6>
                                                                 <div class="contact-info">
                                                                     <div class="contact-item">
                                                                         <i class="bi bi-person"></i>
@@ -407,14 +439,11 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                                                                     </div>
                                                                     <div class="contact-item">
                                                                         <i class="bi bi-diagram-3"></i>
-                                                                        <span><strong>Relationship:</strong> <?= htmlspecialchars($app['parent2_relationship']) ?></span>
+                                                                        <span><?= htmlspecialchars($app['parent2_relationship']) ?></span>
+                                                                        <?php if (!empty($app['parent2_relationship_other'])): ?>
+                                                                        <br><small class="text-muted">(<?= htmlspecialchars($app['parent2_relationship_other']) ?>)</small>
+                                                                        <?php endif; ?>
                                                                     </div>
-                                                                    <?php if (!empty($app['parent2_relationship_other'])): ?>
-                                                                    <div class="contact-item">
-                                                                        <i class="bi bi-tag"></i>
-                                                                        <span><strong>Other:</strong> <?= htmlspecialchars($app['parent2_relationship_other']) ?></span>
-                                                                    </div>
-                                                                    <?php endif; ?>
                                                                     <?php if (!empty($app['parent2_mobile'])): ?>
                                                                     <div class="contact-item">
                                                                         <i class="bi bi-phone"></i>
@@ -433,8 +462,8 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                                                         <?php endif; ?>
                                                     </div>
                                                     <div class="mt-3">
-                                                        <div class="parent-card bg-warning bg-opacity-10">
-                                                            <h6 class="text-warning"><i class="bi bi-exclamation-triangle"></i> Emergency Contact</h6>
+                                                        <div class="parent-card emergency-contact-card">
+                                                            <h6><i class="bi bi-exclamation-triangle"></i> Emergency Contact</h6>
                                                             <div class="contact-item">
                                                                 <i class="bi bi-telephone-forward"></i>
                                                                 <span class="fw-bold"><?= htmlspecialchars($app['emergency_contact']) ?></span>
@@ -443,7 +472,7 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                                                     </div>
                                                 </div>
 
-                                                <!-- Address -->
+                                                <!-- Address - More Compact -->
                                                 <div class="detail-section">
                                                     <h6 class="detail-label"><i class="bi bi-geo-alt"></i> Address</h6>
                                                     <div class="parent-card">
@@ -464,74 +493,73 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                                                     </div>
                                                 </div>
 
-                                                <!-- Medical & Additional Info -->
-                                                <div class="row">
-                                                    <?php if ($app['illness'] === 'Yes' && !empty($app['illness_details'])): ?>
-                                                    <div class="col-md-6">
-                                                        <div class="detail-section medical-info">
-                                                            <h6 class="detail-label"><i class="bi bi-heart-pulse"></i> Medical Conditions</h6>
-                                                            <div class="parent-card">
-                                                                <p class="mb-0"><?= htmlspecialchars($app['illness_details']) ?></p>
+                                                <!-- Medical & Additional Info - More Compact -->
+                                                <?php if ($app['illness'] === 'Yes' || $app['special_needs'] === 'Yes' || $app['allergies'] === 'Yes'): ?>
+                                                <div class="detail-section">
+                                                    <h6 class="detail-label"><i class="bi bi-heart-pulse"></i> Health Information</h6>
+                                                    <div class="row">
+                                                        <?php if ($app['illness'] === 'Yes' && !empty($app['illness_details'])): ?>
+                                                        <div class="col-md-4">
+                                                            <div class="parent-card medical-info">
+                                                                <h6><i class="bi bi-heart-pulse"></i> Medical Conditions</h6>
+                                                                <p class="mb-0 small"><?= htmlspecialchars($app['illness_details']) ?></p>
                                                             </div>
                                                         </div>
-                                                    </div>
-                                                    <?php endif; ?>
-                                                    
-                                                    <?php if ($app['special_needs'] === 'Yes' && !empty($app['special_needs_details'])): ?>
-                                                    <div class="col-md-6">
-                                                        <div class="detail-section special-needs-info">
-                                                            <h6 class="detail-label"><i class="bi bi-person-badge"></i> Special Needs</h6>
-                                                            <div class="parent-card">
-                                                                <p class="mb-0"><?= htmlspecialchars($app['special_needs_details']) ?></p>
+                                                        <?php endif; ?>
+                                                        
+                                                        <?php if ($app['special_needs'] === 'Yes' && !empty($app['special_needs_details'])): ?>
+                                                        <div class="col-md-4">
+                                                            <div class="parent-card special-needs-info">
+                                                                <h6><i class="bi bi-person-badge"></i> Special Needs</h6>
+                                                                <p class="mb-0 small"><?= htmlspecialchars($app['special_needs_details']) ?></p>
                                                             </div>
                                                         </div>
-                                                    </div>
-                                                    <?php endif; ?>
-                                                    
-                                                    <?php if ($app['allergies'] === 'Yes' && !empty($app['allergies_details'])): ?>
-                                                    <div class="col-md-6">
-                                                        <div class="detail-section allergy-info">
-                                                            <h6 class="detail-label"><i class="bi bi-exclamation-triangle"></i> Allergies</h6>
-                                                            <div class="parent-card">
-                                                                <p class="mb-0"><?= htmlspecialchars($app['allergies_details']) ?></p>
+                                                        <?php endif; ?>
+                                                        
+                                                        <?php if ($app['allergies'] === 'Yes' && !empty($app['allergies_details'])): ?>
+                                                        <div class="col-md-4">
+                                                            <div class="parent-card allergy-info">
+                                                                <h6><i class="bi bi-exclamation-triangle"></i> Allergies</h6>
+                                                                <p class="mb-0 small"><?= htmlspecialchars($app['allergies_details']) ?></p>
                                                             </div>
                                                         </div>
+                                                        <?php endif; ?>
                                                     </div>
-                                                    <?php endif; ?>
                                                 </div>
+                                                <?php endif; ?>
 
-                                                <!-- Permissions -->
+                                                <!-- Permissions - More Compact -->
                                                 <div class="detail-section">
                                                     <h6 class="detail-label"><i class="bi bi-shield-check"></i> Permissions & Information</h6>
                                                     <div class="permissions-grid">
                                                         <div class="permission-item">
                                                             <i class="bi bi-water"></i>
-                                                            <span><strong>Swimming:</strong> <?= htmlspecialchars($app['knows_swimming']) ?></span>
+                                                            <span>Swimming: <?= htmlspecialchars($app['knows_swimming']) ?></span>
                                                         </div>
                                                         <div class="permission-item">
                                                             <i class="bi bi-car-front"></i>
-                                                            <span><strong>Travel Sickness:</strong> <?= htmlspecialchars($app['travel_sickness']) ?></span>
+                                                            <span>Travel Sickness: <?= htmlspecialchars($app['travel_sickness']) ?></span>
                                                         </div>
                                                         <div class="permission-item">
                                                             <i class="bi bi-geo-alt"></i>
-                                                            <span><strong>Travel Permission:</strong> <?= htmlspecialchars($app['travel_permission']) ?></span>
+                                                            <span>Travel Permission: <?= htmlspecialchars($app['travel_permission']) ?></span>
                                                         </div>
                                                         <div class="permission-item">
                                                             <i class="bi bi-camera"></i>
-                                                            <span><strong>Photo Permission:</strong> <?= htmlspecialchars($app['photo_permission']) ?></span>
+                                                            <span>Photo Permission: <?= htmlspecialchars($app['photo_permission']) ?></span>
                                                         </div>
                                                         <div class="permission-item">
                                                             <i class="bi bi-bus-front"></i>
-                                                            <span><strong>Transport:</strong> <?= htmlspecialchars($app['transport_mode']) ?></span>
+                                                            <span>Transport: <?= htmlspecialchars($app['transport_mode']) ?></span>
                                                         </div>
                                                         <div class="permission-item">
                                                             <i class="bi bi-house-door"></i>
-                                                            <span><strong>Home Alone:</strong> <?= htmlspecialchars($app['go_home_alone']) ?></span>
+                                                            <span>Home Alone: <?= htmlspecialchars($app['go_home_alone']) ?></span>
                                                         </div>
                                                     </div>
                                                 </div>
                                                 
-                                                <!-- Islamic Education -->
+                                                <!-- Islamic Education - More Compact -->
                                                 <?php if ($app['attended_islamic_education'] === 'Yes'): ?>
                                                 <div class="detail-section">
                                                     <h6 class="detail-label"><i class="bi bi-book-half"></i> Islamic Education History</h6>

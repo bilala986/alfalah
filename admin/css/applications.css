@@ -19,153 +19,230 @@
     border-color: #146c43;
 }
 
-/* applications.css - Enhanced styling for applications page */
+/* applications.css - Professional Compact Design */
 
 /* Enhanced Application Details Design */
 .application-details {
     max-height: 0;
     overflow: hidden;
-    transition: max-height 0.5s ease-out;
-    background: linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%);
+    transition: all 0.5s ease-out;
+    background: linear-gradient(135deg, #f8faff 0%, #f0f4ff 100%);
     border-radius: 12px;
     margin: 8px 0;
-    border: 1px solid transparent;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    border: 1px solid #e1e8ff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    opacity: 0;
+    transform: translateY(-10px);
 }
 
 .application-details.show {
-    max-height: 1200px;
-    padding: 24px;
-    border-color: #e3f2fd;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    max-height: none; /* Let content determine height */
+    height: auto; /* Automatic height based on content */
+    overflow: visible; /* No clipping of content */
+    padding: 20px;
+    border-color: #c5d5ff;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.12);
+    opacity: 1;
+    transform: translateY(0);
 }
 
+/* Ensure all content containers have proper height management */
+.application-details .detail-section,
+.application-details .parent-card,
+.application-details .contact-info,
+.application-details .permissions-grid {
+    height: auto;
+    min-height: fit-content;
+    overflow: visible;
+}
+
+/* Compact detail sections */
 .detail-section {
-    margin-bottom: 24px;
-    padding: 20px;
+    margin-bottom: 20px;
+    padding: 18px;
     background: white;
-    border-radius: 8px;
+    border-radius: 10px;
     border-left: 4px solid #2196F3;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    transition: all 0.3s ease;
+    height: auto;
+    overflow: visible;
 }
 
 .detail-section:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
 }
 
 .detail-label {
     font-weight: 700;
     color: #1976D2;
-    font-size: 1.1rem;
-    margin-bottom: 16px;
+    font-size: 1rem;
+    margin-bottom: 14px;
     display: flex;
     align-items: center;
     gap: 8px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #f0f4ff;
 }
 
 .detail-label i {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
 }
 
+/* Compact grid layouts */
 .detail-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 16px;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+    height: auto;
 }
 
 .detail-item {
     display: flex;
     flex-direction: column;
-    padding: 12px;
+    padding: 10px;
     background: #fafbfc;
     border-radius: 6px;
-    border: 1px solid #e1e5e9;
+    border: 1px solid #e8edff;
+    transition: all 0.2s ease;
+    height: auto;
+    min-height: fit-content;
+}
+
+.detail-item:hover {
+    background: #f5f8ff;
+    border-color: #d0dcff;
 }
 
 .detail-item strong {
     color: #495057;
-    font-size: 0.9rem;
-    margin-bottom: 4px;
+    font-size: 0.85rem;
+    margin-bottom: 3px;
     font-weight: 600;
 }
 
 .detail-item span {
     color: #6c757d;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
+    font-weight: 500;
 }
 
 /* Medical info styling */
 .medical-info {
-    background: linear-gradient(135deg, #fff3e0 0%, #ffecb3 100%);
+    background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
     border-left-color: #ff9800;
+    height: auto;
 }
 
 .special-needs-info {
     background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%);
     border-left-color: #4caf50;
+    height: auto;
 }
 
 .allergy-info {
     background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
     border-left-color: #f44336;
+    height: auto;
 }
 
-/* Parent info styling */
+/* Compact parent cards */
 .parent-card {
     background: white;
-    padding: 20px;
+    padding: 16px;
     border-radius: 8px;
-    border: 1px solid #e1e5e9;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+    border: 1px solid #e8edff;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    height: auto; /* Changed from fit-content to auto */
+    min-height: fit-content;
+    transition: all 0.2s ease;
+    overflow: visible;
+}
+
+.parent-card:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
 
 .parent-card h6 {
     color: #1976D2;
     font-weight: 600;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
 
 .contact-info {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 5px;
+    height: auto;
 }
 
 .contact-item {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 8px;
     color: #6c757d;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
+    line-height: 1.3;
+    height: auto;
+    min-height: fit-content;
 }
 
 .contact-item i {
     color: #2196F3;
-    width: 16px;
+    width: 14px;
+    flex-shrink: 0;
+    margin-top: 1px;
 }
 
-/* Permissions grid */
+/* Emergency contact styling */
+.emergency-contact-card {
+    background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%) !important;
+    border-left: 4px solid #ff9800 !important;
+    border: 1px solid #ffcc80 !important;
+    padding: 14px !important;
+    height: auto;
+}
+
+.emergency-contact-card h6 {
+    color: #f57c00 !important;
+    font-size: 0.9rem !important;
+    margin-bottom: 8px !important;
+}
+
+/* Compact permissions grid */
 .permissions-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 12px;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 10px;
+    height: auto;
 }
 
 .permission-item {
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 8px 12px;
+    padding: 8px 10px;
     background: #f8f9fa;
     border-radius: 6px;
     border: 1px solid #e9ecef;
+    font-size: 0.85rem;
+    transition: all 0.2s ease;
+    height: auto;
+}
+
+.permission-item:hover {
+    background: #e9ecef;
+    transform: translateX(2px);
 }
 
 .permission-item i {
     color: #28a745;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
 }
 
 /* Active view button state */
@@ -173,6 +250,7 @@
     background-color: #0d6efd !important;
     border-color: #0d6efd !important;
     color: white !important;
+    box-shadow: 0 2px 6px rgba(13, 110, 253, 0.3);
 }
 
 .view-btn.active:hover {
@@ -205,30 +283,31 @@
     100% { transform: rotate(360deg); }
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    .application-details.show {
-        padding: 16px;
-    }
-    
-    .detail-section {
-        padding: 16px;
-    }
-    
-    .detail-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .permissions-grid {
-        grid-template-columns: 1fr;
-    }
+/* Professional spacing and layout improvements */
+.application-details.show {
+    padding-bottom: 30px; /* Extra space at bottom */
+}
+
+.detail-section:last-child {
+    margin-bottom: 10px; /* Less margin for last section */
+}
+
+/* Better column utilization */
+.compact-layout .col-md-8 {
+    padding-right: 15px;
+    height: auto;
+}
+
+.compact-layout .col-md-4 {
+    padding-left: 15px;
+    height: auto;
 }
 
 /* Status badges */
 .status-badge {
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 0.8rem;
+    padding: 4px 10px;
+    border-radius: 16px;
+    font-size: 0.75rem;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -256,4 +335,90 @@
     background: #ffebee;
     color: #d32f2f;
     border: 1px solid #ffcdd2;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .application-details.show {
+        padding: 16px;
+    }
+    
+    .detail-section {
+        padding: 14px;
+        margin-bottom: 16px;
+    }
+    
+    .detail-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+    
+    .permissions-grid {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+    
+    .compact-layout .col-md-8,
+    .compact-layout .col-md-4 {
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+}
+
+/* Professional typography improvements */
+.application-details {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.detail-item strong {
+    font-weight: 600;
+}
+
+.contact-item span {
+    font-weight: 500;
+}
+
+/* Subtle animations */
+.application-details.show {
+    animation: fadeInUp 0.5s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Ensure no overflow constraints */
+.application-details * {
+    max-height: none !important;
+    overflow: visible !important;
+}
+
+/* Force automatic height for all containers */
+.application-details,
+.application-details .row,
+.application-details .col-md-8,
+.application-details .col-md-6,
+.application-details .col-md-4 {
+    height: auto !important;
+    min-height: fit-content !important;
+}
+
+/* Search dropdown styling */
+.search-options-dropdown .dropdown-menu {
+    min-width: 200px;
+}
+
+.search-options-dropdown .form-check {
+    margin-bottom: 0.5rem;
+}
+
+.search-options-dropdown .form-check-label {
+    font-size: 0.875rem;
 }

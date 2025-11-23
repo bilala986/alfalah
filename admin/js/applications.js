@@ -20,6 +20,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const filterBtn = document.getElementById('filterBtn');
     const applicationsTableBody = document.getElementById('applicationsTableBody');
     const visibleCount = document.getElementById('visibleCount');
+    const totalCount = document.getElementById('totalCount');
+    
+    // Search options elements
+    const searchStudent = document.getElementById('searchStudent');
+    const searchParent = document.getElementById('searchParent');
+    const searchEmail = document.getElementById('searchEmail');
     
     // Modal elements
     const filterModal = new bootstrap.Modal(document.getElementById('filterModal'));
@@ -43,28 +49,47 @@ document.addEventListener('DOMContentLoaded', function() {
     // Get all rows
     let rows = applicationsTableBody.querySelectorAll('tr[data-student]');
 
-    // Enhanced search function - searches student names, parent names, emails, phones
+    // Enhanced search function with search options
     function searchApplications(searchTerm) {
         let visibleRows = 0;
-        
+
+        // Get search options
+        const searchInStudent = searchStudent ? searchStudent.checked : true;
+        const searchInParent = searchParent ? searchParent.checked : true;
+        const searchInEmail = searchEmail ? searchEmail.checked : false;
+
         rows.forEach(row => {
             const studentName = row.getAttribute('data-student');
             const parentName = row.getAttribute('data-parent');
             const program = row.getAttribute('data-program');
             const applicationId = row.getAttribute('data-application-id');
-            
-            // Get additional data from the row cells for more comprehensive search
+
+            // Get additional data from the row cells
             const studentCell = row.cells[0];
             const parentCell = row.cells[3];
-            
+
             const studentFullText = studentCell.textContent.toLowerCase();
             const parentFullText = parentCell.textContent.toLowerCase();
-            
-            // Search in: student names, parent names, parent emails (from cell text)
-            const matchesSearch = studentName.includes(searchTerm) || 
-                                parentName.includes(searchTerm) ||
-                                studentFullText.includes(searchTerm) ||
-                                parentFullText.includes(searchTerm);
+
+            // Determine what to search based on selected options
+            let matchesSearch = false;
+
+            if (searchTerm === '') {
+                // If no search term, show all rows (but still apply filters)
+                matchesSearch = true;
+            } else {
+                // Search based on selected options ONLY - no fallback to full text
+                if (searchInStudent && studentName.includes(searchTerm)) {
+                    matchesSearch = true;
+                }
+                if (!matchesSearch && searchInParent && parentName.includes(searchTerm)) {
+                    matchesSearch = true;
+                }
+                if (!matchesSearch && searchInEmail && parentFullText.includes(searchTerm)) {
+                    matchesSearch = true;
+                }
+                // REMOVED the fallback search in full text - this was causing the issue
+            }
 
             // Apply both search and filter
             const matchesYear = currentYearFilter === 'all' || program === currentYearFilter || row.querySelector('.mobile-hide:nth-child(3)')?.textContent.includes(currentYearFilter);
@@ -73,7 +98,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (matchesSearch && matchesYear && matchesProgram) {
                 row.style.display = '';
                 visibleRows++;
-                
+
                 // Hide details row
                 const detailsRow = row.nextElementSibling;
                 if (detailsRow && detailsRow.classList.contains('application-details-row')) {
@@ -85,7 +110,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             } else {
                 row.style.display = 'none';
-                
+
                 // Also hide the details row
                 const detailsRow = row.nextElementSibling;
                 if (detailsRow && detailsRow.classList.contains('application-details-row')) {
@@ -117,18 +142,19 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Dynamic table update function (like admin-accounts.js)
+    // Dynamic table update function
     function updateTable(applications) {
         console.log('Updating table with applications:', applications);
         applicationsTableBody.innerHTML = '';
 
+        // Update total count element
+        if (totalCount) {
+            totalCount.textContent = applications.length;
+        }
+
         if (applications.length === 0) {
             applicationsTableBody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">No admission applications found.</td></tr>';
             visibleCount.textContent = '0';
-            const totalCount = document.getElementById('totalCount');
-            if (totalCount) {
-                totalCount.textContent = '0';
-            }
             rows = [];
             return;
         }
@@ -340,6 +366,25 @@ document.addEventListener('DOMContentLoaded', function() {
         filterTable();
     });
     
+    // Search option change listeners
+    if (searchStudent) {
+        searchStudent.addEventListener('change', function() {
+            filterTable();
+        });
+    }
+    
+    if (searchParent) {
+        searchParent.addEventListener('change', function() {
+            filterTable();
+        });
+    }
+    
+    if (searchEmail) {
+        searchEmail.addEventListener('change', function() {
+            filterTable();
+        });
+    }
+    
     // Refresh functionality
     refreshBtn.addEventListener('click', function() {
         const refreshIcon = this.querySelector('i');
@@ -463,4 +508,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Debug: Check if variables are properly set
     console.log('Applications page initialized - Browser Instance ID:', browserInstanceId);
+    console.log('Search options available:', {
+        student: !!searchStudent,
+        parent: !!searchParent,
+        email: !!searchEmail
+    });
 });
