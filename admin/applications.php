@@ -308,141 +308,226 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                                             </div>
                                         </td>
                                     </tr>
-                                    <!-- Application Details Row -->
+                                <!-- Application Details Row - ENHANCED DESIGN -->
                                     <tr class="application-details-row" style="display: none;">
                                         <td colspan="6">
                                             <div class="application-details" id="details-<?= $app['id'] ?>">
-                                                <div class="row">
-                                                    <!-- Student Information -->
-                                                    <div class="col-md-6">
-                                                        <div class="detail-section">
-                                                            <h6 class="detail-label"><i class="bi bi-person"></i> Student Information</h6>
-                                                            <div class="row">
-                                                                <div class="col-6"><strong>Name:</strong></div>
-                                                                <div class="col-6"><?= htmlspecialchars($app['student_first_name'] . ' ' . $app['student_last_name']) ?></div>
-                                                                
-                                                                <div class="col-6"><strong>Gender:</strong></div>
-                                                                <div class="col-6"><?= htmlspecialchars($app['student_gender']) ?></div>
-                                                                
-                                                                <div class="col-6"><strong>Date of Birth:</strong></div>
-                                                                <div class="col-6"><?= $app['student_dob'] ? htmlspecialchars($app['student_dob']) : 'N/A' ?></div>
-                                                                
-                                                                <div class="col-6"><strong>Age:</strong></div>
-                                                                <div class="col-6"><?= $app['student_age'] ?? 'N/A' ?></div>
-                                                                
-                                                                <div class="col-6"><strong>School:</strong></div>
-                                                                <div class="col-6"><?= htmlspecialchars($app['student_school']) ?></div>
+                                                <!-- Student & Program Header -->
+                                                <div class="detail-section">
+                                                    <div class="row align-items-center">
+                                                        <div class="col-md-8">
+                                                            <h5 class="detail-label mb-2">
+                                                                <i class="bi bi-person-badge"></i>
+                                                                <?= htmlspecialchars($app['student_first_name'] . ' ' . $app['student_last_name']) ?>
+                                                            </h5>
+                                                            <div class="detail-grid">
+                                                                <div class="detail-item">
+                                                                    <strong>Age</strong>
+                                                                    <span><?= $app['student_age'] ?? 'N/A' ?></span>
+                                                                </div>
+                                                                <div class="detail-item">
+                                                                    <strong>Gender</strong>
+                                                                    <span><?= htmlspecialchars($app['student_gender']) ?></span>
+                                                                </div>
+                                                                <div class="detail-item">
+                                                                    <strong>Date of Birth</strong>
+                                                                    <span><?= $app['student_dob'] ? htmlspecialchars($app['student_dob']) : 'N/A' ?></span>
+                                                                </div>
+                                                                <div class="detail-item">
+                                                                    <strong>Current School</strong>
+                                                                    <span><?= htmlspecialchars($app['student_school']) ?></span>
+                                                                </div>
                                                             </div>
                                                         </div>
-                                                    </div>
-                                                    
-                                                    <!-- Program Information -->
-                                                    <div class="col-md-6">
-                                                        <div class="detail-section">
-                                                            <h6 class="detail-label"><i class="bi bi-book"></i> Program Information</h6>
-                                                            <div class="row">
-                                                                <div class="col-6"><strong>Year Group:</strong></div>
-                                                                <div class="col-6"><?= htmlspecialchars($app['year_group']) ?></div>
-                                                                
-                                                                <?php if (!empty($app['year_group_other'])): ?>
-                                                                <div class="col-6"><strong>Other:</strong></div>
-                                                                <div class="col-6"><?= htmlspecialchars($app['year_group_other']) ?></div>
-                                                                <?php endif; ?>
-                                                                
-                                                                <div class="col-6"><strong>Program:</strong></div>
-                                                                <div class="col-6"><?= htmlspecialchars($app['interested_program']) ?></div>
+                                                        <div class="col-md-4">
+                                                            <div class="parent-card">
+                                                                <h6><i class="bi bi-info-circle"></i> Program Details</h6>
+                                                                <div class="contact-info">
+                                                                    <div class="contact-item">
+                                                                        <i class="bi bi-book"></i>
+                                                                        <span><strong>Program:</strong> <?= htmlspecialchars($app['interested_program']) ?></span>
+                                                                    </div>
+                                                                    <div class="contact-item">
+                                                                        <i class="bi bi-mortarboard"></i>
+                                                                        <span><strong>Year Group:</strong> <?= htmlspecialchars($app['year_group']) ?></span>
+                                                                    </div>
+                                                                    <?php if (!empty($app['year_group_other'])): ?>
+                                                                    <div class="contact-item">
+                                                                        <i class="bi bi-pencil"></i>
+                                                                        <span><strong>Other:</strong> <?= htmlspecialchars($app['year_group_other']) ?></span>
+                                                                    </div>
+                                                                    <?php endif; ?>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </div>
-                                                
+
                                                 <!-- Parent Information -->
                                                 <div class="detail-section">
                                                     <h6 class="detail-label"><i class="bi bi-people"></i> Parent/Guardian Information</h6>
                                                     <div class="row">
                                                         <div class="col-md-6">
-                                                            <strong>Primary Parent:</strong><br>
-                                                            <?= htmlspecialchars($app['parent1_first_name'] . ' ' . $app['parent1_last_name']) ?><br>
-                                                            <small>Relationship: <?= htmlspecialchars($app['parent1_relationship']) ?></small>
-                                                            <?php if (!empty($app['parent1_relationship_other'])): ?>
-                                                                <br><small>Other: <?= htmlspecialchars($app['parent1_relationship_other']) ?></small>
-                                                            <?php endif; ?>
-                                                            <br><small>Mobile: <?= htmlspecialchars($app['parent1_mobile']) ?></small>
-                                                            <br><small>Email: <?= htmlspecialchars($app['parent1_email']) ?></small>
+                                                            <div class="parent-card">
+                                                                <h6>Primary Parent</h6>
+                                                                <div class="contact-info">
+                                                                    <div class="contact-item">
+                                                                        <i class="bi bi-person"></i>
+                                                                        <span><?= htmlspecialchars($app['parent1_first_name'] . ' ' . $app['parent1_last_name']) ?></span>
+                                                                    </div>
+                                                                    <div class="contact-item">
+                                                                        <i class="bi bi-diagram-3"></i>
+                                                                        <span><strong>Relationship:</strong> <?= htmlspecialchars($app['parent1_relationship']) ?></span>
+                                                                    </div>
+                                                                    <?php if (!empty($app['parent1_relationship_other'])): ?>
+                                                                    <div class="contact-item">
+                                                                        <i class="bi bi-tag"></i>
+                                                                        <span><strong>Other:</strong> <?= htmlspecialchars($app['parent1_relationship_other']) ?></span>
+                                                                    </div>
+                                                                    <?php endif; ?>
+                                                                    <div class="contact-item">
+                                                                        <i class="bi bi-phone"></i>
+                                                                        <span><?= htmlspecialchars($app['parent1_mobile']) ?></span>
+                                                                    </div>
+                                                                    <div class="contact-item">
+                                                                        <i class="bi bi-envelope"></i>
+                                                                        <span><?= htmlspecialchars($app['parent1_email']) ?></span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
                                                         </div>
                                                         <?php if (!empty($app['parent2_first_name'])): ?>
                                                         <div class="col-md-6">
-                                                            <strong>Additional Parent:</strong><br>
-                                                            <?= htmlspecialchars($app['parent2_first_name'] . ' ' . $app['parent2_last_name']) ?><br>
-                                                            <small>Relationship: <?= htmlspecialchars($app['parent2_relationship']) ?></small>
-                                                            <?php if (!empty($app['parent2_relationship_other'])): ?>
-                                                                <br><small>Other: <?= htmlspecialchars($app['parent2_relationship_other']) ?></small>
-                                                            <?php endif; ?>
-                                                            <?php if (!empty($app['parent2_mobile'])): ?>
-                                                                <br><small>Mobile: <?= htmlspecialchars($app['parent2_mobile']) ?></small>
-                                                            <?php endif; ?>
-                                                            <?php if (!empty($app['parent2_email'])): ?>
-                                                                <br><small>Email: <?= htmlspecialchars($app['parent2_email']) ?></small>
-                                                            <?php endif; ?>
+                                                            <div class="parent-card">
+                                                                <h6>Additional Parent</h6>
+                                                                <div class="contact-info">
+                                                                    <div class="contact-item">
+                                                                        <i class="bi bi-person"></i>
+                                                                        <span><?= htmlspecialchars($app['parent2_first_name'] . ' ' . $app['parent2_last_name']) ?></span>
+                                                                    </div>
+                                                                    <div class="contact-item">
+                                                                        <i class="bi bi-diagram-3"></i>
+                                                                        <span><strong>Relationship:</strong> <?= htmlspecialchars($app['parent2_relationship']) ?></span>
+                                                                    </div>
+                                                                    <?php if (!empty($app['parent2_relationship_other'])): ?>
+                                                                    <div class="contact-item">
+                                                                        <i class="bi bi-tag"></i>
+                                                                        <span><strong>Other:</strong> <?= htmlspecialchars($app['parent2_relationship_other']) ?></span>
+                                                                    </div>
+                                                                    <?php endif; ?>
+                                                                    <?php if (!empty($app['parent2_mobile'])): ?>
+                                                                    <div class="contact-item">
+                                                                        <i class="bi bi-phone"></i>
+                                                                        <span><?= htmlspecialchars($app['parent2_mobile']) ?></span>
+                                                                    </div>
+                                                                    <?php endif; ?>
+                                                                    <?php if (!empty($app['parent2_email'])): ?>
+                                                                    <div class="contact-item">
+                                                                        <i class="bi bi-envelope"></i>
+                                                                        <span><?= htmlspecialchars($app['parent2_email']) ?></span>
+                                                                    </div>
+                                                                    <?php endif; ?>
+                                                                </div>
+                                                            </div>
                                                         </div>
                                                         <?php endif; ?>
-                                                        <div class="col-12 mt-2">
-                                                            <strong>Emergency Contact:</strong> <?= htmlspecialchars($app['emergency_contact']) ?>
+                                                    </div>
+                                                    <div class="mt-3">
+                                                        <div class="parent-card bg-warning bg-opacity-10">
+                                                            <h6 class="text-warning"><i class="bi bi-exclamation-triangle"></i> Emergency Contact</h6>
+                                                            <div class="contact-item">
+                                                                <i class="bi bi-telephone-forward"></i>
+                                                                <span class="fw-bold"><?= htmlspecialchars($app['emergency_contact']) ?></span>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
-                                                
+
                                                 <!-- Address -->
                                                 <div class="detail-section">
                                                     <h6 class="detail-label"><i class="bi bi-geo-alt"></i> Address</h6>
-                                                    <?= htmlspecialchars($app['address']) ?><br>
-                                                    <?= htmlspecialchars($app['city']) ?>, 
-                                                    <?php if (!empty($app['county'])): ?>
-                                                        <?= htmlspecialchars($app['county']) ?>,
-                                                    <?php endif; ?>
-                                                    <?= htmlspecialchars($app['postal_code']) ?>
+                                                    <div class="parent-card">
+                                                        <div class="contact-info">
+                                                            <div class="contact-item">
+                                                                <i class="bi bi-house"></i>
+                                                                <span><?= htmlspecialchars($app['address']) ?></span>
+                                                            </div>
+                                                            <div class="contact-item">
+                                                                <i class="bi bi-building"></i>
+                                                                <span><?= htmlspecialchars($app['city']) ?><?= !empty($app['county']) ? ', ' . htmlspecialchars($app['county']) : '' ?></span>
+                                                            </div>
+                                                            <div class="contact-item">
+                                                                <i class="bi bi-mailbox"></i>
+                                                                <span><?= htmlspecialchars($app['postal_code']) ?></span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                                
+
                                                 <!-- Medical & Additional Info -->
                                                 <div class="row">
                                                     <?php if ($app['illness'] === 'Yes' && !empty($app['illness_details'])): ?>
                                                     <div class="col-md-6">
-                                                        <div class="detail-section">
+                                                        <div class="detail-section medical-info">
                                                             <h6 class="detail-label"><i class="bi bi-heart-pulse"></i> Medical Conditions</h6>
-                                                            <?= htmlspecialchars($app['illness_details']) ?>
+                                                            <div class="parent-card">
+                                                                <p class="mb-0"><?= htmlspecialchars($app['illness_details']) ?></p>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                     <?php endif; ?>
                                                     
                                                     <?php if ($app['special_needs'] === 'Yes' && !empty($app['special_needs_details'])): ?>
                                                     <div class="col-md-6">
-                                                        <div class="detail-section">
+                                                        <div class="detail-section special-needs-info">
                                                             <h6 class="detail-label"><i class="bi bi-person-badge"></i> Special Needs</h6>
-                                                            <?= htmlspecialchars($app['special_needs_details']) ?>
+                                                            <div class="parent-card">
+                                                                <p class="mb-0"><?= htmlspecialchars($app['special_needs_details']) ?></p>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                     <?php endif; ?>
                                                     
                                                     <?php if ($app['allergies'] === 'Yes' && !empty($app['allergies_details'])): ?>
                                                     <div class="col-md-6">
-                                                        <div class="detail-section">
+                                                        <div class="detail-section allergy-info">
                                                             <h6 class="detail-label"><i class="bi bi-exclamation-triangle"></i> Allergies</h6>
-                                                            <?= htmlspecialchars($app['allergies_details']) ?>
+                                                            <div class="parent-card">
+                                                                <p class="mb-0"><?= htmlspecialchars($app['allergies_details']) ?></p>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                     <?php endif; ?>
                                                 </div>
-                                                
+
                                                 <!-- Permissions -->
                                                 <div class="detail-section">
-                                                    <h6 class="detail-label"><i class="bi bi-shield-check"></i> Permissions</h6>
-                                                    <div class="row">
-                                                        <div class="col-4"><strong>Swimming:</strong> <?= htmlspecialchars($app['knows_swimming']) ?></div>
-                                                        <div class="col-4"><strong>Travel Sickness:</strong> <?= htmlspecialchars($app['travel_sickness']) ?></div>
-                                                        <div class="col-4"><strong>Travel Permission:</strong> <?= htmlspecialchars($app['travel_permission']) ?></div>
-                                                        <div class="col-4"><strong>Photo Permission:</strong> <?= htmlspecialchars($app['photo_permission']) ?></div>
-                                                        <div class="col-4"><strong>Transport:</strong> <?= htmlspecialchars($app['transport_mode']) ?></div>
-                                                        <div class="col-4"><strong>Home Alone:</strong> <?= htmlspecialchars($app['go_home_alone']) ?></div>
+                                                    <h6 class="detail-label"><i class="bi bi-shield-check"></i> Permissions & Information</h6>
+                                                    <div class="permissions-grid">
+                                                        <div class="permission-item">
+                                                            <i class="bi bi-water"></i>
+                                                            <span><strong>Swimming:</strong> <?= htmlspecialchars($app['knows_swimming']) ?></span>
+                                                        </div>
+                                                        <div class="permission-item">
+                                                            <i class="bi bi-car-front"></i>
+                                                            <span><strong>Travel Sickness:</strong> <?= htmlspecialchars($app['travel_sickness']) ?></span>
+                                                        </div>
+                                                        <div class="permission-item">
+                                                            <i class="bi bi-geo-alt"></i>
+                                                            <span><strong>Travel Permission:</strong> <?= htmlspecialchars($app['travel_permission']) ?></span>
+                                                        </div>
+                                                        <div class="permission-item">
+                                                            <i class="bi bi-camera"></i>
+                                                            <span><strong>Photo Permission:</strong> <?= htmlspecialchars($app['photo_permission']) ?></span>
+                                                        </div>
+                                                        <div class="permission-item">
+                                                            <i class="bi bi-bus-front"></i>
+                                                            <span><strong>Transport:</strong> <?= htmlspecialchars($app['transport_mode']) ?></span>
+                                                        </div>
+                                                        <div class="permission-item">
+                                                            <i class="bi bi-house-door"></i>
+                                                            <span><strong>Home Alone:</strong> <?= htmlspecialchars($app['go_home_alone']) ?></span>
+                                                        </div>
                                                     </div>
                                                 </div>
                                                 
@@ -450,12 +535,22 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                                                 <?php if ($app['attended_islamic_education'] === 'Yes'): ?>
                                                 <div class="detail-section">
                                                     <h6 class="detail-label"><i class="bi bi-book-half"></i> Islamic Education History</h6>
-                                                    <?php if (!empty($app['islamic_years'])): ?>
-                                                        <strong>Years Attended:</strong> <?= htmlspecialchars($app['islamic_years']) ?><br>
-                                                    <?php endif; ?>
-                                                    <?php if (!empty($app['islamic_education_details'])): ?>
-                                                        <strong>Details:</strong> <?= htmlspecialchars($app['islamic_education_details']) ?>
-                                                    <?php endif; ?>
+                                                    <div class="parent-card">
+                                                        <div class="contact-info">
+                                                            <?php if (!empty($app['islamic_years'])): ?>
+                                                            <div class="contact-item">
+                                                                <i class="bi bi-calendar"></i>
+                                                                <span><strong>Years Attended:</strong> <?= htmlspecialchars($app['islamic_years']) ?></span>
+                                                            </div>
+                                                            <?php endif; ?>
+                                                            <?php if (!empty($app['islamic_education_details'])): ?>
+                                                            <div class="contact-item">
+                                                                <i class="bi bi-journal-text"></i>
+                                                                <span><strong>Details:</strong> <?= htmlspecialchars($app['islamic_education_details']) ?></span>
+                                                            </div>
+                                                            <?php endif; ?>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                                 <?php endif; ?>
                                             </div>

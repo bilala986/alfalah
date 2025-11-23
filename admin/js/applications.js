@@ -226,9 +226,14 @@ document.addEventListener('DOMContentLoaded', function() {
             .replace(/'/g, "&#039;");
     }
 
-    // Refresh table data without page reload
+    // Enhanced refresh table data with better loading state
     function refreshTableData(shouldShowToast = false) {
         console.log('Refreshing applications data...');
+        
+        // Show loading state on refresh button
+        const refreshBtn = document.getElementById('refreshBtn');
+        refreshBtn.classList.add('loading');
+        refreshBtn.disabled = true;
         
         fetch(`php/get_applications.php?bid=${browserInstanceId}`)
             .then(response => response.json())
@@ -250,34 +255,61 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (shouldShowToast) {
                     showToast('Error refreshing applications', 'error');
                 }
+            })
+            .finally(() => {
+                // Remove loading state
+                refreshBtn.classList.remove('loading');
+                refreshBtn.disabled = false;
             });
     }
 
-    // View application details
+    // Enhanced view application details with active state
     function handleViewClick() {
         const applicationId = this.getAttribute('data-application-id');
         const detailsRow = this.closest('tr').nextElementSibling;
         const detailsDiv = document.getElementById(`details-${applicationId}`);
+        const isOpening = detailsRow.style.display === 'none';
         
-        if (detailsRow.style.display === 'none') {
-            detailsRow.style.display = 'table-row';
-            detailsDiv.classList.add('show');
-            
-            // Load details content if not already loaded
-            if (detailsDiv.innerHTML.includes('Details loaded dynamically')) {
-                // You could implement AJAX loading of details here if needed
-                detailsDiv.innerHTML = '<div class="text-center py-3"><div class="spinner-border text-primary" role="status"></div><div class="mt-2">Loading details...</div></div>';
-                
-                // Simulate loading - in real implementation, you'd fetch the details
-                setTimeout(() => {
-                    detailsDiv.innerHTML = '<div class="text-center text-muted py-3"><i class="bi bi-check-circle text-success"></i> Details loaded</div>';
-                }, 500);
+        // Close all other open details first
+        document.querySelectorAll('.application-details-row').forEach(row => {
+            if (row !== detailsRow) {
+                const otherDiv = row.querySelector('.application-details');
+                if (otherDiv) {
+                    otherDiv.classList.remove('show');
+                    setTimeout(() => {
+                        row.style.display = 'none';
+                    }, 300);
+                }
             }
+        });
+        
+        // Remove active state from all view buttons
+        document.querySelectorAll('.view-btn').forEach(btn => {
+            btn.classList.remove('active');
+            btn.classList.remove('btn-primary');
+            btn.classList.add('btn-outline-primary');
+        });
+        
+        if (isOpening) {
+            // Open this one
+            detailsRow.style.display = 'table-row';
+            setTimeout(() => {
+                detailsDiv.classList.add('show');
+            }, 10);
+            
+            // Add active state to this button
+            this.classList.remove('btn-outline-primary');
+            this.classList.add('btn-primary', 'active');
         } else {
+            // Close this one
             detailsDiv.classList.remove('show');
             setTimeout(() => {
                 detailsRow.style.display = 'none';
             }, 300);
+            
+            // Remove active state
+            this.classList.remove('btn-primary', 'active');
+            this.classList.add('btn-outline-primary');
         }
     }
 
