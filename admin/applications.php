@@ -4,7 +4,7 @@ require_once 'php/admin_protect.php';
 
 // Only allow approved admins to access this page
 if ($_SESSION['pending_approval']) {
-    header('Location: ../dashboard.php?bid=' . ($_SESSION['browser_instance_id'] ?? ''));
+    header('Location: dashboard.php?bid=' . ($_SESSION['browser_instance_id'] ?? ''));
     exit;
 }
 
@@ -164,7 +164,7 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                 <button class="toggle-btn" id="closeSidebar"><i class="bi bi-x-lg"></i></button>
             </div>
 
-            <a href="../dashboard.php?bid=<?= $browser_instance_id ?>"><i class="bi bi-speedometer2"></i> Dashboard</a>
+            <a href="dashboard.php?bid=<?= $browser_instance_id ?>"><i class="bi bi-speedometer2"></i> Dashboard</a>
             <a href="applications.php?bid=<?= $browser_instance_id ?>" class="active"><i class="bi bi-file-earmark-text"></i> Applications</a>
             <a href="private/admin-accounts.php?bid=<?= $browser_instance_id ?>"><i class="bi bi-shield-check"></i> Admin Accounts</a>
             <a href="#?bid=<?= $browser_instance_id ?>"><i class="bi bi-gear"></i> Settings</a>
