@@ -21,22 +21,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['application_id'])) {
             exit;
         }
         
-        // For now, we'll just log the approval. You can modify this to:
-        // 1. Update a status column in the table
-        // 2. Move to an approved_applications table
-        // 3. Send email notifications, etc.
+        // Update application status to approved
+        $stmt = $pdo->prepare("UPDATE initial_admission SET status = 'approved', scheduled_for_deletion_at = NULL WHERE id = ?");
+        $stmt->execute([$application_id]);
         
-        // Example: If you add a status column to initial_admission:
-        // $stmt = $pdo->prepare("UPDATE initial_admission SET status = 'approved', reviewed_by = ?, reviewed_at = NOW() WHERE id = ?");
-        // $stmt->execute([$_SESSION['admin_id'], $application_id]);
-        
-        // For now, we'll just return success
         echo json_encode([
             'success' => true,
             'message' => 'Application approved successfully',
             'application' => [
                 'id' => $application_id,
-                'student_name' => $application['student_first_name'] . ' ' . $application['student_last_name']
+                'student_name' => $application['student_first_name'] . ' ' . $application['student_last_name'],
+                'status' => 'approved'
             ]
         ]);
         

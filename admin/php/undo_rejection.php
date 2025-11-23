@@ -8,31 +8,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['application_id'])) {
     $application_id = intval($_POST['application_id']);
     
     try {
-        // First, let's check if the application exists
-        $checkStmt = $pdo->prepare("SELECT * FROM initial_admission WHERE id = ?");
+        // First, let's check if the application exists and is pending rejection
+        $checkStmt = $pdo->prepare("SELECT * FROM initial_admission WHERE id = ? AND status = 'pending_rejection'");
         $checkStmt->execute([$application_id]);
         $application = $checkStmt->fetch();
         
         if (!$application) {
             echo json_encode([
                 'success' => false,
-                'message' => 'Application not found'
+                'message' => 'Application not found or not pending rejection'
             ]);
             exit;
         }
         
-        // Update application status to pending_rejection and set deletion time
-        $stmt = $pdo->prepare("UPDATE initial_admission SET status = 'pending_rejection', scheduled_for_deletion_at = DATE_ADD(NOW(), INTERVAL 24 HOUR) WHERE id = ?");
+        // Revert application status back to pending
+        $stmt = $pdo->prepare("UPDATE initial_admission SET status = 'pending', scheduled_for_deletion_at = NULL WHERE id = ?");
         $stmt->execute([$application_id]);
         
         echo json_encode([
             'success' => true,
-            'message' => 'Application rejected successfully. It will be deleted in 24 hours.',
+            'message' => 'Rejection undone successfully. Application is now pending again.',
             'application' => [
                 'id' => $application_id,
                 'student_name' => $application['student_first_name'] . ' ' . $application['student_last_name'],
-                'status' => 'pending_rejection',
-                'scheduled_for_deletion_at' => date('Y-m-d H:i:s', strtotime('+24 hours'))
+                'status' => 'pending'
             ]
         ]);
         

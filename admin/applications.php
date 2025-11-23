@@ -12,7 +12,13 @@ if ($_SESSION['pending_approval']) {
 require_once $_SERVER['DOCUMENT_ROOT'] . '/alfalah/php/db_connect.php';
 
 // Fetch all admission applications
-$stmt = $pdo->prepare("SELECT * FROM initial_admission ORDER BY submitted_at DESC");
+$stmt = $pdo->prepare("SELECT *, 
+                       CASE 
+                           WHEN status = 'approved' THEN 'approved'
+                           WHEN status = 'pending_rejection' THEN 'pending_rejection' 
+                           ELSE 'pending' 
+                       END as display_status
+                       FROM initial_admission ORDER BY submitted_at DESC");
 $stmt->execute();
 $applications = $stmt->fetchAll();
 
@@ -274,6 +280,7 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                                     <th class="mobile-hide">Program</th>
                                     <th class="mobile-hide">Year Group</th>
                                     <th>Parent Contact</th>
+                                    <th>Status</th>
                                     <th class="mobile-hide">Submitted</th>
                                     <th>Actions</th>
                                 </tr>
@@ -281,7 +288,7 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                             <tbody id="applicationsTableBody">
                                 <?php if (empty($applications)): ?>
                                     <tr>
-                                        <td colspan="6" class="text-center text-muted py-4">No admission applications found.</td>
+                                        <td colspan="7" class="text-center text-muted py-4">No admission applications found.</td>
                                     </tr>
                                 <?php else: ?>
                                     <?php foreach ($applications as $app): ?>
@@ -289,7 +296,9 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                                         data-parent="<?= htmlspecialchars(strtolower($app['parent1_first_name'] . ' ' . $app['parent1_last_name'])) ?>"
                                         data-program="<?= htmlspecialchars(strtolower($app['interested_program'])) ?>"
                                         data-age="<?= $app['student_age'] ?? '0' ?>"
-                                        data-application-id="<?= $app['id'] ?>">
+                                        data-application-id="<?= $app['id'] ?>"
+                                        data-status="<?= $app['display_status'] ?? 'pending' ?>"
+                                        data-deletion-time="<?= $app['scheduled_for_deletion_at'] ?? '' ?>">
                                         <td class="fw-semibold">
                                             <?= htmlspecialchars($app['student_first_name'] . ' ' . $app['student_last_name']) ?>
                                             <br>
@@ -306,6 +315,28 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                                             <?= htmlspecialchars($app['parent1_first_name'] . ' ' . $app['parent1_last_name']) ?>
                                             <br>
                                             <small class="text-muted"><?= htmlspecialchars($app['parent1_email']) ?></small>
+                                        </td>
+                                        <td>
+                                            <?php
+                                            $status = $app['display_status'] ?? 'pending';
+                                            $badgeClass = 'status-badge-' . str_replace('_', '-', $status);
+                                            $statusText = ucfirst(str_replace('_', ' ', $status));
+                                            ?>
+                                            <span class="status-badge <?= $badgeClass ?>" id="status-badge-<?= $app['id'] ?>">
+                                                <?= $statusText ?>
+                                                <?php if ($status === 'pending_rejection' && !empty($app['scheduled_for_deletion_at'])): ?>
+                                                    <span class="countdown-timer" id="countdown-<?= $app['id'] ?>"></span>
+                                                <?php endif; ?>
+                                            </span>
+                                            <?php if ($status === 'pending_rejection'): ?>
+                                                <button type="button" 
+                                                        class="btn btn-warning btn-sm undo-rejection-btn" 
+                                                        data-application-id="<?= $app['id'] ?>"
+                                                        data-student-name="<?= htmlspecialchars($app['student_first_name'] . ' ' . $app['student_last_name']) ?>"
+                                                        style="display: none;">
+                                                    <i class="bi bi-arrow-counterclockwise"></i> Undo
+                                                </button>
+                                            <?php endif; ?>
                                         </td>
                                         <td class="mobile-hide">
                                             <?php if ($app['submitted_at']): ?>
@@ -326,23 +357,25 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                                                     <i class="bi bi-eye"></i> View
                                                 </button>
                                                 <button type="button" 
-                                                        class="btn btn-outline-success approve-btn" 
+                                                        class="btn btn-outline-success approve-btn <?= $status === 'approved' ? 'btn-approved' : '' ?>" 
                                                         data-application-id="<?= $app['id'] ?>"
-                                                        data-student-name="<?= htmlspecialchars($app['student_first_name'] . ' ' . $app['student_last_name']) ?>">
-                                                    <i class="bi bi-check-lg"></i> Approve
+                                                        data-student-name="<?= htmlspecialchars($app['student_first_name'] . ' ' . $app['student_last_name']) ?>"
+                                                        <?= $status === 'approved' ? 'disabled' : '' ?>>
+                                                    <i class="bi bi-check-lg"></i> <?= $status === 'approved' ? 'Approved' : 'Approve' ?>
                                                 </button>
                                                 <button type="button" 
-                                                        class="btn btn-outline-danger reject-btn" 
+                                                        class="btn btn-outline-danger reject-btn <?= $status === 'pending_rejection' ? 'btn-pending-rejection' : '' ?>" 
                                                         data-application-id="<?= $app['id'] ?>"
-                                                        data-student-name="<?= htmlspecialchars($app['student_first_name'] . ' ' . $app['student_last_name']) ?>">
-                                                    <i class="bi bi-x-lg"></i> Reject
+                                                        data-student-name="<?= htmlspecialchars($app['student_first_name'] . ' ' . $app['student_last_name']) ?>"
+                                                        <?= $status === 'pending_rejection' ? 'disabled' : '' ?>>
+                                                    <i class="bi bi-x-lg"></i> <?= $status === 'pending_rejection' ? 'Pending Deletion' : 'Reject' ?>
                                                 </button>
                                             </div>
                                         </td>
                                     </tr>
                                     <!-- Application Details Row - PROFESSIONAL COMPACT DESIGN -->
                                     <tr class="application-details-row" style="display: none;">
-                                        <td colspan="6">
+                                        <td colspan="7">
                                             <div class="application-details" id="details-<?= $app['id'] ?>">
                                                 <!-- Student & Program Header - More Compact -->
                                                 <div class="detail-section">
