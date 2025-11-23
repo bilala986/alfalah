@@ -41,6 +41,14 @@ document.addEventListener('DOMContentLoaded', function() {
     const confirmApprove = document.getElementById('confirmApprove');
     const confirmReject = document.getElementById('confirmReject');
     
+    // Age filter elements
+    const minAgeInput = document.getElementById('minAge');
+    const maxAgeInput = document.getElementById('maxAge');
+
+    // Current filter state (add these to your existing filter state)
+    let currentMinAge = null;
+    let currentMaxAge = null;
+    
     // Current filter state
     let currentYearFilter = 'all';
     let currentProgramFilter = 'all';
@@ -49,7 +57,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Get all rows
     let rows = applicationsTableBody.querySelectorAll('tr[data-student]');
 
-    // Enhanced search function with search options
+    // Enhanced search function with search options and age filtering
     function searchApplications(searchTerm) {
         let visibleRows = 0;
 
@@ -63,6 +71,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const parentName = row.getAttribute('data-parent');
             const program = row.getAttribute('data-program');
             const applicationId = row.getAttribute('data-application-id');
+            const age = parseInt(row.getAttribute('data-age')) || 0; // Get age from data attribute
 
             // Get additional data from the row cells
             const studentCell = row.cells[0];
@@ -78,7 +87,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 // If no search term, show all rows (but still apply filters)
                 matchesSearch = true;
             } else {
-                // Search based on selected options ONLY - no fallback to full text
+                // Search based on selected options ONLY
                 if (searchInStudent && studentName.includes(searchTerm)) {
                     matchesSearch = true;
                 }
@@ -88,14 +97,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (!matchesSearch && searchInEmail && parentFullText.includes(searchTerm)) {
                     matchesSearch = true;
                 }
-                // REMOVED the fallback search in full text - this was causing the issue
             }
+
+            // Apply age filter
+            const matchesAge = (currentMinAge === null || age >= currentMinAge) && 
+                              (currentMaxAge === null || age <= currentMaxAge);
 
             // Apply both search and filter
             const matchesYear = currentYearFilter === 'all' || program === currentYearFilter || row.querySelector('.mobile-hide:nth-child(3)')?.textContent.includes(currentYearFilter);
             const matchesProgram = currentProgramFilter === 'all' || program === currentProgramFilter || row.querySelector('.mobile-hide:nth-child(2)')?.textContent.includes(currentProgramFilter);
 
-            if (matchesSearch && matchesYear && matchesProgram) {
+            if (matchesSearch && matchesYear && matchesProgram && matchesAge) {
                 row.style.display = '';
                 visibleRows++;
 
@@ -131,14 +143,19 @@ document.addEventListener('DOMContentLoaded', function() {
     function filterTable() {
         const searchTerm = searchInput.value.toLowerCase();
         searchApplications(searchTerm);
-        
-        // Update filter button appearance
-        if (currentYearFilter === 'all' && currentProgramFilter === 'all') {
-            filterBtn.classList.remove('btn-success');
-            filterBtn.classList.add('btn-outline-primary');
-        } else {
+
+        // Update filter button appearance - check if any filter is active
+        const isAnyFilterActive = currentYearFilter !== 'all' || 
+                                 currentProgramFilter !== 'all' || 
+                                 currentMinAge !== null || 
+                                 currentMaxAge !== null;
+
+        if (isAnyFilterActive) {
             filterBtn.classList.remove('btn-outline-primary');
             filterBtn.classList.add('btn-success');
+        } else {
+            filterBtn.classList.remove('btn-success');
+            filterBtn.classList.add('btn-outline-primary');
         }
     }
 
@@ -164,6 +181,7 @@ document.addEventListener('DOMContentLoaded', function() {
             row.setAttribute('data-student', app.student_first_name.toLowerCase() + ' ' + app.student_last_name.toLowerCase());
             row.setAttribute('data-parent', app.parent1_first_name.toLowerCase() + ' ' + app.parent1_last_name.toLowerCase());
             row.setAttribute('data-program', app.interested_program.toLowerCase());
+            row.setAttribute('data-age', app.student_age || '0'); // Add this line
             row.setAttribute('data-application-id', app.id);
 
             // Format submitted date
@@ -397,12 +415,16 @@ document.addEventListener('DOMContentLoaded', function() {
     filterBtn.addEventListener('click', function() {
         yearGroupSelect.value = currentYearFilter;
         programSelect.value = currentProgramFilter;
+        minAgeInput.value = currentMinAge !== null ? currentMinAge : '';
+        maxAgeInput.value = currentMaxAge !== null ? currentMaxAge : '';
         filterModal.show();
     });
-    
+
     applyFilterBtn.addEventListener('click', function() {
         currentYearFilter = yearGroupSelect.value;
         currentProgramFilter = programSelect.value;
+        currentMinAge = minAgeInput.value ? parseInt(minAgeInput.value) : null;
+        currentMaxAge = maxAgeInput.value ? parseInt(maxAgeInput.value) : null;
         filterTable();
         filterModal.hide();
     });
@@ -410,8 +432,12 @@ document.addEventListener('DOMContentLoaded', function() {
     clearFilterBtn.addEventListener('click', function() {
         currentYearFilter = 'all';
         currentProgramFilter = 'all';
+        currentMinAge = null;
+        currentMaxAge = null;
         yearGroupSelect.value = 'all';
         programSelect.value = 'all';
+        minAgeInput.value = '';
+        maxAgeInput.value = '';
         filterTable();
         filterModal.hide();
     });

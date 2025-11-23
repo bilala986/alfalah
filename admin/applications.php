@@ -288,6 +288,7 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                                     <tr data-student="<?= htmlspecialchars(strtolower($app['student_first_name'] . ' ' . $app['student_last_name'])) ?>" 
                                         data-parent="<?= htmlspecialchars(strtolower($app['parent1_first_name'] . ' ' . $app['parent1_last_name'])) ?>"
                                         data-program="<?= htmlspecialchars(strtolower($app['interested_program'])) ?>"
+                                        data-age="<?= $app['student_age'] ?? '0' ?>"
                                         data-application-id="<?= $app['id'] ?>">
                                         <td class="fw-semibold">
                                             <?= htmlspecialchars($app['student_first_name'] . ' ' . $app['student_last_name']) ?>
@@ -686,6 +687,20 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                                 <option value="Weekend Hifdh">Weekend Hifdh</option>
                                 <option value="Weekend Islamic Studies">Weekend Islamic Studies</option>
                             </select>
+                        </div>
+
+                        <!-- Age Range Filter -->
+                        <div class="mb-3">
+                            <label class="form-label">Age Range</label>
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <input type="number" id="minAge" class="form-control" placeholder="Min Age" min="0" max="30">
+                                </div>
+                                <div class="col-6">
+                                    <input type="number" id="maxAge" class="form-control" placeholder="Max Age" min="0" max="30">
+                                </div>
+                            </div>
+                            <small class="text-muted">Leave empty for no age limit</small>
                         </div>
                     </div>
                     <div class="modal-footer">
