@@ -20,27 +20,32 @@
             <h2 class="login-title">Parent Login</h2>
         </div>
 
-        <form action="#" method="POST">
-    
+        <!-- Alert area -->
+        <div id="alertBox"></div>
+
+        <form action="php/parent_login.php" method="POST" id="loginForm">
+            <!-- CSRF Token -->
+            <input type="hidden" name="csrf_token" id="csrf_token">
+            
             <div class="mb-3">
-                <input type="email" class="form-control" name="parent_email" placeholder="Email Address" required>
+                <input type="email" class="form-control" name="parent_email" placeholder="Email Address" required 
+                       maxlength="150" autocomplete="email">
             </div>
 
             <div class="mb-4">
-                <input type="password" class="form-control" name="parent_password" placeholder="Password" required>
+                <input type="password" class="form-control" name="parent_password" placeholder="Password" required 
+                       maxlength="255" autocomplete="current-password">
             </div>
 
             <button type="submit" class="btn btn-login w-100">Login</button>
-
         </form>
-
 
     </div>
 
 </div>
 
 <script src="../bootstrap/js/bootstrap.bundle.min.js"></script>
-<script src="js/parent.js"></script>
+<script src="js/login.js"></script>
 
 </body>
 </html>
