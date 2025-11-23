@@ -123,7 +123,7 @@ if (isset($_GET['bid']) && $_GET['bid'] !== $browser_instance_id) {
                     <div class="card shadow-sm p-3">
                         <h5><i class="bi bi-person-heart text-success"></i> Parents</h5>
                         <p class="text-muted">View parent profiles.</p>
-                        <a href="#?bid=<?= $browser_instance_id ?>" class="btn btn-success-modern btn-sm">Open</a>
+                        <a href="private/parent-accounts.php?bid=<?= $browser_instance_id ?>" class="btn btn-success-modern btn-sm">Open</a>
                     </div>
                 </div>
 
