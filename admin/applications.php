@@ -328,15 +328,6 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                                                     <span class="countdown-timer" id="countdown-<?= $app['id'] ?>"></span>
                                                 <?php endif; ?>
                                             </span>
-                                            <?php if ($status === 'pending_rejection'): ?>
-                                                <button type="button" 
-                                                        class="btn btn-warning btn-sm undo-rejection-btn" 
-                                                        data-application-id="<?= $app['id'] ?>"
-                                                        data-student-name="<?= htmlspecialchars($app['student_first_name'] . ' ' . $app['student_last_name']) ?>"
-                                                        style="display: none;">
-                                                    <i class="bi bi-arrow-counterclockwise"></i> Undo
-                                                </button>
-                                            <?php endif; ?>
                                         </td>
                                         <td class="mobile-hide">
                                             <?php if ($app['submitted_at']): ?>
@@ -657,7 +648,7 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                     </div>
                     <div class="modal-body">
                         <p>Are you sure you want to reject the application for <strong id="rejectStudentName"></strong>?</p>
-                        <p class="text-danger"><strong>This action cannot be undone.</strong></p>
+                        <p class="text-danger"><strong>This action will be irreversible in 24 hours.</strong></p>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>

@@ -207,10 +207,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const isPendingRejection = status === 'pending_rejection';
 
             const approveBtnClass = isApproved ? 'btn-approved' : 'btn-outline-success';
-            const rejectBtnClass = isPendingRejection ? 'btn-pending-rejection' : 'btn-outline-danger';
-
             const approveBtnText = isApproved ? 'Approved' : 'Approve';
-            const rejectBtnText = isPendingRejection ? 'Pending Deletion' : 'Reject';
 
             // Status badge HTML
             const statusText = status.replace('_', ' ');
@@ -222,10 +219,38 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             statusHtml += `</span>`;
 
+            // Build actions buttons - UNDO BUTTON REPLACES REJECT BUTTON
+            let actionsHtml = '';
             if (isPendingRejection) {
-                statusHtml += `<button type="button" class="btn btn-warning btn-sm undo-rejection-btn" data-application-id="${app.id}" data-student-name="${escapeHtml(app.student_first_name + ' ' + app.student_last_name)}" style="display: none;">
-                    <i class="bi bi-arrow-counterclockwise"></i> Undo
-                </button>`;
+                // Show undo button instead of reject button
+                actionsHtml = `
+                    <div class="btn-group btn-group-sm">
+                        <button type="button" class="btn btn-outline-primary view-btn" data-application-id="${app.id}">
+                            <i class="bi bi-eye"></i> View
+                        </button>
+                        <button type="button" class="btn ${approveBtnClass} approve-btn" data-application-id="${app.id}" data-student-name="${escapeHtml(app.student_first_name + ' ' + app.student_last_name)}" ${isApproved ? 'disabled' : ''}>
+                            <i class="bi bi-check-lg"></i> ${approveBtnText}
+                        </button>
+                        <button type="button" class="btn btn-warning undo-rejection-btn" data-application-id="${app.id}" data-student-name="${escapeHtml(app.student_first_name + ' ' + app.student_last_name)}">
+                            <i class="bi bi-arrow-counterclockwise"></i> Undo
+                        </button>
+                    </div>
+                `;
+            } else {
+                // Show normal buttons (including reject)
+                actionsHtml = `
+                    <div class="btn-group btn-group-sm">
+                        <button type="button" class="btn btn-outline-primary view-btn" data-application-id="${app.id}">
+                            <i class="bi bi-eye"></i> View
+                        </button>
+                        <button type="button" class="btn ${approveBtnClass} approve-btn" data-application-id="${app.id}" data-student-name="${escapeHtml(app.student_first_name + ' ' + app.student_last_name)}" ${isApproved ? 'disabled' : ''}>
+                            <i class="bi bi-check-lg"></i> ${approveBtnText}
+                        </button>
+                        <button type="button" class="btn btn-outline-danger reject-btn" data-application-id="${app.id}" data-student-name="${escapeHtml(app.student_first_name + ' ' + app.student_last_name)}" ${isPendingRejection ? 'disabled' : ''}>
+                            <i class="bi bi-x-lg"></i> Reject
+                        </button>
+                    </div>
+                `;
             }
 
             row.innerHTML = `
@@ -246,19 +271,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 </td>
                 <td>${statusHtml}</td>
                 <td class="mobile-hide">${submittedDate}</td>
-                <td>
-                    <div class="btn-group btn-group-sm">
-                        <button type="button" class="btn btn-outline-primary view-btn" data-application-id="${app.id}">
-                            <i class="bi bi-eye"></i> View
-                        </button>
-                        <button type="button" class="btn ${approveBtnClass} approve-btn" data-application-id="${app.id}" data-student-name="${escapeHtml(app.student_first_name + ' ' + app.student_last_name)}" ${isApproved ? 'disabled' : ''}>
-                            <i class="bi bi-check-lg"></i> ${approveBtnText}
-                        </button>
-                        <button type="button" class="btn ${rejectBtnClass} reject-btn" data-application-id="${app.id}" data-student-name="${escapeHtml(app.student_first_name + ' ' + app.student_last_name)}" ${isPendingRejection ? 'disabled' : ''}>
-                            <i class="bi bi-x-lg"></i> ${rejectBtnText}
-                        </button>
-                    </div>
-                </td>
+                <td>${actionsHtml}</td>
             `;
 
             applicationsTableBody.appendChild(row);
@@ -273,7 +286,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         <div class="text-center text-muted py-3">
                             <i class="bi bi-info-circle"></i> Details loaded dynamically
                         </div>
-                    </div>
+                    </td>
                 </td>
             `;
             applicationsTableBody.appendChild(detailsRow);
