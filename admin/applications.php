@@ -1,0 +1,586 @@
+<?php
+// admin/applications.php
+require_once 'php/admin_protect.php';
+
+// Only allow approved admins to access this page
+if ($_SESSION['pending_approval']) {
+    header('Location: ../dashboard.php?bid=' . ($_SESSION['browser_instance_id'] ?? ''));
+    exit;
+}
+
+// Include database connection
+require_once $_SERVER['DOCUMENT_ROOT'] . '/alfalah/php/db_connect.php';
+
+// Fetch all admission applications
+$stmt = $pdo->prepare("SELECT * FROM initial_admission ORDER BY submitted_at DESC");
+$stmt->execute();
+$applications = $stmt->fetchAll();
+
+$browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Admission Applications - Al Falah</title>
+
+        <link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+        <link rel="stylesheet" href="css/admin.css">
+        <link rel="stylesheet" href="css/applications.css">
+        <style>
+            .table-controls {
+                padding: 1rem 0;
+                border-bottom: 1px solid #dee2e6;
+                margin-bottom: 1rem;
+            }
+            .refresh-spin {
+                animation: refreshSpin 0.6s ease;
+            }
+            @keyframes refreshSpin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+            
+            /* Mobile responsive adjustments */
+            @media (max-width: 768px) {
+                .table-controls .btn-group {
+                    justify-content: center;
+                    width: 100%;
+                    margin-top: 10px;
+                }
+                .table-controls .col-md-6.text-end {
+                    text-align: center !important;
+                }
+            }
+            
+            /* Hide columns on mobile */
+            @media (max-width: 576px) {
+                .mobile-hide {
+                    display: none;
+                }
+            }
+            
+            .application-details {
+                max-height: 0;
+                overflow: hidden;
+                transition: max-height 0.3s ease-out;
+                background-color: #f8f9fa;
+                border-radius: 0.375rem;
+            }
+            
+            .application-details.show {
+                max-height: 500px;
+                padding: 1rem;
+                margin-top: 0.5rem;
+                border: 1px solid #dee2e6;
+            }
+            
+            .detail-section {
+                margin-bottom: 1rem;
+                padding-bottom: 1rem;
+                border-bottom: 1px solid #e9ecef;
+            }
+            
+            .detail-section:last-child {
+                border-bottom: none;
+                margin-bottom: 0;
+            }
+            
+            .detail-label {
+                font-weight: 600;
+                color: #495057;
+            }
+            
+            .detail-value {
+                color: #6c757d;
+            }
+            
+            .status-badge-new {
+                background-color: #0d6efd;
+            }
+            
+            .status-badge-reviewed {
+                background-color: #6c757d;
+            }
+            
+            .status-badge-approved {
+                background-color: #198754;
+            }
+            
+            .status-badge-rejected {
+                background-color: #dc3545;
+            }
+            
+            /* Toast positioning */
+            .toast-container {
+                z-index: 9999;
+            }
+            
+            /* Desktop - bottom right */
+            @media (min-width: 768px) {
+                .toast-container {
+                    bottom: 20px;
+                    right: 20px;
+                }
+            }
+            
+            /* Mobile - center */
+            @media (max-width: 767.98px) {
+                .toast-container {
+                    bottom: 50%;
+                    left: 50%;
+                    transform: translate(-50%, 50%);
+                    width: 90%;
+                    max-width: 400px;
+                }
+            }
+            
+            /* Success toast styling */
+            .toast.bg-success .toast-header {
+                background-color: #198754 !important;
+                color: white;
+            }
+            
+            /* Error toast styling */
+            .toast.bg-danger .toast-header {
+                background-color: #dc3545 !important;
+                color: white;
+            }
+        </style>
+    </head>
+
+    <body>
+
+        <!-- SIDEBAR -->
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header d-flex align-items-center justify-content-between px-3">
+                <div class="d-flex align-items-center">
+                    <img src="../img/logo.png" alt="Al Falah Logo" height="35" class="me-2">
+                    <h5 class="m-0 fw-bold">Admin Panel</h5>
+                </div>
+                <button class="toggle-btn" id="closeSidebar"><i class="bi bi-x-lg"></i></button>
+            </div>
+
+            <a href="../dashboard.php?bid=<?= $browser_instance_id ?>"><i class="bi bi-speedometer2"></i> Dashboard</a>
+            <a href="applications.php?bid=<?= $browser_instance_id ?>" class="active"><i class="bi bi-file-earmark-text"></i> Applications</a>
+            <a href="private/admin-accounts.php?bid=<?= $browser_instance_id ?>"><i class="bi bi-shield-check"></i> Admin Accounts</a>
+            <a href="#?bid=<?= $browser_instance_id ?>"><i class="bi bi-gear"></i> Settings</a>
+
+            <hr>
+            <a href="../php/logout.php?bid=<?= $browser_instance_id ?>" class="logout"><i class="bi bi-box-arrow-right"></i> Logout</a>
+        </div>
+
+        <!-- HEADER -->
+        <div class="header-bar d-flex align-items-center justify-content-between">
+            <button class="open-sidebar-btn" id="openSidebar"><i class="bi bi-list"></i></button>
+
+            <!-- Welcome Message with Admin Name -->
+            <div class="d-flex align-items-center">
+                <span class="me-3 d-none d-md-block">
+                    <i class="bi bi-person-circle me-2"></i>
+                    Welcome, <strong><?php echo htmlspecialchars($_SESSION['admin_name'] ?? 'Admin'); ?></strong>
+                </span>
+
+                <!-- Mobile-friendly version -->
+                <span class="d-block d-md-none">
+                    <i class="bi bi-person-circle me-1"></i>
+                    <strong><?php echo htmlspecialchars(explode(' ', $_SESSION['admin_name'] ?? 'Admin')[0]); ?></strong>
+                </span>
+            </div>
+        </div>
+
+        <!-- MAIN CONTENT -->
+        <div class="content" id="content">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="dashboard-title m-0">Admission Applications</h2>
+            </div>
+
+            <!-- Applications Table -->
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <!-- Table Controls Inside Card -->
+                    <div class="table-controls">
+                        <div class="row g-2 align-items-center">
+                            <!-- Search on the left -->
+                            <div class="col-md-6">
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                                    <input type="text" id="searchInput" class="form-control" placeholder="Search student or parent names...">
+                                </div>
+                            </div>
+                            
+                            <!-- Refresh and Filter buttons on the right -->
+                            <div class="col-md-6 text-end">
+                                <div class="btn-group">
+                                    <button id="refreshBtn" class="btn btn-outline-primary" title="Refresh Table">
+                                        <i class="bi bi-arrow-repeat"></i> Refresh
+                                    </button>
+                                    <button id="filterBtn" class="btn btn-outline-primary" title="Filter Applications">
+                                        <i class="bi bi-funnel"></i> Filter
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Results count -->
+                        <div class="row mt-2">
+                            <div class="col-12">
+                                <small class="text-muted">
+                                    Showing <span id="visibleCount"><?= count($applications) ?></span> of <span id="totalCount"><?= count($applications) ?></span> applications
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="applicationsTable">
+                            <thead>
+                                <tr>
+                                    <th>Student Name</th>
+                                    <th class="mobile-hide">Program</th>
+                                    <th class="mobile-hide">Year Group</th>
+                                    <th>Parent Contact</th>
+                                    <th class="mobile-hide">Submitted</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="applicationsTableBody">
+                                <?php if (empty($applications)): ?>
+                                    <tr>
+                                        <td colspan="6" class="text-center text-muted py-4">No admission applications found.</td>
+                                    </tr>
+                                <?php else: ?>
+                                    <?php foreach ($applications as $app): ?>
+                                    <tr data-student="<?= htmlspecialchars(strtolower($app['student_first_name'] . ' ' . $app['student_last_name'])) ?>" 
+                                        data-parent="<?= htmlspecialchars(strtolower($app['parent1_first_name'] . ' ' . $app['parent1_last_name'])) ?>"
+                                        data-program="<?= htmlspecialchars(strtolower($app['interested_program'])) ?>"
+                                        data-application-id="<?= $app['id'] ?>">
+                                        <td class="fw-semibold">
+                                            <?= htmlspecialchars($app['student_first_name'] . ' ' . $app['student_last_name']) ?>
+                                            <br>
+                                            <small class="text-muted">Age: <?= $app['student_age'] ?? 'N/A' ?></small>
+                                        </td>
+                                        <td class="mobile-hide"><?= htmlspecialchars($app['interested_program']) ?></td>
+                                        <td class="mobile-hide">
+                                            <?= htmlspecialchars($app['year_group']) ?>
+                                            <?php if (!empty($app['year_group_other'])): ?>
+                                                <br><small class="text-muted">(<?= htmlspecialchars($app['year_group_other']) ?>)</small>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td>
+                                            <?= htmlspecialchars($app['parent1_first_name'] . ' ' . $app['parent1_last_name']) ?>
+                                            <br>
+                                            <small class="text-muted"><?= htmlspecialchars($app['parent1_email']) ?></small>
+                                        </td>
+                                        <td class="mobile-hide">
+                                            <?php if ($app['submitted_at']): ?>
+                                                <?php 
+                                                $submittedDate = new DateTime($app['submitted_at'], new DateTimeZone('UTC'));
+                                                $submittedDate->setTimezone(new DateTimeZone('Europe/London'));
+                                                echo $submittedDate->format('M j, Y g:i A');
+                                                ?>
+                                            <?php else: ?>
+                                                N/A
+                                            <?php endif; ?>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm">
+                                                <button type="button" 
+                                                        class="btn btn-outline-primary view-btn" 
+                                                        data-application-id="<?= $app['id'] ?>">
+                                                    <i class="bi bi-eye"></i> View
+                                                </button>
+                                                <button type="button" 
+                                                        class="btn btn-outline-success approve-btn" 
+                                                        data-application-id="<?= $app['id'] ?>"
+                                                        data-student-name="<?= htmlspecialchars($app['student_first_name'] . ' ' . $app['student_last_name']) ?>">
+                                                    <i class="bi bi-check-lg"></i> Approve
+                                                </button>
+                                                <button type="button" 
+                                                        class="btn btn-outline-danger reject-btn" 
+                                                        data-application-id="<?= $app['id'] ?>"
+                                                        data-student-name="<?= htmlspecialchars($app['student_first_name'] . ' ' . $app['student_last_name']) ?>">
+                                                    <i class="bi bi-x-lg"></i> Reject
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <!-- Application Details Row -->
+                                    <tr class="application-details-row" style="display: none;">
+                                        <td colspan="6">
+                                            <div class="application-details" id="details-<?= $app['id'] ?>">
+                                                <div class="row">
+                                                    <!-- Student Information -->
+                                                    <div class="col-md-6">
+                                                        <div class="detail-section">
+                                                            <h6 class="detail-label"><i class="bi bi-person"></i> Student Information</h6>
+                                                            <div class="row">
+                                                                <div class="col-6"><strong>Name:</strong></div>
+                                                                <div class="col-6"><?= htmlspecialchars($app['student_first_name'] . ' ' . $app['student_last_name']) ?></div>
+                                                                
+                                                                <div class="col-6"><strong>Gender:</strong></div>
+                                                                <div class="col-6"><?= htmlspecialchars($app['student_gender']) ?></div>
+                                                                
+                                                                <div class="col-6"><strong>Date of Birth:</strong></div>
+                                                                <div class="col-6"><?= $app['student_dob'] ? htmlspecialchars($app['student_dob']) : 'N/A' ?></div>
+                                                                
+                                                                <div class="col-6"><strong>Age:</strong></div>
+                                                                <div class="col-6"><?= $app['student_age'] ?? 'N/A' ?></div>
+                                                                
+                                                                <div class="col-6"><strong>School:</strong></div>
+                                                                <div class="col-6"><?= htmlspecialchars($app['student_school']) ?></div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <!-- Program Information -->
+                                                    <div class="col-md-6">
+                                                        <div class="detail-section">
+                                                            <h6 class="detail-label"><i class="bi bi-book"></i> Program Information</h6>
+                                                            <div class="row">
+                                                                <div class="col-6"><strong>Year Group:</strong></div>
+                                                                <div class="col-6"><?= htmlspecialchars($app['year_group']) ?></div>
+                                                                
+                                                                <?php if (!empty($app['year_group_other'])): ?>
+                                                                <div class="col-6"><strong>Other:</strong></div>
+                                                                <div class="col-6"><?= htmlspecialchars($app['year_group_other']) ?></div>
+                                                                <?php endif; ?>
+                                                                
+                                                                <div class="col-6"><strong>Program:</strong></div>
+                                                                <div class="col-6"><?= htmlspecialchars($app['interested_program']) ?></div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <!-- Parent Information -->
+                                                <div class="detail-section">
+                                                    <h6 class="detail-label"><i class="bi bi-people"></i> Parent/Guardian Information</h6>
+                                                    <div class="row">
+                                                        <div class="col-md-6">
+                                                            <strong>Primary Parent:</strong><br>
+                                                            <?= htmlspecialchars($app['parent1_first_name'] . ' ' . $app['parent1_last_name']) ?><br>
+                                                            <small>Relationship: <?= htmlspecialchars($app['parent1_relationship']) ?></small>
+                                                            <?php if (!empty($app['parent1_relationship_other'])): ?>
+                                                                <br><small>Other: <?= htmlspecialchars($app['parent1_relationship_other']) ?></small>
+                                                            <?php endif; ?>
+                                                            <br><small>Mobile: <?= htmlspecialchars($app['parent1_mobile']) ?></small>
+                                                            <br><small>Email: <?= htmlspecialchars($app['parent1_email']) ?></small>
+                                                        </div>
+                                                        <?php if (!empty($app['parent2_first_name'])): ?>
+                                                        <div class="col-md-6">
+                                                            <strong>Additional Parent:</strong><br>
+                                                            <?= htmlspecialchars($app['parent2_first_name'] . ' ' . $app['parent2_last_name']) ?><br>
+                                                            <small>Relationship: <?= htmlspecialchars($app['parent2_relationship']) ?></small>
+                                                            <?php if (!empty($app['parent2_relationship_other'])): ?>
+                                                                <br><small>Other: <?= htmlspecialchars($app['parent2_relationship_other']) ?></small>
+                                                            <?php endif; ?>
+                                                            <?php if (!empty($app['parent2_mobile'])): ?>
+                                                                <br><small>Mobile: <?= htmlspecialchars($app['parent2_mobile']) ?></small>
+                                                            <?php endif; ?>
+                                                            <?php if (!empty($app['parent2_email'])): ?>
+                                                                <br><small>Email: <?= htmlspecialchars($app['parent2_email']) ?></small>
+                                                            <?php endif; ?>
+                                                        </div>
+                                                        <?php endif; ?>
+                                                        <div class="col-12 mt-2">
+                                                            <strong>Emergency Contact:</strong> <?= htmlspecialchars($app['emergency_contact']) ?>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <!-- Address -->
+                                                <div class="detail-section">
+                                                    <h6 class="detail-label"><i class="bi bi-geo-alt"></i> Address</h6>
+                                                    <?= htmlspecialchars($app['address']) ?><br>
+                                                    <?= htmlspecialchars($app['city']) ?>, 
+                                                    <?php if (!empty($app['county'])): ?>
+                                                        <?= htmlspecialchars($app['county']) ?>,
+                                                    <?php endif; ?>
+                                                    <?= htmlspecialchars($app['postal_code']) ?>
+                                                </div>
+                                                
+                                                <!-- Medical & Additional Info -->
+                                                <div class="row">
+                                                    <?php if ($app['illness'] === 'Yes' && !empty($app['illness_details'])): ?>
+                                                    <div class="col-md-6">
+                                                        <div class="detail-section">
+                                                            <h6 class="detail-label"><i class="bi bi-heart-pulse"></i> Medical Conditions</h6>
+                                                            <?= htmlspecialchars($app['illness_details']) ?>
+                                                        </div>
+                                                    </div>
+                                                    <?php endif; ?>
+                                                    
+                                                    <?php if ($app['special_needs'] === 'Yes' && !empty($app['special_needs_details'])): ?>
+                                                    <div class="col-md-6">
+                                                        <div class="detail-section">
+                                                            <h6 class="detail-label"><i class="bi bi-person-badge"></i> Special Needs</h6>
+                                                            <?= htmlspecialchars($app['special_needs_details']) ?>
+                                                        </div>
+                                                    </div>
+                                                    <?php endif; ?>
+                                                    
+                                                    <?php if ($app['allergies'] === 'Yes' && !empty($app['allergies_details'])): ?>
+                                                    <div class="col-md-6">
+                                                        <div class="detail-section">
+                                                            <h6 class="detail-label"><i class="bi bi-exclamation-triangle"></i> Allergies</h6>
+                                                            <?= htmlspecialchars($app['allergies_details']) ?>
+                                                        </div>
+                                                    </div>
+                                                    <?php endif; ?>
+                                                </div>
+                                                
+                                                <!-- Permissions -->
+                                                <div class="detail-section">
+                                                    <h6 class="detail-label"><i class="bi bi-shield-check"></i> Permissions</h6>
+                                                    <div class="row">
+                                                        <div class="col-4"><strong>Swimming:</strong> <?= htmlspecialchars($app['knows_swimming']) ?></div>
+                                                        <div class="col-4"><strong>Travel Sickness:</strong> <?= htmlspecialchars($app['travel_sickness']) ?></div>
+                                                        <div class="col-4"><strong>Travel Permission:</strong> <?= htmlspecialchars($app['travel_permission']) ?></div>
+                                                        <div class="col-4"><strong>Photo Permission:</strong> <?= htmlspecialchars($app['photo_permission']) ?></div>
+                                                        <div class="col-4"><strong>Transport:</strong> <?= htmlspecialchars($app['transport_mode']) ?></div>
+                                                        <div class="col-4"><strong>Home Alone:</strong> <?= htmlspecialchars($app['go_home_alone']) ?></div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <!-- Islamic Education -->
+                                                <?php if ($app['attended_islamic_education'] === 'Yes'): ?>
+                                                <div class="detail-section">
+                                                    <h6 class="detail-label"><i class="bi bi-book-half"></i> Islamic Education History</h6>
+                                                    <?php if (!empty($app['islamic_years'])): ?>
+                                                        <strong>Years Attended:</strong> <?= htmlspecialchars($app['islamic_years']) ?><br>
+                                                    <?php endif; ?>
+                                                    <?php if (!empty($app['islamic_education_details'])): ?>
+                                                        <strong>Details:</strong> <?= htmlspecialchars($app['islamic_education_details']) ?>
+                                                    <?php endif; ?>
+                                                </div>
+                                                <?php endif; ?>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Approve Confirmation Modal -->
+        <div class="modal fade" id="approveModal" tabindex="-1" aria-labelledby="approveModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="approveModalLabel">Confirm Approval</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Are you sure you want to approve the application for <strong id="approveStudentName"></strong>?</p>
+                        <p class="text-muted">This will mark the application as approved and notify the parents.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" id="confirmApprove" class="btn btn-success">Approve</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reject Confirmation Modal -->
+        <div class="modal fade" id="rejectModal" tabindex="-1" aria-labelledby="rejectModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="rejectModalLabel">Confirm Rejection</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Are you sure you want to reject the application for <strong id="rejectStudentName"></strong>?</p>
+                        <p class="text-danger"><strong>This action cannot be undone.</strong></p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" id="confirmReject" class="btn btn-danger">Reject</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Toast Notification Container -->
+        <div class="toast-container position-fixed p-3">
+            <div id="liveToast" class="toast align-items-center" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        Operation completed successfully!
+                    </div>
+                    <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Filter Modal -->
+        <div class="modal fade modal-green" id="filterModal" tabindex="-1" aria-labelledby="filterModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="filterModalLabel">Filter Applications</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="yearGroupSelect" class="form-label">Year Group</label>
+                            <select id="yearGroupSelect" class="form-select">
+                                <option value="all">All Year Groups</option>
+                                <option value="Nursery">Nursery</option>
+                                <option value="Reception">Reception</option>
+                                <option value="Year 1">Year 1</option>
+                                <option value="Year 2">Year 2</option>
+                                <option value="Year 3">Year 3</option>
+                                <option value="Year 4">Year 4</option>
+                                <option value="Year 5">Year 5</option>
+                                <option value="Year 6">Year 6</option>
+                                <option value="Year 7">Year 7</option>
+                                <option value="Year 8">Year 8</option>
+                                <option value="Year 9">Year 9</option>
+                                <option value="Year 10">Year 10</option>
+                                <option value="Year 11">Year 11</option>
+                                <option value="College / Sixth Form">College / Sixth Form</option>
+                                <option value="University">University</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="programSelect" class="form-label">Program</label>
+                            <select id="programSelect" class="form-select">
+                                <option value="all">All Programs</option>
+                                <option value="Weekday Morning Hifdh">Weekday Morning Hifdh</option>
+                                <option value="Weekday Evening Hifdh">Weekday Evening Hifdh</option>
+                                <option value="Weekday Evening Islamic Studies">Weekday Evening Islamic Studies</option>
+                                <option value="Weekend Hifdh">Weekend Hifdh</option>
+                                <option value="Weekend Islamic Studies">Weekend Islamic Studies</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" id="clearFilterBtn" class="btn btn-outline-danger">Clear Filter</button>
+                        <button type="button" id="applyFilterBtn" class="btn btn-primary">Apply Filter</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script src="../bootstrap/js/bootstrap.bundle.min.js"></script>
+        <script src="js/dashboard.js"></script>
+        <script>
+            // Pass PHP variables to JavaScript
+            const browserInstanceId = '<?= $browser_instance_id ?>';
+        </script>
+        
+        <script src="js/applications.js"></script>
+    </body>
+</html>

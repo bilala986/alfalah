@@ -96,7 +96,7 @@ if (isset($_GET['bid']) && $_GET['bid'] !== $browser_instance_id) {
                     <div class="card shadow-sm p-3">
                         <h5><i class="bi bi-file-earmark-text text-success"></i> Admissions</h5>
                         <p class="text-muted">View new applications.</p>
-                        <a href="#?bid=<?= $browser_instance_id ?>" class="btn btn-success-modern btn-sm">Open</a>
+                        <a href="applications.php?bid=<?= $browser_instance_id ?>" class="btn btn-success-modern btn-sm">Open</a>
                     </div>
                 </div>
 

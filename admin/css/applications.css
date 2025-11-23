@@ -1,0 +1,20 @@
+/* Green theme for modals */
+.modal-green .modal-header {
+    background-color: #198754;
+    color: white;
+    border-bottom: none;
+}
+
+.modal-green .modal-header .btn-close {
+    filter: invert(1);
+}
+
+.modal-green .btn-primary {
+    background-color: #198754;
+    border-color: #198754;
+}
+
+.modal-green .btn-primary:hover {
+    background-color: #157347;
+    border-color: #146c43;
+}
