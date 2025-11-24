@@ -401,33 +401,6 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
             </div>
         </div>
 
-        <!-- Filter Modal -->
-        <div class="modal fade modal-green" id="filterModal" tabindex="-1" aria-labelledby="filterModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="filterModalLabel">Filter Parents</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label for="studentMatchSelect" class="form-label">Filter by Student Match</label>
-                            <select id="studentMatchSelect" class="form-select">
-                                <option value="all">All Parents</option>
-                                <option value="matched">With Matching Students</option>
-                                <option value="unmatched">No Matching Students</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="button" id="clearFilterBtn" class="btn btn-outline-danger">Clear Filter</button>
-                        <button type="button" id="applyFilterBtn" class="btn btn-primary">Apply Filter</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <!-- Remove Confirmation Modal -->
         <div class="modal fade" id="removeModal" tabindex="-1" aria-labelledby="removeModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">

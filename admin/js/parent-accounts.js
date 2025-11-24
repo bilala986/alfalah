@@ -4,34 +4,23 @@ document.addEventListener('DOMContentLoaded', function() {
     // DOM Elements
     const searchInput = document.getElementById('searchInput');
     const refreshBtn = document.getElementById('refreshBtn');
-    const filterBtn = document.getElementById('filterBtn');
     const parentTableBody = document.getElementById('parentTableBody');
     const visibleCount = document.getElementById('visibleCount');
     const totalCount = document.getElementById('totalCount');
-    const statusSelect = document.getElementById('statusSelect');
-    const studentMatchSelect = document.getElementById('studentMatchSelect');
-    const applyFilterBtn = document.getElementById('applyFilterBtn');
-    const clearFilterBtn = document.getElementById('clearFilterBtn');
+    
+    // Disable filter button
+    filterBtn.disabled = true;
 
     // Modal Elements
     const editModal = new bootstrap.Modal(document.getElementById('editModal'));
-    const filterModal = new bootstrap.Modal(document.getElementById('filterModal'));
     const removeModal = new bootstrap.Modal(document.getElementById('removeModal'));
     
     // Toast
     const liveToast = new bootstrap.Toast(document.getElementById('liveToast'));
 
-    // State
-    let currentFilters = {
-        studentMatch: 'all'
-    };
-
     // Event Listeners
     searchInput.addEventListener('input', filterTable);
     refreshBtn.addEventListener('click', refreshTable);
-    filterBtn.addEventListener('click', () => filterModal.show());
-    applyFilterBtn.addEventListener('click', applyFilters);
-    clearFilterBtn.addEventListener('click', clearFilters);
 
     // Edit button handlers
     document.addEventListener('click', function(e) {
@@ -76,12 +65,6 @@ document.addEventListener('DOMContentLoaded', function() {
             const name = row.dataset.name;
             const email = row.dataset.email;
 
-            // Check student match filter
-            const hasStudents = row.querySelector('.student-list, .fw-semibold') !== null;
-            const studentMatchFilter = currentFilters.studentMatch === 'all' || 
-                (currentFilters.studentMatch === 'matched' && hasStudents) ||
-                (currentFilters.studentMatch === 'unmatched' && !hasStudents);
-
             // Check search term - now includes student names
             let matchesSearch = name.includes(searchTerm) || email.includes(searchTerm);
 
@@ -96,7 +79,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
 
-            const shouldShow = matchesSearch && studentMatchFilter;
+            const shouldShow = matchesSearch;
             row.style.display = shouldShow ? '' : 'none';
 
             if (shouldShow) visibleRows++;
@@ -106,8 +89,11 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function refreshTable() {
-        refreshBtn.querySelector('i').classList.add('refresh-spin');
-        
+        // Add loading animation and disable button
+        const refreshIcon = refreshBtn.querySelector('i');
+        refreshIcon.classList.add('refresh-spin');
+        refreshBtn.disabled = true;
+
         fetch(window.location.href, {
             headers: {
                 'X-Requested-With': 'XMLHttpRequest'
@@ -118,11 +104,12 @@ document.addEventListener('DOMContentLoaded', function() {
             const parser = new DOMParser();
             const doc = parser.parseFromString(html, 'text/html');
             const newTableBody = doc.getElementById('parentTableBody');
-            
+
             if (newTableBody) {
                 parentTableBody.innerHTML = newTableBody.innerHTML;
                 updateRowCounts();
                 filterTable();
+                showToast('Table refreshed successfully!', 'success');
             }
         })
         .catch(error => {
@@ -130,25 +117,12 @@ document.addEventListener('DOMContentLoaded', function() {
             showToast('Error refreshing table', 'danger');
         })
         .finally(() => {
+            // Remove loading animation and re-enable button
             setTimeout(() => {
-                refreshBtn.querySelector('i').classList.remove('refresh-spin');
+                refreshIcon.classList.remove('refresh-spin');
+                refreshBtn.disabled = false;
             }, 600);
         });
-    }
-
-    function applyFilters() {
-        currentFilters.status = statusSelect.value;
-        currentFilters.studentMatch = studentMatchSelect.value;
-        filterTable();
-        filterModal.hide();
-    }
-
-    function clearFilters() {
-        studentMatchSelect.value = 'all';
-        currentFilters.studentMatch = 'all';
-        searchInput.value = '';
-        filterTable();
-        filterModal.hide();
     }
 
     function updateRowCounts() {
