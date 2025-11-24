@@ -8,6 +8,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const visibleCount = document.getElementById('visibleCount');
     const totalCount = document.getElementById('totalCount');
     
+    // Search options elements
+    const searchName = document.getElementById('searchName');
+    const searchEmail = document.getElementById('searchEmail');
+    const searchStudent = document.getElementById('searchStudent');
+    
     // Disable filter button
     filterBtn.disabled = true;
 
@@ -22,6 +27,19 @@ document.addEventListener('DOMContentLoaded', function() {
     searchInput.addEventListener('input', filterTable);
     refreshBtn.addEventListener('click', refreshTable);
 
+    // Search option change listeners
+    if (searchName) {
+        searchName.addEventListener('change', filterTable);
+    }
+
+    if (searchEmail) {
+        searchEmail.addEventListener('change', filterTable);
+    }
+
+    if (searchStudent) {
+        searchStudent.addEventListener('change', filterTable);
+    }    
+    
     // Edit button handlers
     document.addEventListener('click', function(e) {
         if (e.target.closest('.edit-btn')) {
@@ -61,20 +79,37 @@ document.addEventListener('DOMContentLoaded', function() {
         const rows = parentTableBody.querySelectorAll('tr');
         let visibleRows = 0;
 
+        // Get search options
+        const searchInName = searchName ? searchName.checked : true;
+        const searchInEmail = searchEmail ? searchEmail.checked : true;
+        const searchInStudent = searchStudent ? searchStudent.checked : true;
+
         rows.forEach(row => {
             const name = row.dataset.name;
             const email = row.dataset.email;
 
-            // Check search term - now includes student names
-            let matchesSearch = name.includes(searchTerm) || email.includes(searchTerm);
+            // Check search term with options
+            let matchesSearch = false;
 
-            // If no match yet, check student names
-            if (!matchesSearch && searchTerm) {
-                const studentElements = row.querySelectorAll('.student-item, .fw-semibold');
-                for (let studentEl of studentElements) {
-                    if (studentEl.textContent.toLowerCase().includes(searchTerm)) {
-                        matchesSearch = true;
-                        break;
+            if (searchTerm === '') {
+                // If no search term, show all rows
+                matchesSearch = true;
+            } else {
+                // Search based on selected options
+                if (searchInName && name.includes(searchTerm)) {
+                    matchesSearch = true;
+                }
+                if (!matchesSearch && searchInEmail && email.includes(searchTerm)) {
+                    matchesSearch = true;
+                }
+                if (!matchesSearch && searchInStudent) {
+                    // Check student names
+                    const studentElements = row.querySelectorAll('.student-item, .fw-semibold');
+                    for (let studentEl of studentElements) {
+                        if (studentEl.textContent.toLowerCase().includes(searchTerm)) {
+                            matchesSearch = true;
+                            break;
+                        }
                     }
                 }
             }
@@ -108,7 +143,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (newTableBody) {
                 parentTableBody.innerHTML = newTableBody.innerHTML;
                 updateRowCounts();
-                filterTable();
+                filterTable(); // This will reapply the current search and filters
                 showToast('Table refreshed successfully!', 'success');
             }
         })

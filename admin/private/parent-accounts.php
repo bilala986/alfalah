@@ -224,6 +224,37 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="bi bi-search"></i></span>
                                     <input type="text" id="searchInput" class="form-control" placeholder="Search names, emails, or students...">
+
+                                    <!-- Search Options Dropdown -->
+                                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="bi bi-filter"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end p-2" style="min-width: 200px;">
+                                        <li class="mb-2">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="searchName" checked>
+                                                <label class="form-check-label small" for="searchName">
+                                                    Parent Names
+                                                </label>
+                                            </div>
+                                        </li>
+                                        <li class="mb-2">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="searchEmail" checked>
+                                                <label class="form-check-label small" for="searchEmail">
+                                                    Email Addresses
+                                                </label>
+                                            </div>
+                                        </li>
+                                        <li>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="searchStudent" checked>
+                                                <label class="form-check-label small" for="searchStudent">
+                                                    Student Names
+                                                </label>
+                                            </div>
+                                        </li>
+                                    </ul>
                                 </div>
                             </div>
                             

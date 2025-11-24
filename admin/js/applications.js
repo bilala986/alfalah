@@ -146,26 +146,50 @@ document.addEventListener('DOMContentLoaded', function() {
         const rows = applicationsTableBody.querySelectorAll('tr[data-student]');
         let visibleRows = 0;
 
+        // Get search options
+        const searchInStudent = searchStudent ? searchStudent.checked : true;
+        const searchInParent = searchParent ? searchParent.checked : true;
+        const searchInEmail = searchEmail ? searchEmail.checked : false;
+
         rows.forEach(row => {
-            const status = row.getAttribute('data-status');
-            const accountStatus = row.getAttribute('data-account-status');
+            const studentName = row.getAttribute('data-student');
+            const parentName = row.getAttribute('data-parent');
             const program = row.getAttribute('data-program');
             const age = parseInt(row.getAttribute('data-age')) || 0;
+            const status = row.getAttribute('data-status');
+            const accountStatus = row.getAttribute('data-account-status');
 
-            // Check status filter
+            // Get additional data from the row cells for email search
+            const parentCell = row.cells[3];
+            const parentFullText = parentCell.textContent.toLowerCase();
+
+            // Determine what to search based on selected options
+            let matchesSearch = false;
+
+            if (searchTerm === '') {
+                // If no search term, show all rows (but still apply filters)
+                matchesSearch = true;
+            } else {
+                // Search based on selected options ONLY
+                if (searchInStudent && studentName.includes(searchTerm)) {
+                    matchesSearch = true;
+                }
+                if (!matchesSearch && searchInParent && parentName.includes(searchTerm)) {
+                    matchesSearch = true;
+                }
+                if (!matchesSearch && searchInEmail && parentFullText.includes(searchTerm)) {
+                    matchesSearch = true;
+                }
+            }
+
+            // Apply filters
             const statusFilter = currentStatusFilter === 'all' || status === currentStatusFilter;
-
-            // Check account status filter
             const accountStatusFilter = currentAccountStatusFilter === 'all' || accountStatus === currentAccountStatusFilter;
-
-            // Check program filter
             const programFilter = currentProgramFilter === 'all' || program === currentProgramFilter;
-
-            // Check age filter
             const ageFilter = (currentMinAge === null || age >= currentMinAge) && 
                              (currentMaxAge === null || age <= currentMaxAge);
 
-            const shouldShow = statusFilter && accountStatusFilter && programFilter && ageFilter;
+            const shouldShow = matchesSearch && statusFilter && accountStatusFilter && programFilter && ageFilter;
             row.style.display = shouldShow ? '' : 'none';
 
             if (shouldShow) {
@@ -197,8 +221,7 @@ document.addEventListener('DOMContentLoaded', function() {
         visibleCount.textContent = visibleRows;
 
         // Update filter button appearance - check if any filter is active
-        const isAnyFilterActive = currentYearFilter !== 'all' || 
-                                 currentProgramFilter !== 'all' || 
+        const isAnyFilterActive = currentProgramFilter !== 'all' || 
                                  currentMinAge !== null || 
                                  currentMaxAge !== null ||
                                  currentStatusFilter !== 'all' ||
@@ -866,25 +889,25 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Search functionality
     searchInput.addEventListener('input', function() {
-        filterTable();
+        filterTable(); // This should call filterTable, not searchApplications
     });
-    
+
     // Search option change listeners
     if (searchStudent) {
         searchStudent.addEventListener('change', function() {
-            filterTable();
+            filterTable(); // This should call filterTable, not searchApplications
         });
     }
-    
+
     if (searchParent) {
         searchParent.addEventListener('change', function() {
-            filterTable();
+            filterTable(); // This should call filterTable, not searchApplications
         });
     }
-    
+
     if (searchEmail) {
         searchEmail.addEventListener('change', function() {
-            filterTable();
+            filterTable(); // This should call filterTable, not searchApplications
         });
     }
     
