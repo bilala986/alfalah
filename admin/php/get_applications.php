@@ -5,11 +5,7 @@ require_once $_SERVER['DOCUMENT_ROOT'] . '/alfalah/php/db_connect.php';
 header('Content-Type: application/json');
 
 try {
-    $stmt = $pdo->prepare("SELECT *, 
-                           COALESCE(status, 'pending') as status,
-                           scheduled_for_deletion_at
-                           FROM initial_admission 
-                           ORDER BY submitted_at DESC");
+    $stmt = $pdo->prepare("SELECT * FROM initial_admission ORDER BY submitted_at DESC");
     $stmt->execute();
     $applications = $stmt->fetchAll(PDO::FETCH_ASSOC);
     

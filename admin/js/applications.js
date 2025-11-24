@@ -284,9 +284,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 <td colspan="7">
                     <div class="application-details" id="details-${app.id}">
                         <div class="text-center text-muted py-3">
-                            <i class="bi bi-info-circle"></i> Details loaded dynamically
+                            <i class="bi bi-hourglass-split"></i> Click "View" to load details
                         </div>
-                    </td>
+                    </div>
                 </td>
             `;
             applicationsTableBody.appendChild(detailsRow);
@@ -434,13 +434,13 @@ document.addEventListener('DOMContentLoaded', function() {
             });
     }
 
-    // Enhanced view application details with active state
+    // Enhanced view application details with dynamic content loading
     function handleViewClick() {
         const applicationId = this.getAttribute('data-application-id');
         const detailsRow = this.closest('tr').nextElementSibling;
         const detailsDiv = document.getElementById(`details-${applicationId}`);
         const isOpening = detailsRow.style.display === 'none';
-        
+
         // Close all other open details first
         document.querySelectorAll('.application-details-row').forEach(row => {
             if (row !== detailsRow) {
@@ -453,21 +453,24 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
         });
-        
+
         // Remove active state from all view buttons
         document.querySelectorAll('.view-btn').forEach(btn => {
             btn.classList.remove('active');
             btn.classList.remove('btn-primary');
             btn.classList.add('btn-outline-primary');
         });
-        
+
         if (isOpening) {
+            // Load details content dynamically
+            loadApplicationDetails(applicationId, detailsDiv);
+
             // Open this one
             detailsRow.style.display = 'table-row';
             setTimeout(() => {
                 detailsDiv.classList.add('show');
             }, 10);
-            
+
             // Add active state to this button
             this.classList.remove('btn-outline-primary');
             this.classList.add('btn-primary', 'active');
@@ -477,11 +480,285 @@ document.addEventListener('DOMContentLoaded', function() {
             setTimeout(() => {
                 detailsRow.style.display = 'none';
             }, 300);
-            
+
             // Remove active state
             this.classList.remove('btn-primary', 'active');
             this.classList.add('btn-outline-primary');
         }
+    }
+
+    // Function to load application details
+    function loadApplicationDetails(applicationId, detailsDiv) {
+        // Show loading state
+        detailsDiv.innerHTML = '<div class="text-center text-muted py-3"><i class="bi bi-hourglass-split"></i> Loading details...</div>';
+
+        fetch(`php/get_application_details.php?id=${applicationId}&bid=${browserInstanceId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    detailsDiv.innerHTML = generateDetailsHTML(data.application);
+                } else {
+                    detailsDiv.innerHTML = '<div class="text-center text-danger py-3"><i class="bi bi-exclamation-triangle"></i> Error loading details</div>';
+                }
+            })
+            .catch(error => {
+                console.error('Error loading application details:', error);
+                detailsDiv.innerHTML = '<div class="text-center text-danger py-3"><i class="bi bi-exclamation-triangle"></i> Error loading details</div>';
+            });
+    }
+
+    // Function to generate detailed HTML from application data
+    function generateDetailsHTML(app) {
+        // Helper function to check if medical info should be shown
+        const hasMedicalInfo = (app.illness === 'Yes' && app.illness_details) || 
+                              (app.special_needs === 'Yes' && app.special_needs_details) || 
+                              (app.allergies === 'Yes' && app.allergies_details);
+
+        return `
+            <!-- Student & Program Header -->
+            <div class="detail-section">
+                <div class="row compact-layout">
+                    <div class="col-md-8">
+                        <h5 class="detail-label">
+                            <i class="bi bi-person-badge"></i>
+                            Student Information - ${escapeHtml(app.student_first_name + ' ' + app.student_last_name)}
+                        </h5>
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <strong>Full Name</strong>
+                                <span>${escapeHtml(app.student_first_name + ' ' + app.student_last_name)}</span>
+                            </div>
+                            <div class="detail-item">
+                                <strong>Age</strong>
+                                <span>${app.student_age || 'N/A'}</span>
+                            </div>
+                            <div class="detail-item">
+                                <strong>Gender</strong>
+                                <span>${escapeHtml(app.student_gender || 'N/A')}</span>
+                            </div>
+                            <div class="detail-item">
+                                <strong>Date of Birth</strong>
+                                <span>${app.student_dob ? escapeHtml(app.student_dob) : 'N/A'}</span>
+                            </div>
+                            <div class="detail-item">
+                                <strong>Current School</strong>
+                                <span>${escapeHtml(app.student_school || 'N/A')}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="parent-card">
+                            <h6><i class="bi bi-info-circle"></i> Program Details</h6>
+                            <div class="contact-info">
+                                <div class="contact-item">
+                                    <i class="bi bi-book"></i>
+                                    <span><strong>Program:</strong> ${escapeHtml(app.interested_program || 'N/A')}</span>
+                                </div>
+                                <div class="contact-item">
+                                    <i class="bi bi-mortarboard"></i>
+                                    <span><strong>Year Group:</strong> ${escapeHtml(app.year_group || 'N/A')}</span>
+                                </div>
+                                ${app.year_group_other ? `
+                                <div class="contact-item">
+                                    <i class="bi bi-pencil"></i>
+                                    <span><strong>Other:</strong> ${escapeHtml(app.year_group_other)}</span>
+                                </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Parent Information -->
+            <div class="detail-section">
+                <h6 class="detail-label"><i class="bi bi-people"></i> Parent/Guardian Information</h6>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="parent-card">
+                            <h6><i class="bi bi-person-check"></i> Primary Parent</h6>
+                            <div class="contact-info">
+                                <div class="contact-item">
+                                    <i class="bi bi-person"></i>
+                                    <span>${escapeHtml(app.parent1_first_name + ' ' + app.parent1_last_name)}</span>
+                                </div>
+                                <div class="contact-item">
+                                    <i class="bi bi-diagram-3"></i>
+                                    <span>${escapeHtml(app.parent1_relationship || 'N/A')}</span>
+                                    ${app.parent1_relationship_other ? `
+                                    <br><small class="text-muted">(${escapeHtml(app.parent1_relationship_other)})</small>
+                                    ` : ''}
+                                </div>
+                                <div class="contact-item">
+                                    <i class="bi bi-phone"></i>
+                                    <span>${escapeHtml(app.parent1_mobile || 'N/A')}</span>
+                                </div>
+                                <div class="contact-item">
+                                    <i class="bi bi-envelope"></i>
+                                    <span>${escapeHtml(app.parent1_email || 'N/A')}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    ${app.parent2_first_name ? `
+                    <div class="col-md-6">
+                        <div class="parent-card">
+                            <h6><i class="bi bi-person-plus"></i> Additional Parent</h6>
+                            <div class="contact-info">
+                                <div class="contact-item">
+                                    <i class="bi bi-person"></i>
+                                    <span>${escapeHtml(app.parent2_first_name + ' ' + app.parent2_last_name)}</span>
+                                </div>
+                                <div class="contact-item">
+                                    <i class="bi bi-diagram-3"></i>
+                                    <span>${escapeHtml(app.parent2_relationship || 'N/A')}</span>
+                                    ${app.parent2_relationship_other ? `
+                                    <br><small class="text-muted">(${escapeHtml(app.parent2_relationship_other)})</small>
+                                    ` : ''}
+                                </div>
+                                ${app.parent2_mobile ? `
+                                <div class="contact-item">
+                                    <i class="bi bi-phone"></i>
+                                    <span>${escapeHtml(app.parent2_mobile)}</span>
+                                </div>
+                                ` : ''}
+                                ${app.parent2_email ? `
+                                <div class="contact-item">
+                                    <i class="bi bi-envelope"></i>
+                                    <span>${escapeHtml(app.parent2_email)}</span>
+                                </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+                    ` : ''}
+                </div>
+                <div class="mt-3">
+                    <div class="parent-card emergency-contact-card">
+                        <h6><i class="bi bi-exclamation-triangle"></i> Emergency Contact</h6>
+                        <div class="contact-item">
+                            <i class="bi bi-telephone-forward"></i>
+                            <span class="fw-bold">${escapeHtml(app.emergency_contact || 'N/A')}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Address -->
+            <div class="detail-section">
+                <h6 class="detail-label"><i class="bi bi-geo-alt"></i> Address</h6>
+                <div class="parent-card">
+                    <div class="contact-info">
+                        <div class="contact-item">
+                            <i class="bi bi-house"></i>
+                            <span>${escapeHtml(app.address || 'N/A')}</span>
+                        </div>
+                        <div class="contact-item">
+                            <i class="bi bi-building"></i>
+                            <span>${escapeHtml(app.city || 'N/A')}${app.county ? ', ' + escapeHtml(app.county) : ''}</span>
+                        </div>
+                        <div class="contact-item">
+                            <i class="bi bi-mailbox"></i>
+                            <span>${escapeHtml(app.postal_code || 'N/A')}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Medical & Additional Info -->
+            ${hasMedicalInfo ? `
+            <div class="detail-section">
+                <h6 class="detail-label"><i class="bi bi-heart-pulse"></i> Health Information</h6>
+                <div class="row">
+                    ${app.illness === 'Yes' && app.illness_details ? `
+                    <div class="col-md-4">
+                        <div class="parent-card medical-info">
+                            <h6><i class="bi bi-heart-pulse"></i> Medical Conditions</h6>
+                            <p class="mb-0 small">${escapeHtml(app.illness_details)}</p>
+                        </div>
+                    </div>
+                    ` : ''}
+
+                    ${app.special_needs === 'Yes' && app.special_needs_details ? `
+                    <div class="col-md-4">
+                        <div class="parent-card special-needs-info">
+                            <h6><i class="bi bi-person-badge"></i> Special Needs</h6>
+                            <p class="mb-0 small">${escapeHtml(app.special_needs_details)}</p>
+                        </div>
+                    </div>
+                    ` : ''}
+
+                    ${app.allergies === 'Yes' && app.allergies_details ? `
+                    <div class="col-md-4">
+                        <div class="parent-card allergy-info">
+                            <h6><i class="bi bi-exclamation-triangle"></i> Allergies</h6>
+                            <p class="mb-0 small">${escapeHtml(app.allergies_details)}</p>
+                        </div>
+                    </div>
+                    ` : ''}
+                </div>
+            </div>
+            ` : ''}
+
+            <!-- Permissions -->
+            <div class="detail-section">
+                <h6 class="detail-label"><i class="bi bi-shield-check"></i> Permissions & Information</h6>
+                <div class="permissions-grid">
+                    <div class="permission-item">
+                        <i class="bi bi-water"></i>
+                        <span>Swimming: ${escapeHtml(app.knows_swimming || 'N/A')}</span>
+                    </div>
+                    <div class="permission-item">
+                        <i class="bi bi-car-front"></i>
+                        <span>Travel Sickness: ${escapeHtml(app.travel_sickness || 'N/A')}</span>
+                    </div>
+                    <div class="permission-item">
+                        <i class="bi bi-geo-alt"></i>
+                        <span>Travel Permission: ${escapeHtml(app.travel_permission || 'N/A')}</span>
+                    </div>
+                    <div class="permission-item">
+                        <i class="bi bi-camera"></i>
+                        <span>Photo Permission: ${escapeHtml(app.photo_permission || 'N/A')}</span>
+                    </div>
+                    <div class="permission-item">
+                        <i class="bi bi-bus-front"></i>
+                        <span>Transport: ${escapeHtml(app.transport_mode || 'N/A')}</span>
+                    </div>
+                    <div class="permission-item">
+                        <i class="bi bi-house-door"></i>
+                        <span>Home Alone: ${escapeHtml(app.go_home_alone || 'N/A')}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Islamic Education -->
+            ${app.attended_islamic_education === 'Yes' ? `
+            <div class="detail-section">
+                <h6 class="detail-label"><i class="bi bi-book-half"></i> Islamic Education History</h6>
+                <div class="parent-card">
+                    <div class="contact-info">
+                        ${app.islamic_years ? `
+                        <div class="contact-item">
+                            <i class="bi bi-calendar"></i>
+                            <span><strong>Years Attended:</strong> ${escapeHtml(app.islamic_years)}</span>
+                        </div>
+                        ` : ''}
+                        ${app.islamic_education_details ? `
+                        <div class="contact-item">
+                            <i class="bi bi-journal-text"></i>
+                            <span><strong>Details:</strong> ${escapeHtml(app.islamic_education_details)}</span>
+                        </div>
+                        ` : ''}
+                    </div>
+                </div>
+            </div>
+            ` : ''}
+
+            <!-- Submission Date -->
+            <div class="text-center mt-3">
+                <small class="text-muted">Application submitted on: ${app.submitted_at ? new Date(app.submitted_at).toLocaleString() : 'N/A'}</small>
+            </div>
+        `;
     }
 
     // Approve application
