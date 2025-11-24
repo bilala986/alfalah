@@ -710,6 +710,28 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
+                        <!-- Status Filter -->
+                        <div class="mb-3">
+                            <label for="statusSelect" class="form-label">Status</label>
+                            <select id="statusSelect" class="form-select">
+                                <option value="all">All Statuses</option>
+                                <option value="approved">Approved</option>
+                                <option value="pending">Pending</option>
+                                <option value="pending_rejection">Pending Rejection</option>
+                            </select>
+                        </div>
+
+                        <!-- Account Created Filter -->
+                        <div class="mb-3">
+                            <label for="accountStatusSelect" class="form-label">Account Created</label>
+                            <select id="accountStatusSelect" class="form-select">
+                                <option value="all">All Account Statuses</option>
+                                <option value="created">Account Created</option>
+                                <option value="not_created">No Account Yet</option>
+                                <option value="not_applicable">Not Approved</option>
+                            </select>
+                        </div>
+
                         <div class="mb-3">
                             <label for="yearGroupSelect" class="form-label">Year Group</label>
                             <select id="yearGroupSelect" class="form-select">

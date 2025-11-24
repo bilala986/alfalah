@@ -31,6 +31,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const filterModal = new bootstrap.Modal(document.getElementById('filterModal'));
     const yearGroupSelect = document.getElementById('yearGroupSelect');
     const programSelect = document.getElementById('programSelect');
+    const statusSelect = document.getElementById('statusSelect');
+    const accountStatusSelect = document.getElementById('accountStatusSelect');
     const applyFilterBtn = document.getElementById('applyFilterBtn');
     const clearFilterBtn = document.getElementById('clearFilterBtn');
     
@@ -45,14 +47,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const minAgeInput = document.getElementById('minAge');
     const maxAgeInput = document.getElementById('maxAge');
 
-    // Current filter state (add these to your existing filter state)
-    let currentMinAge = null;
-    let currentMaxAge = null;
-    
     // Current filter state
     let currentYearFilter = 'all';
     let currentProgramFilter = 'all';
-    let currentActionApplicationId = null;
+    let currentMinAge = null;
+    let currentMaxAge = null;
+    let currentStatusFilter = 'all';
+    let currentAccountStatusFilter = 'all';
 
     // Get all rows
     let rows = applicationsTableBody.querySelectorAll('tr[data-student]');
@@ -142,13 +143,66 @@ document.addEventListener('DOMContentLoaded', function() {
     // Enhanced filter function
     function filterTable() {
         const searchTerm = searchInput.value.toLowerCase();
-        searchApplications(searchTerm);
+        const rows = applicationsTableBody.querySelectorAll('tr[data-student]');
+        let visibleRows = 0;
+
+        rows.forEach(row => {
+            const status = row.getAttribute('data-status');
+            const accountStatus = row.getAttribute('data-account-status');
+            const program = row.getAttribute('data-program');
+            const age = parseInt(row.getAttribute('data-age')) || 0;
+
+            // Check status filter
+            const statusFilter = currentStatusFilter === 'all' || status === currentStatusFilter;
+
+            // Check account status filter
+            const accountStatusFilter = currentAccountStatusFilter === 'all' || accountStatus === currentAccountStatusFilter;
+
+            // Check program filter
+            const programFilter = currentProgramFilter === 'all' || program === currentProgramFilter;
+
+            // Check age filter
+            const ageFilter = (currentMinAge === null || age >= currentMinAge) && 
+                             (currentMaxAge === null || age <= currentMaxAge);
+
+            const shouldShow = statusFilter && accountStatusFilter && programFilter && ageFilter;
+            row.style.display = shouldShow ? '' : 'none';
+
+            if (shouldShow) {
+                visibleRows++;
+
+                // Hide details row
+                const detailsRow = row.nextElementSibling;
+                if (detailsRow && detailsRow.classList.contains('application-details-row')) {
+                    detailsRow.style.display = 'none';
+                    const detailsDiv = detailsRow.querySelector('.application-details');
+                    if (detailsDiv) {
+                        detailsDiv.classList.remove('show');
+                    }
+                }
+            } else {
+                // Also hide the details row
+                const detailsRow = row.nextElementSibling;
+                if (detailsRow && detailsRow.classList.contains('application-details-row')) {
+                    detailsRow.style.display = 'none';
+                    const detailsDiv = detailsRow.querySelector('.application-details');
+                    if (detailsDiv) {
+                        detailsDiv.classList.remove('show');
+                    }
+                }
+            }
+        });
+
+        // Update visible count
+        visibleCount.textContent = visibleRows;
 
         // Update filter button appearance - check if any filter is active
         const isAnyFilterActive = currentYearFilter !== 'all' || 
                                  currentProgramFilter !== 'all' || 
                                  currentMinAge !== null || 
-                                 currentMaxAge !== null;
+                                 currentMaxAge !== null ||
+                                 currentStatusFilter !== 'all' ||
+                                 currentAccountStatusFilter !== 'all';
 
         if (isAnyFilterActive) {
             filterBtn.classList.remove('btn-outline-primary');
@@ -846,6 +900,8 @@ document.addEventListener('DOMContentLoaded', function() {
     filterBtn.addEventListener('click', function() {
         yearGroupSelect.value = currentYearFilter;
         programSelect.value = currentProgramFilter;
+        statusSelect.value = currentStatusFilter;
+        accountStatusSelect.value = currentAccountStatusFilter;
         minAgeInput.value = currentMinAge !== null ? currentMinAge : '';
         maxAgeInput.value = currentMaxAge !== null ? currentMaxAge : '';
         filterModal.show();
@@ -854,6 +910,8 @@ document.addEventListener('DOMContentLoaded', function() {
     applyFilterBtn.addEventListener('click', function() {
         currentYearFilter = yearGroupSelect.value;
         currentProgramFilter = programSelect.value;
+        currentStatusFilter = statusSelect.value;
+        currentAccountStatusFilter = accountStatusSelect.value;
         currentMinAge = minAgeInput.value ? parseInt(minAgeInput.value) : null;
         currentMaxAge = maxAgeInput.value ? parseInt(maxAgeInput.value) : null;
         filterTable();
@@ -863,12 +921,18 @@ document.addEventListener('DOMContentLoaded', function() {
     clearFilterBtn.addEventListener('click', function() {
         currentYearFilter = 'all';
         currentProgramFilter = 'all';
+        currentStatusFilter = 'all';
+        currentAccountStatusFilter = 'all';
         currentMinAge = null;
         currentMaxAge = null;
+
         yearGroupSelect.value = 'all';
         programSelect.value = 'all';
+        statusSelect.value = 'all';
+        accountStatusSelect.value = 'all';
         minAgeInput.value = '';
         maxAgeInput.value = '';
+
         filterTable();
         filterModal.hide();
     });
