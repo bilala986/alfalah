@@ -19,9 +19,8 @@
             <img src="../../img/logo.png" class="login-logo" alt="Al Falah Logo">
             <h2 class="login-title">Create Account</h2>
             <p class="mb-4" style="font-size: 0.95rem;">
-                Please ensure you use the <strong>same parent email address</strong> that was
-                provided on the admissions form. Your portal account will link directly to 
-                your child's application.
+                <strong>Important:</strong> You can only create an account if your admission application has been <strong>approved</strong>. 
+                Please use the <strong>exact same email address</strong> that you provided on your admission form.
             </p>
         </div>
 

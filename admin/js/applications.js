@@ -159,7 +159,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Dynamic table update function with status support
+    // Dynamic table update function with status support - UPDATED WITH DOCUMENT FRAGMENT
     function updateTable(applications) {
         console.log('Updating table with applications:', applications);
         applicationsTableBody.innerHTML = '';
@@ -175,6 +175,9 @@ document.addEventListener('DOMContentLoaded', function() {
             rows = [];
             return;
         }
+
+        // Create document fragment for efficient DOM manipulation
+        var frag = document.createDocumentFragment();
 
         applications.forEach(app => {
             const status = app.status || 'pending';
@@ -274,7 +277,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <td>${actionsHtml}</td>
             `;
 
-            applicationsTableBody.appendChild(row);
+            frag.append(row);
 
             // Create details row
             const detailsRow = document.createElement('tr');
@@ -289,8 +292,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                 </td>
             `;
-            applicationsTableBody.appendChild(detailsRow);
+            frag.append(detailsRow);
         });
+        
+        // Append all rows at once using the document fragment
+        document.getElementById('applicationsTableBody').append(frag);
 
         // Reattach event listeners
         attachEventListeners();

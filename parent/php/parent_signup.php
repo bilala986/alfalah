@@ -1,5 +1,5 @@
 <?php
-// parent/php/parent_signup.php - FIXED VERSION
+// parent/php/parent_signup.php - UPDATED VERSION WITH APPLICATION VERIFICATION
 session_start();
 header('Content-Type: application/json');
 
@@ -59,13 +59,33 @@ if ($parent_password !== $parent_confirm_password) {
     exit;
 }
 
-// Check for existing email
 try {
+    // FIRST: Check if email already exists in parent_users
     $stmt = $pdo->prepare("SELECT id FROM parent_users WHERE email = ?");
     $stmt->execute([$parent_email]);
     
     if ($stmt->rowCount() > 0) {
         echo json_encode(["success" => false, "message" => "An account with this email already exists."]);
+        exit;
+    }
+
+    // SECOND: Check if there's an APPROVED application with this email
+    $stmt = $pdo->prepare("
+        SELECT id, student_first_name, student_last_name 
+        FROM initial_admission 
+        WHERE (parent1_email = ? OR parent2_email = ?) 
+        AND status = 'approved'
+        LIMIT 1
+    ");
+    $stmt->execute([$parent_email, $parent_email]);
+    $approved_application = $stmt->fetch();
+
+    if (!$approved_application) {
+        // No approved application found with this email
+        echo json_encode([
+            "success" => false, 
+            "message" => "No approved application found with this email. Please ensure your admission application has been approved before creating an account."
+        ]);
         exit;
     }
 
