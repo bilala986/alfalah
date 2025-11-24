@@ -1,5 +1,5 @@
 <?php
-// parent/php/parent_signup.php - UPDATED VERSION WITH APPLICATION VERIFICATION
+// parent/php/parent_signup.php - UPDATED VERSION WITH LAST LOGIN UPDATE
 session_start();
 header('Content-Type: application/json');
 
@@ -97,7 +97,7 @@ try {
     }
 
     // Insert parent - Auto-approved for parents (no approval needed)
-    $stmt = $pdo->prepare("INSERT INTO parent_users (name, email, password_hash, is_approved, is_active, created_at, login_attempts) VALUES (?, ?, ?, 1, 1, NOW(), 0)");
+    $stmt = $pdo->prepare("INSERT INTO parent_users (name, email, password_hash, is_approved, is_active, created_at, login_attempts, last_login) VALUES (?, ?, ?, 1, 1, NOW(), 0, NOW())");
     
     if ($stmt->execute([$parent_name, $parent_email, $hashedPassword])) {
         $parent_id = $pdo->lastInsertId();

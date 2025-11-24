@@ -47,34 +47,20 @@ if (isBruteForce(getClientIP(), $email)) {
 }
 
 try {
-    // Check if login_attempts column exists to adjust query
-    $columnExists = $pdo->query("SHOW COLUMNS FROM parent_users LIKE 'login_attempts'")->rowCount() > 0;
-    
-    if ($columnExists) {
-        $stmt = $pdo->prepare("SELECT id, name, email, password_hash, is_approved, login_attempts, lockout_until FROM parent_users WHERE email = ? AND is_active = 1");
-    } else {
-        $stmt = $pdo->prepare("SELECT id, name, email, password_hash, is_approved FROM parent_users WHERE email = ? AND is_active = 1");
-    }
-    
+    // Check if parent exists - simplified query without column checks
+    $stmt = $pdo->prepare("SELECT id, name, email, password_hash, is_approved FROM parent_users WHERE email = ? AND is_active = 1");
     $stmt->execute([$email]);
     $parent = $stmt->fetch();
     
-    if ($parent) {
-        // Check if account is locked (only if column exists)
-        if ($columnExists && $parent['lockout_until'] && strtotime($parent['lockout_until']) > time()) {
-            $lockout_time = date('g:i A', strtotime($parent['lockout_until']));
-            echo json_encode(["success" => false, "message" => "Account temporarily locked. Try again after $lockout_time."]);
-            exit;
-        }
-        
+    if ($parent) {        
         if (password_verify($password, $parent['password_hash'])) {
-            // Successful login - update last_login timestamp
-            if ($columnExists) {
-                $updateStmt = $pdo->prepare("UPDATE parent_users SET login_attempts = 0, lockout_until = NULL, last_login = NOW() WHERE id = ?");
-            } else {
-                $updateStmt = $pdo->prepare("UPDATE parent_users SET last_login = NOW() WHERE id = ?");
+            // Successful login - ALWAYS update last_login timestamp
+            $updateStmt = $pdo->prepare("UPDATE parent_users SET last_login = NOW() WHERE id = ?");
+            $updateResult = $updateStmt->execute([$parent['id']]);
+            
+            if (!$updateResult) {
+                error_log("Failed to update last_login for parent ID: " . $parent['id']);
             }
-            $updateStmt->execute([$parent['id']]);
             
             // Generate a NEW session ID for login
             $new_browser_instance_id = 'p' . bin2hex(random_bytes(16));
@@ -108,8 +94,7 @@ try {
                 "browser_instance_id" => $new_browser_instance_id
             ]);
         } else {
-            // Failed login - increment attempt counter (with fallback)
-            recordFailedAttempt($pdo, $parent['id'], getClientIP());
+            // Failed login
             error_log("Failed login attempt for email: " . $email . " from IP: " . getClientIP());
             
             // Use generic message to prevent user enumeration
