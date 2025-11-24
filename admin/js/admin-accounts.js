@@ -101,7 +101,7 @@ document.addEventListener('DOMContentLoaded', function() {
         return ukTimeString;
     }
 
-    // Update table with new data - FIXED VERSION
+    // Update table with new data - FIXED VERSION WITH DOCUMENT FRAGMENT
     function updateTable(admins) {
         console.log('Updating table with admins:', admins);
         adminTableBody.innerHTML = '';
@@ -118,6 +118,9 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
+        // Create document fragment for efficient DOM manipulation
+        var frag = document.createDocumentFragment();
+        
         admins.forEach(admin => {
             console.log('Admin:', admin.name);
             console.log('Created (raw):', admin.created_at);
@@ -173,8 +176,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 </td>
             `;
 
-            adminTableBody.appendChild(row);
+            frag.append(row);
         });
+        
+        // Append all rows at once using the document fragment
+        document.getElementById('adminTableBody').append(frag);
 
         // Reattach event listeners to new buttons
         attachEventListeners();
