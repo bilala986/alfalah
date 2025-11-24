@@ -1,5 +1,5 @@
 <?php
-// admin/php/admin_protect.php - FIXED VERSION WITH PROPER TAB ISOLATION
+// admin/php/admin_protect.php - FIXED VERSION WITH AJAX SUPPORT
 
 // Security headers
 header("X-Frame-Options: DENY");
@@ -30,28 +30,54 @@ if (empty($_SESSION['browser_instance_id'])) {
     $_SESSION['browser_instance_id'] = session_id();
 }
 
+// Check if this is an AJAX request
+$is_ajax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
+
 // Validate session exists and is valid
 if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
-    // Redirect with current bid to maintain tab context
-    $redirect_url = "login.php";
-    if (!empty($browser_instance_id)) {
-        $redirect_url .= "?bid=" . urlencode($browser_instance_id);
+    if ($is_ajax) {
+        // For AJAX requests, return JSON error instead of redirect
+        header('Content-Type: application/json');
+        http_response_code(401);
+        echo json_encode([
+            'success' => false,
+            'message' => 'Session expired. Please refresh the page.',
+            'requires_login' => true
+        ]);
+        exit;
+    } else {
+        // For normal requests, redirect to login
+        $redirect_url = "login.php";
+        if (!empty($browser_instance_id)) {
+            $redirect_url .= "?bid=" . urlencode($browser_instance_id);
+        }
+        header('Location: ' . $redirect_url);
+        exit;
     }
-    header('Location: ' . $redirect_url);
-    exit;
 }
 
 // Session timeout (1 hour)
 if (isset($_SESSION['last_activity']) && (time() - $_SESSION['last_activity'] > 3600)) {
-    // Only destroy this specific session
-    session_destroy();
-    
-    $redirect_url = "login.php";
-    if (!empty($browser_instance_id)) {
-        $redirect_url .= "?bid=" . urlencode($browser_instance_id);
+    if ($is_ajax) {
+        // For AJAX requests, return JSON error
+        header('Content-Type: application/json');
+        http_response_code(401);
+        echo json_encode([
+            'success' => false,
+            'message' => 'Session expired. Please refresh the page.',
+            'requires_login' => true
+        ]);
+        exit;
+    } else {
+        // For normal requests, redirect to login
+        session_destroy();
+        $redirect_url = "login.php";
+        if (!empty($browser_instance_id)) {
+            $redirect_url .= "?bid=" . urlencode($browser_instance_id);
+        }
+        header('Location: ' . $redirect_url);
+        exit;
     }
-    header('Location: ' . $redirect_url);
-    exit;
 }
 
 // Update last activity time
@@ -67,15 +93,26 @@ try {
     $admin = $stmt->fetch();
     
     if (!$admin || $admin['is_active'] == 0) {
-        // Admin not found or inactive - destroy only this session
-        session_destroy();
-        
-        $redirect_url = "login.php";
-        if (!empty($browser_instance_id)) {
-            $redirect_url .= "?bid=" . urlencode($browser_instance_id);
+        if ($is_ajax) {
+            // For AJAX requests, return JSON error
+            header('Content-Type: application/json');
+            http_response_code(401);
+            echo json_encode([
+                'success' => false,
+                'message' => 'Admin account not found or inactive.',
+                'requires_login' => true
+            ]);
+            exit;
+        } else {
+            // For normal requests, redirect to login
+            session_destroy();
+            $redirect_url = "login.php";
+            if (!empty($browser_instance_id)) {
+                $redirect_url .= "?bid=" . urlencode($browser_instance_id);
+            }
+            header('Location: ' . $redirect_url);
+            exit;
         }
-        header('Location: ' . $redirect_url);
-        exit;
     }
     
     $_SESSION['pending_approval'] = ($admin['is_approved'] == 0);

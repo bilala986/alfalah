@@ -16,11 +16,12 @@ $stmt = $pdo->prepare("SELECT id, name, email, created_at, last_login, is_approv
 $stmt->execute();
 $parents = $stmt->fetchAll();
 
-// Fetch all students for dropdown
+// Fetch only APPROVED students for dropdown
 $students_stmt = $pdo->prepare("
     SELECT id, student_first_name, student_last_name, parent1_email, parent2_email 
     FROM initial_admission 
-    WHERE parent1_email IS NOT NULL OR parent2_email IS NOT NULL
+    WHERE (parent1_email IS NOT NULL OR parent2_email IS NOT NULL)
+    AND status = 'approved'
     ORDER BY student_first_name, student_last_name
 ");
 $students_stmt->execute();
@@ -260,9 +261,11 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                                     
                                     foreach ($parents as $parent): 
                                         // Find matching students for this parent email
+                                        // Find matching APPROVED students for this parent email
                                         $matching_students = array_filter($all_students, function($student) use ($parent) {
-                                            return $student['parent1_email'] === $parent['email'] || 
-                                                   $student['parent2_email'] === $parent['email'];
+                                            return ($student['parent1_email'] === $parent['email'] || 
+                                                    $student['parent2_email'] === $parent['email']);
+                                            // Note: We don't need to check status here because $all_students now only contains approved students
                                         });
                                     ?>
                                     <tr data-name="<?= htmlspecialchars(strtolower($parent['name'])) ?>" 
@@ -272,31 +275,30 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                                         <td class="fw-semibold"><?= htmlspecialchars($parent['name']) ?></td>
                                         <td><?= htmlspecialchars($parent['email']) ?></td>
                                         <td>
-                                            <select class="form-select form-select-sm student-dropdown" 
-                                                    data-parent-id="<?= $parent['id'] ?>" 
-                                                    data-parent-email="<?= htmlspecialchars($parent['email']) ?>">
-                                                <option value="">Select Student</option>
-                                                <?php if (!empty($matching_students)): ?>
+                                            <?php if (count($matching_students) === 1): ?>
+                                                <!-- Single student - show directly -->
+                                                <?php $student = reset($matching_students); ?>
+                                                <span class="fw-semibold">
+                                                    <?= htmlspecialchars($student['student_first_name'] . ' ' . $student['student_last_name']) ?>
+                                                </span>
+                                                <small class="text-muted d-block">(Only child)</small>
+                                            <?php elseif (count($matching_students) > 1): ?>
+                                                <!-- Multiple students - dropdown -->
+                                                <select class="form-select form-select-sm student-dropdown">
+                                                    <option value="">View children (<?= count($matching_students) ?>)</option>
                                                     <?php foreach ($matching_students as $student): ?>
-                                                        <option value="<?= $student['id'] ?>" 
-                                                                data-student-name="<?= htmlspecialchars($student['student_first_name'] . ' ' . $student['student_last_name']) ?>">
+                                                        <option value="<?= $student['id'] ?>">
                                                             <?= htmlspecialchars($student['student_first_name'] . ' ' . $student['student_last_name']) ?>
                                                         </option>
                                                     <?php endforeach; ?>
-                                                <?php else: ?>
-                                                    <option value="" class="no-students" disabled>No matching students found</option>
-                                                <?php endif; ?>
-                                            </select>
-                                            <?php if (!empty($matching_students)): ?>
+                                                </select>
                                                 <small class="text-success d-block mt-1">
-                                                    <i class="bi bi-check-circle"></i> 
-                                                    <?= count($matching_students) ?> student(s) matched
+                                                    <i class="bi bi-people-fill"></i> 
+                                                    <?= count($matching_students) ?> children enrolled
                                                 </small>
                                             <?php else: ?>
-                                                <small class="text-danger d-block mt-1">
-                                                    <i class="bi bi-exclamation-circle"></i> 
-                                                    No students match this email
-                                                </small>
+                                                <!-- No students -->
+                                                <span class="text-muted">No approved students</span>
                                             <?php endif; ?>
                                         </td>
                                         <td class="mobile-hide">

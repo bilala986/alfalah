@@ -240,7 +240,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                 `;
             } else {
-                // Show normal buttons (including reject)
+                // Show normal buttons (including reject) - UPDATED TO DISABLE REJECT FOR APPROVED
                 actionsHtml = `
                     <div class="btn-group btn-group-sm">
                         <button type="button" class="btn btn-outline-primary view-btn" data-application-id="${app.id}">
@@ -249,8 +249,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         <button type="button" class="btn ${approveBtnClass} approve-btn" data-application-id="${app.id}" data-student-name="${escapeHtml(app.student_first_name + ' ' + app.student_last_name)}" ${isApproved ? 'disabled' : ''}>
                             <i class="bi bi-check-lg"></i> ${approveBtnText}
                         </button>
-                        <button type="button" class="btn btn-outline-danger reject-btn" data-application-id="${app.id}" data-student-name="${escapeHtml(app.student_first_name + ' ' + app.student_last_name)}" ${isPendingRejection ? 'disabled' : ''}>
-                            <i class="bi bi-x-lg"></i> Reject
+                        <button type="button" class="btn btn-outline-danger reject-btn" data-application-id="${app.id}" data-student-name="${escapeHtml(app.student_first_name + ' ' + app.student_last_name)}" ${isApproved ? 'disabled' : ''}>
+                            <i class="bi bi-x-lg"></i> ${isApproved ? 'Reject' : 'Reject'}
                         </button>
                     </div>
                 `;
@@ -369,8 +369,25 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             body: `application_id=${applicationId}`
         })
-        .then(response => response.json())
+        .then(response => {
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                return response.text().then(text => {
+                    throw new Error('Server returned non-JSON response');
+                });
+            }
+            return response.json();
+        })
         .then(data => {
+            if (data.requires_login) {
+                // Session expired, redirect to login
+                showToast('Session expired. Redirecting to login...', 'error');
+                setTimeout(() => {
+                    window.location.href = `login.php?bid=${browserInstanceId}`;
+                }, 2000);
+                return;
+            }
+
             if (data.success) {
                 showToast(`Rejection undone for ${studentName}. Application is now pending again.`, 'success');
                 refreshTableData(false);
@@ -860,8 +877,25 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             body: `application_id=${currentActionApplicationId}`
         })
-        .then(response => response.json())
+        .then(response => {
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                return response.text().then(text => {
+                    throw new Error('Server returned non-JSON response');
+                });
+            }
+            return response.json();
+        })
         .then(data => {
+            if (data.requires_login) {
+                // Session expired, redirect to login
+                showToast('Session expired. Redirecting to login...', 'error');
+                setTimeout(() => {
+                    window.location.href = `login.php?bid=${browserInstanceId}`;
+                }, 2000);
+                return;
+            }
+
             if (data.success) {
                 approveModal.hide();
                 showToast('Application approved successfully!', 'success');
@@ -894,8 +928,25 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             body: `application_id=${currentActionApplicationId}`
         })
-        .then(response => response.json())
+        .then(response => {
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                return response.text().then(text => {
+                    throw new Error('Server returned non-JSON response');
+                });
+            }
+            return response.json();
+        })
         .then(data => {
+            if (data.requires_login) {
+                // Session expired, redirect to login
+                showToast('Session expired. Redirecting to login...', 'error');
+                setTimeout(() => {
+                    window.location.href = `login.php?bid=${browserInstanceId}`;
+                }, 2000);
+                return;
+            }
+
             if (data.success) {
                 rejectModal.hide();
                 showToast('Application rejected successfully!', 'success');
