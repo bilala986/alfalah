@@ -325,7 +325,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function updateCountdownTimer(applicationId, deletionTime) {
         const countdownElement = document.getElementById(`countdown-${applicationId}`);
-        const undoButton = document.querySelector(`.undo-rejection-btn[data-application-id="${applicationId}"]`);
 
         if (!countdownElement) return;
 
@@ -335,20 +334,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (timeLeft <= 0) {
             countdownElement.textContent = '(0h)';
-            if (undoButton) {
-                undoButton.style.display = 'none';
-            }
             return;
         }
 
         const hoursLeft = Math.floor(timeLeft / (1000 * 60 * 60));
         countdownElement.textContent = `(${hoursLeft}h)`;
 
-        // Show undo button if less than 1 hour remaining
-        if (undoButton && hoursLeft < 1) {
+        // Show minutes when less than 1 hour remaining
+        if (hoursLeft < 1) {
             const minutesLeft = Math.floor(timeLeft / (1000 * 60));
             countdownElement.textContent = `(${minutesLeft}m)`;
-            undoButton.style.display = 'inline-block';
         }
     }
 

@@ -341,27 +341,50 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                                             <?php endif; ?>
                                         </td>
                                         <td>
-                                            <div class="btn-group btn-group-sm">
-                                                <button type="button" 
-                                                        class="btn btn-outline-primary view-btn" 
-                                                        data-application-id="<?= $app['id'] ?>">
-                                                    <i class="bi bi-eye"></i> View
-                                                </button>
-                                                <button type="button" 
-                                                        class="btn btn-outline-success approve-btn <?= $status === 'approved' ? 'btn-approved' : '' ?>" 
-                                                        data-application-id="<?= $app['id'] ?>"
-                                                        data-student-name="<?= htmlspecialchars($app['student_first_name'] . ' ' . $app['student_last_name']) ?>"
-                                                        <?= $status === 'approved' ? 'disabled' : '' ?>>
-                                                    <i class="bi bi-check-lg"></i> <?= $status === 'approved' ? 'Approved' : 'Approve' ?>
-                                                </button>
-                                                <button type="button" 
-                                                        class="btn btn-outline-danger reject-btn <?= $status === 'pending_rejection' ? 'btn-pending-rejection' : '' ?>" 
-                                                        data-application-id="<?= $app['id'] ?>"
-                                                        data-student-name="<?= htmlspecialchars($app['student_first_name'] . ' ' . $app['student_last_name']) ?>"
-                                                        <?= $status === 'pending_rejection' ? 'disabled' : '' ?>>
-                                                    <i class="bi bi-x-lg"></i> <?= $status === 'pending_rejection' ? 'Pending Deletion' : 'Reject' ?>
-                                                </button>
-                                            </div>
+                                            <?php if ($status === 'pending_rejection'): ?>
+                                                <!-- Show undo button instead of reject button for pending rejection -->
+                                                <div class="btn-group btn-group-sm">
+                                                    <button type="button" 
+                                                            class="btn btn-outline-primary view-btn" 
+                                                            data-application-id="<?= $app['id'] ?>">
+                                                        <i class="bi bi-eye"></i> View
+                                                    </button>
+                                                    <button type="button" 
+                                                            class="btn btn-outline-success approve-btn" 
+                                                            data-application-id="<?= $app['id'] ?>"
+                                                            data-student-name="<?= htmlspecialchars($app['student_first_name'] . ' ' . $app['student_last_name']) ?>">
+                                                        <i class="bi bi-check-lg"></i> Approve
+                                                    </button>
+                                                    <button type="button" 
+                                                            class="btn btn-warning undo-rejection-btn" 
+                                                            data-application-id="<?= $app['id'] ?>"
+                                                            data-student-name="<?= htmlspecialchars($app['student_first_name'] . ' ' . $app['student_last_name']) ?>">
+                                                        <i class="bi bi-arrow-counterclockwise"></i> Undo
+                                                    </button>
+                                                </div>
+                                            <?php else: ?>
+                                                <!-- Show normal buttons for other statuses -->
+                                                <div class="btn-group btn-group-sm">
+                                                    <button type="button" 
+                                                            class="btn btn-outline-primary view-btn" 
+                                                            data-application-id="<?= $app['id'] ?>">
+                                                        <i class="bi bi-eye"></i> View
+                                                    </button>
+                                                    <button type="button" 
+                                                            class="btn btn-outline-success approve-btn <?= $status === 'approved' ? 'btn-approved' : '' ?>" 
+                                                            data-application-id="<?= $app['id'] ?>"
+                                                            data-student-name="<?= htmlspecialchars($app['student_first_name'] . ' ' . $app['student_last_name']) ?>"
+                                                            <?= $status === 'approved' ? 'disabled' : '' ?>>
+                                                        <i class="bi bi-check-lg"></i> <?= $status === 'approved' ? 'Approved' : 'Approve' ?>
+                                                    </button>
+                                                    <button type="button" 
+                                                            class="btn btn-outline-danger reject-btn" 
+                                                            data-application-id="<?= $app['id'] ?>"
+                                                            data-student-name="<?= htmlspecialchars($app['student_first_name'] . ' ' . $app['student_last_name']) ?>">
+                                                        <i class="bi bi-x-lg"></i> Reject
+                                                    </button>
+                                                </div>
+                                            <?php endif; ?>
                                         </td>
                                     </tr>
                                     <!-- Application Details Row - PROFESSIONAL COMPACT DESIGN -->
