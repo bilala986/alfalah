@@ -150,6 +150,20 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                 color: #6c757d;
                 font-style: italic;
             }
+            
+            .student-list {
+                max-height: 120px;
+                overflow-y: auto;
+            }
+
+            .student-item {
+                padding: 2px 0;
+                font-size: 0.9rem;
+            }
+
+            .student-item:not(:last-child) {
+                border-bottom: 1px solid #f0f0f0;
+            }
         </style>
     </head>
 
@@ -209,7 +223,7 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                             <div class="col-md-6">
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="bi bi-search"></i></span>
-                                    <input type="text" id="searchInput" class="form-control" placeholder="Search names or emails...">
+                                    <input type="text" id="searchInput" class="form-control" placeholder="Search names, emails, or students...">
                                 </div>
                             </div>
                             
@@ -245,7 +259,6 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                                     <th>Student Match</th>
                                     <th class="mobile-hide">Account Created</th>
                                     <th class="mobile-hide">Last Login</th>
-                                    <th>Status</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -283,15 +296,15 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                                                 </span>
                                                 <small class="text-muted d-block">(Only child)</small>
                                             <?php elseif (count($matching_students) > 1): ?>
-                                                <!-- Multiple students - dropdown -->
-                                                <select class="form-select form-select-sm student-dropdown">
-                                                    <option value="">View children (<?= count($matching_students) ?>)</option>
+                                                <!-- Multiple students - simple list -->
+                                                <div class="student-list">
                                                     <?php foreach ($matching_students as $student): ?>
-                                                        <option value="<?= $student['id'] ?>">
+                                                        <div class="student-item">
+                                                            <i class="bi bi-person-fill me-1"></i>
                                                             <?= htmlspecialchars($student['student_first_name'] . ' ' . $student['student_last_name']) ?>
-                                                        </option>
+                                                        </div>
                                                     <?php endforeach; ?>
-                                                </select>
+                                                </div>
                                                 <small class="text-success d-block mt-1">
                                                     <i class="bi bi-people-fill"></i> 
                                                     <?= count($matching_students) ?> children enrolled
@@ -326,13 +339,6 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                                             <?php endif; ?>
                                         </td>
                                         <td>
-                                            <?php if ($parent['is_approved']): ?>
-                                                <span class="badge bg-success">Approved</span>
-                                            <?php else: ?>
-                                                <span class="badge bg-warning">Pending</span>
-                                            <?php endif; ?>
-                                        </td>
-                                        <td>
                                             <div class="btn-group btn-group-sm">
                                                 <button type="button" 
                                                         class="btn btn-outline-primary edit-btn" 
@@ -342,16 +348,6 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                                                         data-parent-approved="<?= $parent['is_approved'] ?>">
                                                     <i class="bi bi-pencil"></i> Edit
                                                 </button>
-
-                                                <?php if (!$parent['is_approved']): ?>
-                                                    <button type="button" 
-                                                            class="btn btn-outline-success approve-btn" 
-                                                            data-parent-id="<?= $parent['id'] ?>"
-                                                            data-parent-name="<?= htmlspecialchars($parent['name']) ?>"
-                                                            data-parent-email="<?= htmlspecialchars($parent['email']) ?>">
-                                                        <i class="bi bi-check-lg"></i> Approve
-                                                    </button>
-                                                <?php endif; ?>
 
                                                 <button type="button" 
                                                         class="btn btn-outline-danger remove-btn" 
@@ -415,14 +411,6 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                     </div>
                     <div class="modal-body">
                         <div class="mb-3">
-                            <label for="statusSelect" class="form-label">Filter by Status</label>
-                            <select id="statusSelect" class="form-select">
-                                <option value="all">All Parents</option>
-                                <option value="approved">Approved Only</option>
-                                <option value="pending">Pending Only</option>
-                            </select>
-                        </div>
-                        <div class="mb-3">
                             <label for="studentMatchSelect" class="form-label">Filter by Student Match</label>
                             <select id="studentMatchSelect" class="form-select">
                                 <option value="all">All Parents</option>
@@ -435,26 +423,6 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                         <button type="button" id="clearFilterBtn" class="btn btn-outline-danger">Clear Filter</button>
                         <button type="button" id="applyFilterBtn" class="btn btn-primary">Apply Filter</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Approve Confirmation Modal -->
-        <div class="modal fade" id="approveModal" tabindex="-1" aria-labelledby="approveModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="approveModalLabel">Confirm Approval</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <p>Are you sure you want to approve <strong id="approveParentName"></strong> (<span id="approveParentEmail"></span>)?</p>
-                        <p class="text-muted">This will grant them full access to the parent portal.</p>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="button" id="confirmApprove" class="btn btn-success">Approve</button>
                     </div>
                 </div>
             </div>

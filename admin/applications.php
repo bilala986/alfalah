@@ -11,14 +11,21 @@ if ($_SESSION['pending_approval']) {
 // Include database connection
 require_once $_SERVER['DOCUMENT_ROOT'] . '/alfalah/php/db_connect.php';
 
-// Fetch all admission applications
-$stmt = $pdo->prepare("SELECT *, 
+// Fetch all admission applications with parent account status
+$stmt = $pdo->prepare("SELECT ia.*, 
                        CASE 
-                           WHEN status = 'approved' THEN 'approved'
-                           WHEN status = 'pending_rejection' THEN 'pending_rejection' 
+                           WHEN ia.status = 'approved' THEN 'approved'
+                           WHEN ia.status = 'pending_rejection' THEN 'pending_rejection' 
                            ELSE 'pending' 
-                       END as display_status
-                       FROM initial_admission ORDER BY submitted_at DESC");
+                       END as display_status,
+                       CASE 
+                           WHEN ia.status = 'approved' AND pu.id IS NOT NULL THEN 'created'
+                           WHEN ia.status = 'approved' AND pu.id IS NULL THEN 'not_created'
+                           ELSE 'not_applicable'
+                       END as account_status
+                       FROM initial_admission ia
+                       LEFT JOIN parent_users pu ON (pu.email = ia.parent1_email OR pu.email = ia.parent2_email)
+                       ORDER BY ia.submitted_at DESC");
 $stmt->execute();
 $applications = $stmt->fetchAll();
 
@@ -281,7 +288,7 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                                     <th class="mobile-hide">Year Group</th>
                                     <th>Parent Contact</th>
                                     <th>Status</th>
-                                    <th class="mobile-hide">Submitted</th>
+                                    <th class="mobile-hide">Account Created?</th> <!-- NEW COLUMN -->
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -298,6 +305,7 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                                         data-age="<?= $app['student_age'] ?? '0' ?>"
                                         data-application-id="<?= $app['id'] ?>"
                                         data-status="<?= $app['display_status'] ?? 'pending' ?>"
+                                        data-account-status="<?= $app['account_status'] ?? 'not_applicable' ?>"
                                         data-deletion-time="<?= $app['scheduled_for_deletion_at'] ?? '' ?>">
                                         <td class="fw-semibold">
                                             <?= htmlspecialchars($app['student_first_name'] . ' ' . $app['student_last_name']) ?>
@@ -330,14 +338,14 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                                             </span>
                                         </td>
                                         <td class="mobile-hide">
-                                            <?php if ($app['submitted_at']): ?>
-                                                <?php 
-                                                $submittedDate = new DateTime($app['submitted_at'], new DateTimeZone('UTC'));
-                                                $submittedDate->setTimezone(new DateTimeZone('Europe/London'));
-                                                echo $submittedDate->format('M j, Y g:i A');
-                                                ?>
+                                            <?php if ($app['display_status'] === 'approved'): ?>
+                                                <?php if ($app['account_status'] === 'created'): ?>
+                                                    <span class="badge bg-success">Account Created</span>
+                                                <?php else: ?>
+                                                    <span class="badge bg-warning">No Account Yet</span>
+                                                <?php endif; ?>
                                             <?php else: ?>
-                                                N/A
+                                                <span class="text-muted">-</span>
                                             <?php endif; ?>
                                         </td>
                                         <td>

@@ -188,6 +188,7 @@ document.addEventListener('DOMContentLoaded', function() {
             row.setAttribute('data-age', app.student_age || '0');
             row.setAttribute('data-application-id', app.id);
             row.setAttribute('data-status', status);
+            row.setAttribute('data-account-status', app.account_status || 'not_applicable');
             row.setAttribute('data-deletion-time', app.scheduled_for_deletion_at || '');
 
             // Format submitted date
@@ -273,7 +274,15 @@ document.addEventListener('DOMContentLoaded', function() {
                     <small class="text-muted">${escapeHtml(app.parent1_email)}</small>
                 </td>
                 <td>${statusHtml}</td>
-                <td class="mobile-hide">${submittedDate}</td>
+                <td class="mobile-hide">
+                    ${status === 'approved' ? 
+                        (app.account_status === 'created' ? 
+                            '<span class="badge bg-success">Account Created</span>' : 
+                            '<span class="badge bg-warning">No Account Yet</span>'
+                        ) : 
+                        '<span class="text-muted">-</span>'
+                    }
+                </td>
                 <td>${actionsHtml}</td>
             `;
 

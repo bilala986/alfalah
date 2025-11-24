@@ -1,4 +1,4 @@
-// admin/js/parent-accounts.js - PARENT ACCOUNTS MANAGEMENT
+// admin/js/parent-accounts.js - SIMPLIFIED PARENT ACCOUNTS MANAGEMENT
 
 document.addEventListener('DOMContentLoaded', function() {
     // DOM Elements
@@ -16,7 +16,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Modal Elements
     const editModal = new bootstrap.Modal(document.getElementById('editModal'));
     const filterModal = new bootstrap.Modal(document.getElementById('filterModal'));
-    const approveModal = new bootstrap.Modal(document.getElementById('approveModal'));
     const removeModal = new bootstrap.Modal(document.getElementById('removeModal'));
     
     // Toast
@@ -24,12 +23,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // State
     let currentFilters = {
-        status: 'all',
         studentMatch: 'all'
     };
-
-    // Initialize
-    updateRowCounts();
 
     // Event Listeners
     searchInput.addEventListener('input', filterTable);
@@ -50,15 +45,6 @@ document.addEventListener('DOMContentLoaded', function() {
             );
         }
 
-        if (e.target.closest('.approve-btn')) {
-            const btn = e.target.closest('.approve-btn');
-            openApproveModal(
-                btn.dataset.parentId,
-                btn.dataset.parentName,
-                btn.dataset.parentEmail
-            );
-        }
-
         if (e.target.closest('.remove-btn')) {
             const btn = e.target.closest('.remove-btn');
             openRemoveModal(
@@ -67,25 +53,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 btn.dataset.parentEmail
             );
         }
-
-        // Student dropdown change
-        if (e.target.classList.contains('student-dropdown')) {
-            const dropdown = e.target;
-            const parentId = dropdown.dataset.parentId;
-            const studentId = dropdown.value;
-            const studentName = dropdown.options[dropdown.selectedIndex]?.dataset.studentName;
-            
-            if (studentId) {
-                linkStudentToParent(parentId, studentId, studentName);
-            }
-        }
     });
 
     // Save changes in edit modal
     document.getElementById('saveChangesBtn').addEventListener('click', saveParentChanges);
 
     // Confirm actions
-    document.getElementById('confirmApprove').addEventListener('click', approveParent);
     document.getElementById('confirmRemove').addEventListener('click', removeParent);
 
     // Form change detection
@@ -102,25 +75,30 @@ document.addEventListener('DOMContentLoaded', function() {
         rows.forEach(row => {
             const name = row.dataset.name;
             const email = row.dataset.email;
-            const status = row.dataset.status;
-            
+
             // Check student match filter
-            const hasStudents = row.querySelector('.student-dropdown option:not([disabled])') !== null;
+            const hasStudents = row.querySelector('.student-list, .fw-semibold') !== null;
             const studentMatchFilter = currentFilters.studentMatch === 'all' || 
                 (currentFilters.studentMatch === 'matched' && hasStudents) ||
                 (currentFilters.studentMatch === 'unmatched' && !hasStudents);
-            
-            // Check status filter
-            const statusFilter = currentFilters.status === 'all' || 
-                (currentFilters.status === 'approved' && status === 'approved') ||
-                (currentFilters.status === 'pending' && status === 'pending');
-            
-            // Check search term
-            const matchesSearch = name.includes(searchTerm) || email.includes(searchTerm);
-            
-            const shouldShow = matchesSearch && statusFilter && studentMatchFilter;
+
+            // Check search term - now includes student names
+            let matchesSearch = name.includes(searchTerm) || email.includes(searchTerm);
+
+            // If no match yet, check student names
+            if (!matchesSearch && searchTerm) {
+                const studentElements = row.querySelectorAll('.student-item, .fw-semibold');
+                for (let studentEl of studentElements) {
+                    if (studentEl.textContent.toLowerCase().includes(searchTerm)) {
+                        matchesSearch = true;
+                        break;
+                    }
+                }
+            }
+
+            const shouldShow = matchesSearch && studentMatchFilter;
             row.style.display = shouldShow ? '' : 'none';
-            
+
             if (shouldShow) visibleRows++;
         });
 
@@ -166,9 +144,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function clearFilters() {
-        statusSelect.value = 'all';
         studentMatchSelect.value = 'all';
-        currentFilters.status = 'all';
         currentFilters.studentMatch = 'all';
         searchInput.value = '';
         filterTable();
@@ -189,13 +165,6 @@ document.addEventListener('DOMContentLoaded', function() {
         
         document.getElementById('saveChangesBtn').disabled = true;
         editModal.show();
-    }
-
-    function openApproveModal(parentId, name, email) {
-        document.getElementById('approveParentName').textContent = name;
-        document.getElementById('approveParentEmail').textContent = email;
-        document.getElementById('confirmApprove').dataset.parentId = parentId;
-        approveModal.show();
     }
 
     function openRemoveModal(parentId, name, email) {
@@ -243,33 +212,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    function approveParent() {
-        const parentId = document.getElementById('confirmApprove').dataset.parentId;
-
-        const formData = new FormData();
-        formData.append('parent_id', parentId);
-        formData.append('action', 'approve_parent');
-
-        fetch('../php/approve_parent.php', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                showToast('Parent approved successfully', 'success');
-                approveModal.hide();
-                refreshTable();
-            } else {
-                showToast(data.message || 'Error approving parent', 'danger');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            showToast('Network error occurred', 'danger');
-        });
-    }
-
     function removeParent() {
         const parentId = document.getElementById('confirmRemove').dataset.parentId;
 
@@ -289,30 +231,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 refreshTable();
             } else {
                 showToast(data.message || 'Error removing parent', 'danger');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            showToast('Network error occurred', 'danger');
-        });
-    }
-
-    function linkStudentToParent(parentId, studentId, studentName) {
-        const formData = new FormData();
-        formData.append('parent_id', parentId);
-        formData.append('student_id', studentId);
-        formData.append('action', 'link_student');
-
-        fetch('../php/link_student.php', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                showToast(`Student ${studentName} linked to parent successfully`, 'success');
-            } else {
-                showToast(data.message || 'Error linking student', 'danger');
             }
         })
         .catch(error => {
