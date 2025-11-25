@@ -94,6 +94,9 @@ document.addEventListener('DOMContentLoaded', function() {
             hour12: true
         });
 
+        // Debug: Check what we're getting
+        console.log('Original:', dateTimeString, 'UK Time:', ukTimeString);
+
         return ukTimeString;
     }
 
@@ -119,6 +122,10 @@ document.addEventListener('DOMContentLoaded', function() {
         
         teachers.forEach(teacher => {
             console.log('Teacher:', teacher.name);
+            console.log('Created (raw):', teacher.created_at);
+            console.log('Created (UK):', teacher.created_at ? formatUKDateTime(teacher.created_at) : 'N/A');
+            console.log('Last Login (raw):', teacher.last_login);
+            console.log('Last Login (UK):', teacher.last_login ? formatUKDateTime(teacher.last_login) : 'Never');
 
             const row = document.createElement('tr');
             row.setAttribute('data-name', teacher.name.toLowerCase());
@@ -265,19 +272,24 @@ document.addEventListener('DOMContentLoaded', function() {
         filterModal.hide();
     });
 
-    // Edit modal functionality
+    // Edit modal functionality - WITH DEBUG LOGGING
     function handleEditClick() {
         const teacherId = this.getAttribute('data-teacher-id');
         const teacherName = this.getAttribute('data-teacher-name');
         const teacherEmail = this.getAttribute('data-teacher-email');
         const teacherApproved = this.getAttribute('data-teacher-approved');
 
-        // DEBUG LOGGING
+        // DEBUG LOGGING - CRITICAL
         console.log('=== EDIT MODAL DEBUG ===');
         console.log('Teacher ID:', teacherId);
         console.log('Teacher Name:', teacherName);
         console.log('Teacher Email:', teacherEmail);
         console.log('Teacher Approved (raw from data attribute):', teacherApproved);
+        console.log('Type of teacherApproved:', typeof teacherApproved);
+        console.log('teacherApproved === "1":', teacherApproved === '1');
+        console.log('teacherApproved === "0":', teacherApproved === '0');
+        console.log('teacherApproved == 1:', teacherApproved == 1);
+        console.log('teacherApproved == 0:', teacherApproved == 0);
 
         // Populate form
         editTeacherId.value = teacherId;
@@ -327,7 +339,7 @@ document.addEventListener('DOMContentLoaded', function() {
         saveChangesBtn.disabled = !hasChanges;
     }
 
-    // Save changes functionality
+    // Save changes functionality - WITH DEBUG LOGGING
     saveChangesBtn.addEventListener('click', function() {
         const formData = new FormData();
         const isApproved = editApproved.checked ? '1' : '0';

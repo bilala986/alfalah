@@ -8,7 +8,7 @@ header('Content-Type: application/json');
 try {
     $stmt = $pdo->prepare("SELECT id, name, email, created_at, last_login, is_approved FROM teacher_users ORDER BY created_at DESC");
     $stmt->execute();
-    $teachers = $stmt->fetchAll();
+    $teachers = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
     echo json_encode([
         'success' => true,
@@ -17,7 +17,7 @@ try {
 } catch (PDOException $e) {
     echo json_encode([
         'success' => false,
-        'message' => 'Error fetching teachers: ' . $e->getMessage()
+        'message' => 'Database error: ' . $e->getMessage()
     ]);
 }
 ?>

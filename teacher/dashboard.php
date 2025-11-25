@@ -29,7 +29,6 @@ if (isset($_GET['bid']) && $_GET['bid'] !== $browser_instance_id) {
 </head>
 
 <body>
-
     <!-- SIDEBAR -->
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header d-flex align-items-center justify-content-between px-3">
@@ -41,10 +40,12 @@ if (isset($_GET['bid']) && $_GET['bid'] !== $browser_instance_id) {
         </div>
 
         <a href="dashboard.php?bid=<?= $browser_instance_id ?>" class="active"><i class="bi bi-speedometer2"></i> Dashboard</a>
+        <a href="#?bid=<?= $browser_instance_id ?>"><i class="bi bi-journal-text"></i> My Classes</a>
+        <a href="#?bid=<?= $browser_instance_id ?>"><i class="bi bi-calendar-check"></i> Attendance</a>
+        <a href="#?bid=<?= $browser_instance_id ?>"><i class="bi bi-clipboard-data"></i> Grades</a>
         <a href="#?bid=<?= $browser_instance_id ?>"><i class="bi bi-gear"></i> Settings</a>
 
         <hr>
-
         <a href="php/logout.php?bid=<?= $browser_instance_id ?>" class="logout">
             <i class="bi bi-box-arrow-right"></i> Logout
         </a>
@@ -57,13 +58,13 @@ if (isset($_GET['bid']) && $_GET['bid'] !== $browser_instance_id) {
         <!-- Welcome Message with Teacher Name -->
         <div class="d-flex align-items-center">
             <span class="me-3 d-none d-md-block">
-                <i class="bi bi-person-circle me-2"></i>
+                <i class="bi bi-person-badge me-2"></i>
                 Welcome, <strong><?php echo htmlspecialchars($_SESSION['teacher_name'] ?? 'Teacher'); ?></strong>
             </span>
 
             <!-- Mobile-friendly version -->
             <span class="d-block d-md-none">
-                <i class="bi bi-person-circle me-1"></i>
+                <i class="bi bi-person-badge me-1"></i>
                 <strong><?php echo htmlspecialchars(explode(' ', $_SESSION['teacher_name'] ?? 'Teacher')[0]); ?></strong>
             </span>
         </div>
@@ -71,7 +72,7 @@ if (isset($_GET['bid']) && $_GET['bid'] !== $browser_instance_id) {
 
     <!-- MAIN CONTENT -->
     <div class="content" id="content">
-        <h2 class="dashboard-title m-0 text-center">Teacher Dashboard Overview</h2>
+        <h2 class="dashboard-title m-0 text-center">Teacher Dashboard</h2>
 
         <!-- Approval Status Banner -->
         <?php if (isset($_SESSION['pending_approval']) && $_SESSION['pending_approval']): ?>
@@ -90,53 +91,62 @@ if (isset($_GET['bid']) && $_GET['bid'] !== $browser_instance_id) {
             <div class="col-md-4 mb-3">
                 <div class="card shadow-sm p-3">
                     <h5><i class="bi bi-journal-text text-primary"></i> My Classes</h5>
-                    <p class="text-muted">View and manage your classes.</p>
-                    <a href="#?bid=<?= $browser_instance_id ?>" class="btn btn-primary btn-sm">View Classes</a>
-                </div>
-            </div>
-
-            <!-- STUDENTS -->
-            <div class="col-md-4 mb-3">
-                <div class="card shadow-sm p-3">
-                    <h5><i class="bi bi-people-fill text-primary"></i> Students</h5>
-                    <p class="text-muted">Manage student information.</p>
-                    <a href="#?bid=<?= $browser_instance_id ?>" class="btn btn-primary btn-sm">View Students</a>
+                    <p class="text-muted">View and manage your assigned classes.</p>
+                    <a href="#?bid=<?= $browser_instance_id ?>" class="btn btn-primary-modern btn-sm">View Classes</a>
                 </div>
             </div>
 
             <!-- ATTENDANCE -->
             <div class="col-md-4 mb-3">
                 <div class="card shadow-sm p-3">
-                    <h5><i class="bi bi-calendar-check text-primary"></i> Attendance</h5>
-                    <p class="text-muted">Take and view attendance records.</p>
-                    <a href="#?bid=<?= $browser_instance_id ?>" class="btn btn-primary btn-sm">Manage Attendance</a>
+                    <h5><i class="bi bi-calendar-check text-success"></i> Attendance</h5>
+                    <p class="text-muted">Take and manage student attendance.</p>
+                    <a href="#?bid=<?= $browser_instance_id ?>" class="btn btn-success-modern btn-sm">Manage</a>
                 </div>
             </div>
 
             <!-- GRADES -->
             <div class="col-md-4 mb-3">
                 <div class="card shadow-sm p-3">
-                    <h5><i class="bi bi-award text-primary"></i> Grades</h5>
-                    <p class="text-muted">Enter and manage student grades.</p>
-                    <a href="#?bid=<?= $browser_instance_id ?>" class="btn btn-primary btn-sm">Manage Grades</a>
+                    <h5><i class="bi bi-clipboard-data text-info"></i> Grades</h5>
+                    <p class="text-muted">Record and manage student grades.</p>
+                    <a href="#?bid=<?= $browser_instance_id ?>" class="btn btn-info-modern btn-sm">Enter Grades</a>
                 </div>
             </div>
 
-            <!-- ASSIGNMENTS -->
+            <!-- STUDENT PROFILES -->
             <div class="col-md-4 mb-3">
                 <div class="card shadow-sm p-3">
-                    <h5><i class="bi bi-clipboard-check text-primary"></i> Assignments</h5>
-                    <p class="text-muted">Create and manage assignments.</p>
-                    <a href="#?bid=<?= $browser_instance_id ?>" class="btn btn-primary btn-sm">Manage Assignments</a>
+                    <h5><i class="bi bi-people-fill text-warning"></i> Students</h5>
+                    <p class="text-muted">View student profiles and information.</p>
+                    <a href="#?bid=<?= $browser_instance_id ?>" class="btn btn-warning-modern btn-sm">View Students</a>
+                </div>
+            </div>
+
+            <!-- REPORTS -->
+            <div class="col-md-4 mb-3">
+                <div class="card shadow-sm p-3">
+                    <h5><i class="bi bi-graph-up text-danger"></i> Reports</h5>
+                    <p class="text-muted">Generate class and student reports.</p>
+                    <a href="#?bid=<?= $browser_instance_id ?>" class="btn btn-danger-modern btn-sm">View Reports</a>
+                </div>
+            </div>
+
+            <!-- PROFILE -->
+            <div class="col-md-4 mb-3">
+                <div class="card shadow-sm p-3">
+                    <h5><i class="bi bi-person-gear text-secondary"></i> Profile</h5>
+                    <p class="text-muted">Manage your account settings.</p>
+                    <a href="#?bid=<?= $browser_instance_id ?>" class="btn btn-secondary-modern btn-sm">Edit Profile</a>
                 </div>
             </div>
         </div>
         <?php else: ?>
-        <!-- Pending Approval Message (No Cards) -->
+        <!-- Pending Approval Message -->
         <div class="text-center mt-5 py-5">
             <i class="bi bi-clock display-1 text-warning"></i>
             <h3 class="mt-3 text-muted">Account Pending Approval</h3>
-            <p class="text-muted">Your teacher account is currently under review. You will receive access to all dashboard features once approved by an administrator.</p>
+            <p class="text-muted">Your teacher account is currently under review. You will receive access to all teaching features once approved.</p>
         </div>
         <?php endif; ?>
     </div>

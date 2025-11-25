@@ -14,11 +14,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Generate unique browser instance ID PER TAB (using sessionStorage)
     function getBrowserInstanceId() {
-        // Try to get existing ID from sessionStorage (tab-specific)
         let instanceId = sessionStorage.getItem('teacher_browser_instance_id');
         
         if (!instanceId) {
-            // Generate PHP-compatible session ID: 't' + 32 hex chars = 33 chars total
             const hexChars = '0123456789abcdef';
             let hexString = 't'; // Start with 't' for teacher
             for (let i = 0; i < 32; i++) {
@@ -26,7 +24,6 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             instanceId = hexString;
             
-            // Store in sessionStorage (tab-specific) AND localStorage (as backup)
             sessionStorage.setItem('teacher_browser_instance_id', instanceId);
             localStorage.setItem('teacher_tab_' + Date.now(), instanceId);
         }
@@ -65,13 +62,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function showFieldError(input, message) {
-        // Remove any existing error
         hideFieldError(input);
-        
-        // Add error styling
         input.classList.add('is-invalid');
-        
-        // Create error message
         const errorDiv = document.createElement('div');
         errorDiv.className = 'invalid-feedback d-block';
         errorDiv.textContent = message;
@@ -87,8 +79,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function validatePassword(password) {
-        console.log("Testing password:", password);
-
         const requirements = {
             length: password.length >= 12,
             uppercase: /[A-Z]/.test(password),
@@ -96,11 +86,6 @@ document.addEventListener("DOMContentLoaded", () => {
             number: /[0-9]/.test(password),
             special: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)
         };
-
-        // Debug output
-        console.log("Password requirements:", requirements);
-        console.log("Has number:", /[0-9]/.test(password), "Test result:", requirements.number);
-        console.log("Has special:", /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password), "Test result:", requirements.special);
 
         return requirements;
     }
@@ -160,7 +145,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const teacherName = form.querySelector('[name="teacher_name"]');
         const teacherEmail = form.querySelector('[name="teacher_email"]');
         const teacherPassword = form.querySelector('[name="teacher_password"]');
-        const teacherConfirmPassword = form.querySelector('[name="teacher_password_confirm"]');
+        const teacherConfirmPassword = form.querySelector('[name="teacher_confirm_password"]');
 
         // Clear previous errors
         inputs.forEach(input => hideFieldError(input));
@@ -219,20 +204,9 @@ document.addEventListener("DOMContentLoaded", () => {
         hideFieldError(this);
 
         if (this.value.length > 0) {
-            // Show password strength meter
             passwordStrength.style.display = 'block';
-
-            // Update strength meter
-            const requirements = updatePasswordStrength(this.value);
-
-            // Debug: Check if elements exist
-            const numberElement = passwordRequirements.querySelector('[data-requirement="number"]');
-            const specialElement = passwordRequirements.querySelector('[data-requirement="special"]');
-            console.log("Number element found:", !!numberElement);
-            console.log("Special element found:", !!specialElement);
-
+            updatePasswordStrength(this.value);
         } else {
-            // Hide password strength meter when empty
             passwordStrength.style.display = 'none';
         }
     });
@@ -254,7 +228,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
     
-    // Session consistency validation
     function validateSessionConsistency() {
         const currentSessionId = sessionStorage.getItem('teacher_current_session_id');
         const urlParams = new URLSearchParams(window.location.search);
@@ -274,20 +247,14 @@ document.addEventListener("DOMContentLoaded", () => {
         document.addEventListener('DOMContentLoaded', validateSessionConsistency);
     }
 
+    // In the form submit event listener, change the redirect URL:
     form.addEventListener("submit", async (e) => {
         e.preventDefault();
         alertBox.innerHTML = "";
 
-        console.log("=== FORM SUBMISSION DEBUG ===");
-        console.log("Form validation starting...");
-
-        // Validate form before submission
         if (!validateForm()) {
-            console.log("Form validation failed");
             return;
         }
-
-        console.log("Form validation passed");
 
         const submitBtn = form.querySelector('button[type="submit"]');
         const originalText = submitBtn.textContent;
@@ -299,7 +266,6 @@ document.addEventListener("DOMContentLoaded", () => {
         // Add browser instance ID to form data (tab-specific)
         const browserId = getBrowserInstanceId();
         formData.append('browser_instance_id', browserId);
-        console.log("Browser instance ID:", browserId);
 
         // Ensure CSRF token is included
         if (!formData.get('csrf_token')) {
@@ -307,28 +273,21 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         try {
-            console.log("Sending request to:", form.action);
             const response = await fetch(form.action, {
                 method: "POST",
                 body: formData,
             });
 
-            console.log("Response status:", response.status);
             const data = await response.json();
-            console.log("Server response:", data);
 
             if (data.success) {
-                // Store the browser instance ID for this session in sessionStorage
                 if (data.browser_instance_id) {
                     sessionStorage.setItem('teacher_current_session_id', data.browser_instance_id);
-                    console.log("Stored session ID:", data.browser_instance_id);
                 }
 
-                console.log("Redirecting to dashboard...");
-                // Redirect with browser instance ID
+                // CORRECT: Redirect to dashboard in parent directory
                 window.location.href = "../dashboard.php?bid=" + (data.browser_instance_id || getBrowserInstanceId());
             } else {
-                console.log("Server returned error:", data.message);
                 showAlert(data.message, "danger");
             }
         } catch (error) {

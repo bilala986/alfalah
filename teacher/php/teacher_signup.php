@@ -1,5 +1,5 @@
 <?php
-// teacher/php/teacher_signup.php
+// teacher/php/teacher_signup.php - FIXED VERSION
 session_start();
 header('Content-Type: application/json');
 
@@ -8,13 +8,13 @@ header("X-Frame-Options: DENY");
 header("X-Content-Type-Options: nosniff");
 
 // Include database connection
-require_once $_SERVER['DOCUMENT_ROOT'] . '/alfalah/php/db_connect.php';
-require_once $_SERVER['DOCUMENT_ROOT'] . '/alfalah/php/security_functions.php';
+require_once '../../php/db_connect.php';
+require_once '../../php/security_functions.php';
 
 $teacher_name = trim($_POST['teacher_name'] ?? '');
 $teacher_email = trim($_POST['teacher_email'] ?? '');
 $teacher_password = $_POST['teacher_password'] ?? '';
-$teacher_password_confirm = $_POST['teacher_password_confirm'] ?? '';
+$teacher_confirm_password = $_POST['teacher_confirm_password'] ?? '';
 $csrf_token = $_POST['csrf_token'] ?? '';
 
 // Validate CSRF token
@@ -25,7 +25,7 @@ if (!validateCsrfToken($csrf_token)) {
 }
 
 // Basic validation
-if (empty($teacher_name) || empty($teacher_email) || empty($teacher_password) || empty($teacher_password_confirm)) {
+if (empty($teacher_name) || empty($teacher_email) || empty($teacher_password) || empty($teacher_confirm_password)) {
     echo json_encode(["success" => false, "message" => "Please fill out all fields."]);
     exit;
 }
@@ -54,7 +54,7 @@ if (!empty($password_errors)) {
 }
 
 // Check if passwords match
-if ($teacher_password !== $teacher_password_confirm) {
+if ($teacher_password !== $teacher_confirm_password) {
     echo json_encode(["success" => false, "message" => "Passwords do not match."]);
     exit;
 }
@@ -85,8 +85,8 @@ try {
         // Generate a NEW browser instance ID
         $new_browser_instance_id = 't' . bin2hex(random_bytes(16));
         
-        // Proper session handling
-        session_write_close();
+        // CRITICAL FIX: Proper session handling
+        session_write_close(); // Close current session
         
         // Start new session with the custom ID
         session_id($new_browser_instance_id);
@@ -97,7 +97,7 @@ try {
         $_SESSION['teacher_name'] = $teacher_name;
         $_SESSION['teacher_email'] = $teacher_email;
         $_SESSION['teacher_logged_in'] = true;
-        $_SESSION['pending_approval'] = true; // TRUE for new accounts
+        $_SESSION['pending_approval'] = true; // This should be TRUE for new accounts
         $_SESSION['login_time'] = time();
         $_SESSION['browser_instance_id'] = $new_browser_instance_id;
         $_SESSION['user_agent'] = $_SERVER['HTTP_USER_AGENT'] ?? '';
@@ -109,7 +109,7 @@ try {
         
         echo json_encode([
             "success" => true, 
-            "message" => "Teacher account created successfully! Awaiting admin approval.",
+            "message" => "Teacher account created successfully! Awaiting approval.",
             "browser_instance_id" => $new_browser_instance_id
         ]);
         exit;

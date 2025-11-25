@@ -11,11 +11,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Generate unique browser instance ID PER TAB (using sessionStorage)
     function getBrowserInstanceId() {
-        // Try to get existing ID from sessionStorage (tab-specific)
         let instanceId = sessionStorage.getItem('teacher_browser_instance_id');
         
         if (!instanceId) {
-            // Generate PHP-compatible session ID: 't' + 32 hex chars = 33 chars total
             const hexChars = '0123456789abcdef';
             let hexString = 't'; // Start with 't' for teacher
             for (let i = 0; i < 32; i++) {
@@ -23,7 +21,6 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             instanceId = hexString;
             
-            // Store in sessionStorage (tab-specific) AND localStorage (as backup)
             sessionStorage.setItem('teacher_browser_instance_id', instanceId);
             localStorage.setItem('teacher_tab_' + Date.now(), instanceId);
         }
@@ -52,7 +49,6 @@ document.addEventListener("DOMContentLoaded", () => {
     // Initialize CSRF token
     setCsrfToken();
     
-    // Create alert box if it doesn't exist
     function createAlertBox() {
         const alertDiv = document.createElement('div');
         alertDiv.id = 'alertBox';
@@ -88,8 +84,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function validateForm() {
         let isValid = true;
-        const email = form.querySelector('[name="email"]');
-        const password = form.querySelector('[name="password"]');
+        const email = form.querySelector('[name="teacher_email"]');
+        const password = form.querySelector('[name="teacher_password"]');
 
         inputs.forEach(input => hideFieldError(input));
 
@@ -129,15 +125,12 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
     
-    // Session consistency validation
     function validateSessionConsistency() {
         const currentSessionId = sessionStorage.getItem('teacher_current_session_id');
         const urlParams = new URLSearchParams(window.location.search);
         const urlSessionId = urlParams.get('bid');
 
-        // If we have both URL session ID and stored session ID, they must match
         if (currentSessionId && urlSessionId && currentSessionId !== urlSessionId) {
-            // Session inconsistency detected - likely tab mixing
             sessionStorage.removeItem('teacher_current_session_id');
             sessionStorage.removeItem('teacher_browser_instance_id');
             window.location.href = 'login.php';
@@ -183,12 +176,10 @@ document.addEventListener("DOMContentLoaded", () => {
             const data = await response.json();
 
             if (data.success) {
-                // Store the browser instance ID for this session in sessionStorage
                 if (data.browser_instance_id) {
                     sessionStorage.setItem('teacher_current_session_id', data.browser_instance_id);
                 }
                 
-                // Redirect with browser instance ID
                 window.location.href = "dashboard.php?bid=" + (data.browser_instance_id || getBrowserInstanceId());
             } else {
                 showAlert(data.message, "danger");

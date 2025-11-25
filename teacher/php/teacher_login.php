@@ -1,5 +1,5 @@
 <?php
-// teacher/php/teacher_login.php - SECURE VERSION WITH WORKING SECURITY FUNCTIONS
+// teacher/php/teacher_login.php - FIXED VERSION WITH LAST LOGIN UPDATE
 session_start();
 header('Content-Type: application/json');
 
@@ -8,16 +8,18 @@ header("X-Frame-Options: DENY");
 header("X-Content-Type-Options: nosniff");
 header("Referrer-Policy: strict-origin-when-cross-origin");
 
-// Include files - IMPORTANT: security functions FIRST
-require_once $_SERVER['DOCUMENT_ROOT'] . '/alfalah/php/security_functions.php';
-require_once $_SERVER['DOCUMENT_ROOT'] . '/alfalah/php/db_connect.php';
+// Include database connection
+require_once '../../php/db_connect.php';
 
-$email = trim($_POST['email'] ?? '');
-$password = $_POST['password'] ?? '';
+// Include security functions
+require_once '../../php/security_functions.php';
+
+$email = trim($_POST['teacher_email'] ?? '');
+$password = $_POST['teacher_password'] ?? '';
 $browser_instance_id = $_POST['browser_instance_id'] ?? '';
 $csrf_token = $_POST['csrf_token'] ?? '';
 
-// Enhanced CSRF validation
+// Validate CSRF token
 if (!validateCsrfToken($csrf_token)) {
     error_log("CSRF token validation failed for teacher login from IP: " . getClientIP());
     echo json_encode(["success" => false, "message" => "Security validation failed. Please refresh the page."]);
@@ -39,12 +41,9 @@ if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
 // Sanitize email
 $email = filter_var($email, FILTER_SANITIZE_EMAIL);
 
-// Check for brute force attempts with enhanced logging
-$client_ip = getClientIP();
-error_log("TEACHER LOGIN: Attempt for email: $email from IP: $client_ip");
-
-if (isTeacherBruteForce($client_ip, $email)) {
-    error_log("Brute force attempt detected for teacher email: " . $email . " from IP: " . $client_ip);
+// Check for brute force attempts (with fallback)
+if (isBruteForce(getClientIP(), $email)) {
+    error_log("Brute force attempt detected for teacher email: " . $email . " from IP: " . getClientIP());
     echo json_encode(["success" => false, "message" => "Too many login attempts. Please try again in 15 minutes."]);
     exit;
 }
@@ -63,7 +62,7 @@ try {
     $teacher = $stmt->fetch();
     
     if ($teacher) {
-        // Check if account is locked
+        // Check if account is locked (only if column exists)
         if ($columnExists && $teacher['lockout_until'] && strtotime($teacher['lockout_until']) > time()) {
             $lockout_time = date('g:i A', strtotime($teacher['lockout_until']));
             echo json_encode(["success" => false, "message" => "Account temporarily locked. Try again after $lockout_time."]);
@@ -71,7 +70,7 @@ try {
         }
         
         if (password_verify($password, $teacher['password_hash'])) {
-            // Successful login - update last_login timestamp
+            // Successful login - ALWAYS update last_login timestamp
             if ($columnExists) {
                 $updateStmt = $pdo->prepare("UPDATE teacher_users SET login_attempts = 0, lockout_until = NULL, last_login = NOW() WHERE id = ?");
             } else {
@@ -101,12 +100,10 @@ try {
             $_SESSION['login_time'] = time();
             $_SESSION['browser_instance_id'] = $new_browser_instance_id;
             $_SESSION['user_agent'] = $_SERVER['HTTP_USER_AGENT'] ?? '';
-            $_SESSION['ip_address'] = $client_ip;
+            $_SESSION['ip_address'] = getClientIP();
             
             // Set session timeout (1 hour)
             $_SESSION['last_activity'] = time();
-            
-            error_log("TEACHER LOGIN SUCCESS: Teacher ID " . $teacher['id'] . " logged in from IP: " . $client_ip);
             
             echo json_encode([
                 "success" => true, 
@@ -114,18 +111,16 @@ try {
                 "browser_instance_id" => $new_browser_instance_id
             ]);
         } else {
-            // Failed login - increment attempt counter
-            if ($columnExists) {
-                recordTeacherFailedAttempt($pdo, $teacher['id'], $client_ip);
-            }
-            error_log("Failed login attempt for teacher email: " . $email . " from IP: " . $client_ip);
+            // Failed login - increment attempt counter (with fallback)
+            recordFailedAttempt($pdo, $teacher['id'], getClientIP(), 'teacher');
+            error_log("Failed login attempt for teacher email: " . $email . " from IP: " . getClientIP());
             
             // Use generic message to prevent user enumeration
             echo json_encode(["success" => false, "message" => "Invalid email or password."]);
         }
     } else {
         // Use generic message to prevent user enumeration
-        error_log("Failed login attempt for non-existent teacher email: " . $email . " from IP: " . $client_ip);
+        error_log("Failed login attempt for non-existent teacher email: " . $email . " from IP: " . getClientIP());
         echo json_encode(["success" => false, "message" => "Invalid email or password."]);
     }
     

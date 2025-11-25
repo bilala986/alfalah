@@ -1,5 +1,5 @@
 <?php
-// admin/private/teacher-accounts.php
+// admin/teacher-accounts.php
 require_once '../php/admin_protect.php';
 
 // Only allow approved admins to access this page
@@ -103,7 +103,7 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                 color: white;
             }
             
-            /* Blue theme for modals (teacher theme) */
+            /* Blue theme for modals (teacher-specific) */
             .modal-blue .modal-header {
                 background-color: #0d6efd;
                 color: white;
@@ -141,7 +141,6 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
             <a href="../dashboard.php?bid=<?= $browser_instance_id ?>"><i class="bi bi-speedometer2"></i> Dashboard</a>
             <a href="admin-accounts.php?bid=<?= $browser_instance_id ?>"><i class="bi bi-shield-check"></i> Admin Accounts</a>
             <a href="teacher-accounts.php?bid=<?= $browser_instance_id ?>" class="active"><i class="bi bi-person-badge"></i> Teacher Accounts</a>
-            <a href="parent-accounts.php?bid=<?= $browser_instance_id ?>"><i class="bi bi-person-heart"></i> Parent Accounts</a>
             <a href="#?bid=<?= $browser_instance_id ?>"><i class="bi bi-gear"></i> Settings</a>
 
             <hr>
@@ -242,7 +241,7 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                                         <td class="mobile-hide">
                                             <?php if ($teacher['created_at']): ?>
                                                 <?php 
-                                                // Convert from UTC to UK time
+                                                // EXPLICITLY convert from UTC to UK time
                                                 $createdDate = new DateTime($teacher['created_at'], new DateTimeZone('UTC'));
                                                 $createdDate->setTimezone(new DateTimeZone('Europe/London'));
                                                 echo $createdDate->format('M j, Y g:i A');
@@ -254,7 +253,7 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                                         <td class="mobile-hide">
                                             <?php if ($teacher['last_login']): ?>
                                                 <?php 
-                                                // Convert from UTC to UK time
+                                                // EXPLICITLY convert from UTC to UK time
                                                 $loginDate = new DateTime($teacher['last_login'], new DateTimeZone('UTC'));
                                                 $loginDate->setTimezone(new DateTimeZone('Europe/London'));
                                                 echo $loginDate->format('M j, Y g:i A');
