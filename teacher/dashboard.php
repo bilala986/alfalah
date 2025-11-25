@@ -1,102 +1,147 @@
+<?php
+// At the very top of teacher/dashboard.php
+require_once 'php/teacher_protect.php';
+
+// Get the browser instance ID for this session
+$browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
+
+// Verify the session ID in URL matches the one in session
+if (isset($_GET['bid']) && $_GET['bid'] !== $browser_instance_id) {
+    // Session ID mismatch - possible tab mixing, redirect to login
+    session_destroy();
+    header('Location: login.php');
+    exit;
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Teacher Dashboard – Al Falah</title>
+    <title>Teacher Dashboard - Al Falah</title>
 
     <!-- Bootstrap -->
     <link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet"
           href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-
     <link rel="stylesheet" href="css/teacher.css">
 </head>
+
 <body>
 
-<!-- SIDEBAR -->
-<div class="sidebar" id="sidebar">
+    <!-- SIDEBAR -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header d-flex align-items-center justify-content-between px-3">
+            <div class="d-flex align-items-center">
+                <img src="../img/logo.png" alt="Al Falah Logo" height="35" class="me-2">
+                <h5 class="m-0 fw-bold">Teacher Panel</h5>
+            </div>
+            <button class="toggle-btn" id="closeSidebar"><i class="bi bi-x-lg"></i></button>
+        </div>
 
-    <div class="sidebar-header d-flex align-items-center justify-content-between px-3">
+        <a href="dashboard.php?bid=<?= $browser_instance_id ?>" class="active"><i class="bi bi-speedometer2"></i> Dashboard</a>
+        <a href="#?bid=<?= $browser_instance_id ?>"><i class="bi bi-gear"></i> Settings</a>
+
+        <hr>
+
+        <a href="php/logout.php?bid=<?= $browser_instance_id ?>" class="logout">
+            <i class="bi bi-box-arrow-right"></i> Logout
+        </a>
+    </div>
+
+    <!-- HEADER -->
+    <div class="header-bar d-flex align-items-center justify-content-between">
+        <button class="open-sidebar-btn" id="openSidebar"><i class="bi bi-list"></i></button>
+
+        <!-- Welcome Message with Teacher Name -->
         <div class="d-flex align-items-center">
-            <img src="../img/logo.png" alt="Al Falah Logo" height="35" class="me-2">
-            <h5 class="m-0 fw-bold">Teacher Panel</h5>
+            <span class="me-3 d-none d-md-block">
+                <i class="bi bi-person-circle me-2"></i>
+                Welcome, <strong><?php echo htmlspecialchars($_SESSION['teacher_name'] ?? 'Teacher'); ?></strong>
+            </span>
+
+            <!-- Mobile-friendly version -->
+            <span class="d-block d-md-none">
+                <i class="bi bi-person-circle me-1"></i>
+                <strong><?php echo htmlspecialchars(explode(' ', $_SESSION['teacher_name'] ?? 'Teacher')[0]); ?></strong>
+            </span>
         </div>
-        <button class="toggle-btn" id="closeSidebar"><i class="bi bi-x-lg"></i></button>
     </div>
 
-    <a href="dashboard.php" class="active"><i class="bi bi-speedometer2"></i> Dashboard</a>
-    <a href="#"><i class="bi bi-book-half"></i> My Classes</a>
-    <a href="#"><i class="bi bi-people-fill"></i> Students</a>
-    <a href="#"><i class="bi bi-clipboard-check"></i> Attendance</a>
+    <!-- MAIN CONTENT -->
+    <div class="content" id="content">
+        <h2 class="dashboard-title m-0 text-center">Teacher Dashboard Overview</h2>
 
-    <hr>
+        <!-- Approval Status Banner -->
+        <?php if (isset($_SESSION['pending_approval']) && $_SESSION['pending_approval']): ?>
+        <div class="alert alert-warning alert-dismissible fade show mt-3" role="alert">
+            <i class="bi bi-clock-history me-2"></i>
+            <strong>Account Pending Approval</strong> - Your teacher account is awaiting verification. 
+            You will gain full access once approved by an administrator.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <?php endif; ?>
 
-    <a href="#" class="logout"><i class="bi bi-box-arrow-right"></i> Logout</a>
-</div>
+        <!-- DASHBOARD CARDS (Only show if approved) -->
+        <?php if (!isset($_SESSION['pending_approval']) || !$_SESSION['pending_approval']): ?>
+        <div class="row mt-4">
+            <!-- MY CLASSES -->
+            <div class="col-md-4 mb-3">
+                <div class="card shadow-sm p-3">
+                    <h5><i class="bi bi-journal-text text-primary"></i> My Classes</h5>
+                    <p class="text-muted">View and manage your classes.</p>
+                    <a href="#?bid=<?= $browser_instance_id ?>" class="btn btn-primary btn-sm">View Classes</a>
+                </div>
+            </div>
 
-<!-- HEADER -->
-<div class="header-bar d-flex align-items-center justify-content-between">
-    <button class="open-sidebar-btn" id="openSidebar"><i class="bi bi-list"></i></button>
-</div>
+            <!-- STUDENTS -->
+            <div class="col-md-4 mb-3">
+                <div class="card shadow-sm p-3">
+                    <h5><i class="bi bi-people-fill text-primary"></i> Students</h5>
+                    <p class="text-muted">Manage student information.</p>
+                    <a href="#?bid=<?= $browser_instance_id ?>" class="btn btn-primary btn-sm">View Students</a>
+                </div>
+            </div>
 
-<!-- MAIN CONTENT -->
-<div class="content" id="content">
+            <!-- ATTENDANCE -->
+            <div class="col-md-4 mb-3">
+                <div class="card shadow-sm p-3">
+                    <h5><i class="bi bi-calendar-check text-primary"></i> Attendance</h5>
+                    <p class="text-muted">Take and view attendance records.</p>
+                    <a href="#?bid=<?= $browser_instance_id ?>" class="btn btn-primary btn-sm">Manage Attendance</a>
+                </div>
+            </div>
 
-    <h2 class="dashboard-title m-0">Teacher Dashboard</h2>
+            <!-- GRADES -->
+            <div class="col-md-4 mb-3">
+                <div class="card shadow-sm p-3">
+                    <h5><i class="bi bi-award text-primary"></i> Grades</h5>
+                    <p class="text-muted">Enter and manage student grades.</p>
+                    <a href="#?bid=<?= $browser_instance_id ?>" class="btn btn-primary btn-sm">Manage Grades</a>
+                </div>
+            </div>
 
-    <div class="row mt-4">
-
-        <!-- Classes -->
-        <div class="col-md-4 mb-3">
-            <div class="card shadow-sm p-3">
-                <h5><i class="bi bi-book-half text-success"></i> My Classes</h5>
-                <p class="text-muted">Manage and view your assigned classes.</p>
-                <a href="#" class="btn btn-success-modern btn-sm">Open</a>
+            <!-- ASSIGNMENTS -->
+            <div class="col-md-4 mb-3">
+                <div class="card shadow-sm p-3">
+                    <h5><i class="bi bi-clipboard-check text-primary"></i> Assignments</h5>
+                    <p class="text-muted">Create and manage assignments.</p>
+                    <a href="#?bid=<?= $browser_instance_id ?>" class="btn btn-primary btn-sm">Manage Assignments</a>
+                </div>
             </div>
         </div>
-
-        <!-- Students -->
-        <div class="col-md-4 mb-3">
-            <div class="card shadow-sm p-3">
-                <h5><i class="bi bi-people-fill text-success"></i> Students</h5>
-                <p class="text-muted">View student lists for your classes.</p>
-                <a href="#" class="btn btn-success-modern btn-sm">View</a>
-            </div>
+        <?php else: ?>
+        <!-- Pending Approval Message (No Cards) -->
+        <div class="text-center mt-5 py-5">
+            <i class="bi bi-clock display-1 text-warning"></i>
+            <h3 class="mt-3 text-muted">Account Pending Approval</h3>
+            <p class="text-muted">Your teacher account is currently under review. You will receive access to all dashboard features once approved by an administrator.</p>
         </div>
-
-        <!-- Diary Notes -->
-        <div class="col-md-4 mb-3">
-            <div class="card shadow-sm p-3">
-                <h5><i class="bi bi-journal-text text-success"></i> Diary Notes</h5>
-                <p class="text-muted">Record student diary or behaviour notes.</p>
-                <a href="#" class="btn btn-success-modern btn-sm">Add Notes</a>
-            </div>
-        </div>
-
-        <!-- Chats -->
-        <div class="col-md-4 mb-3">
-            <div class="card shadow-sm p-3">
-                <h5><i class="bi bi-chat-dots-fill text-success"></i> Chats</h5>
-                <p class="text-muted">Chat with parents.</p>
-                <a href="#" class="btn btn-success-modern btn-sm">Open</a>
-            </div>
-        </div>
-
-        <!-- Attendance -->
-        <div class="col-md-4 mb-3">
-            <div class="card shadow-sm p-3">
-                <h5><i class="bi bi-clipboard-check text-success"></i> Attendance</h5>
-                <p class="text-muted">Mark and review attendance.</p>
-                <a href="#" class="btn btn-success-modern btn-sm">Manage</a>
-            </div>
-        </div>
-
+        <?php endif; ?>
     </div>
-</div>
 
-<script src="../bootstrap/js/bootstrap.bundle.min.js"></script>
-<script src="js/teacher.js"></script>
-
+    <script src="../bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="js/dashboard.js"></script>
 </body>
 </html>

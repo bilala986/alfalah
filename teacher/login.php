@@ -10,34 +10,39 @@
 </head>
 
 <body class="login-body">
+    <div class="login-wrapper">
+        <div class="login-glass-card text-center w-100" style="max-width: 450px;">
 
-<div class="login-wrapper">
+            <div class="text-center mb-4">
+                <img src="../img/logo.png" class="login-logo" alt="Al Falah Logo">
+                <h2 class="login-title">Teacher Login</h2>
+            </div>
 
-    <div class="login-glass-card text-center w-100" style="max-width: 450px;">
+            <!-- Alert area -->
+            <div id="alertBox"></div>
 
-        <div class="text-center mb-4">
-            <img src="../img/logo.png" class="login-logo" alt="Al Falah Logo">
-            <h2 class="login-title">Teacher Login</h2>
+            <!-- Updated form with CSRF protection -->
+            <form action="php/teacher_login.php" method="POST" id="loginForm">
+                <!-- CSRF Token -->
+                <input type="hidden" name="csrf_token" id="csrf_token">
+                
+                <div class="mb-3">
+                    <input type="email" class="form-control" name="email" placeholder="Email Address" required 
+                           maxlength="150" autocomplete="email">
+                </div>
+
+                <div class="mb-4">
+                    <input type="password" class="form-control" name="password" placeholder="Password" required 
+                           maxlength="255" autocomplete="current-password">
+                </div>
+
+                <button type="submit" class="btn btn-login w-100">Login</button>
+            </form>
+
         </div>
-
-        <form action="#" method="POST">
-
-            <div class="mb-3">
-                <input type="email" class="form-control" name="teacher_email" placeholder="Email Address" required>
-            </div>
-
-            <div class="mb-4">
-                <input type="password" class="form-control" name="teacher_password" placeholder="Password" required>
-            </div>
-
-            <button type="submit" class="btn btn-login w-100">Login</button>
-
-        </form>
-
-
     </div>
 
-</div>
-
+    <script src="../bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="js/login.js"></script>
 </body>
 </html>
