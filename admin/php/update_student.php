@@ -24,6 +24,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['student_id'])) {
             updated_at = CURRENT_TIMESTAMP
             WHERE id = ?");
         $stmt->execute([$first_name, $last_name, $age, $program, $year_group, $teacher_id, $student_id]);
+
+        // Debug logging
+        error_log("Student update: ID {$student_id}, Teacher ID: {$teacher_id}");
+
+        // Verify the update worked
+        $checkStmt = $pdo->prepare("SELECT teacher_id FROM students WHERE id = ?");
+        $checkStmt->execute([$student_id]);
+        $result = $checkStmt->fetch();
+        error_log("Verified teacher_id: " . $result['teacher_id']);
         
         echo json_encode([
             'success' => true,

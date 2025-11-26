@@ -12,7 +12,7 @@ if ($_SESSION['pending_approval']) {
 require_once $_SERVER['DOCUMENT_ROOT'] . '/alfalah/php/db_connect.php';
 
 // Function to format program names for display
-function formatProgramName($programValue) {
+function formatProgramNames($programValues) {
     $programMap = [
         'weekday_morning_hifdh' => 'Weekday Morning Hifdh',
         'weekday_evening_hifdh' => 'Weekday Evening Hifdh',
@@ -20,11 +20,21 @@ function formatProgramName($programValue) {
         'weekend_hifdh' => 'Weekend Hifdh',
         'weekend_islamic_studies' => 'Weekend Islamic Studies'
     ];
-    return $programMap[$programValue] ?? $programValue;
+    
+    if (empty($programValues)) {
+        return 'Not set';
+    }
+    
+    $programs = explode(',', $programValues);
+    $formattedPrograms = array_map(function($program) use ($programMap) {
+        return $programMap[trim($program)] ?? trim($program);
+    }, $programs);
+    
+    return implode(', ', $formattedPrograms);
 }
 
-// Fetch all teacher users - UPDATED QUERY
-$stmt = $pdo->prepare("SELECT id, name, email, year_group, program, assigned_students, created_at, last_login, is_approved FROM teacher_users ORDER BY created_at DESC");
+// Fetch all teacher users
+$stmt = $pdo->prepare("SELECT id, name, email, year_group, program, created_at, last_login, is_approved FROM teacher_users ORDER BY created_at DESC");
 $stmt->execute();
 $teachers = $stmt->fetchAll();
 
@@ -41,101 +51,7 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
         <link href="../../bootstrap/css/bootstrap.min.css" rel="stylesheet">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
         <link rel="stylesheet" href="../css/admin.css">
-        <style>
-            .table-controls {
-                padding: 1rem 0;
-                border-bottom: 1px solid #dee2e6;
-                margin-bottom: 1rem;
-            }
-            .refresh-spin {
-                animation: refreshSpin 0.6s ease;
-            }
-            @keyframes refreshSpin {
-                0% { transform: rotate(0deg); }
-                100% { transform: rotate(360deg); }
-            }
-            
-            /* Mobile responsive adjustments */
-            @media (max-width: 768px) {
-                .table-controls .btn-group {
-                    justify-content: center;
-                    width: 100%;
-                    margin-top: 10px;
-                }
-                .table-controls .col-md-6.text-end {
-                    text-align: center !important;
-                }
-            }
-            
-            /* Hide columns on mobile */
-            @media (max-width: 576px) {
-                .mobile-hide {
-                    display: none;
-                }
-            }
-            
-            .save-btn:disabled {
-                opacity: 0.6;
-                cursor: not-allowed;
-            }
-            
-            /* Toast positioning */
-            .toast-container {
-                z-index: 9999;
-            }
-            
-            /* Desktop - bottom right */
-            @media (min-width: 768px) {
-                .toast-container {
-                    bottom: 20px;
-                    right: 20px;
-                }
-            }
-            
-            /* Mobile - center */
-            @media (max-width: 767.98px) {
-                .toast-container {
-                    bottom: 50%;
-                    left: 50%;
-                    transform: translate(-50%, 50%);
-                    width: 90%;
-                    max-width: 400px;
-                }
-            }
-            
-            /* Success toast styling */
-            .toast.bg-success .toast-header {
-                background-color: #198754 !important;
-                color: white;
-            }
-            
-            /* Error toast styling */
-            .toast.bg-danger .toast-header {
-                background-color: #dc3545 !important;
-                color: white;
-            }
-            
-            /* Blue theme for modals (teacher-specific) */
-            .modal-blue .modal-header {
-                background-color: #0d6efd;
-                color: white;
-                border-bottom: none;
-            }
-            
-            .modal-blue .modal-header .btn-close {
-                filter: invert(1);
-            }
-            
-            .modal-blue .btn-primary {
-                background-color: #0d6efd;
-                border-color: #0d6efd;
-            }
-            
-            .modal-blue .btn-primary:hover {
-                background-color: #0b5ed7;
-                border-color: #0a58ca;
-            }
-        </style>
+        <link rel="stylesheet" href="../css/teacher-accounts.css">
     </head>
 
     <body>
@@ -227,9 +143,8 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                                 <tr>
                                     <th>Name</th>
                                     <th>Email</th>
-                                    <th class="mobile-hide">Year Group</th>
-                                    <th class="mobile-hide">Program</th>
-                                    <th class="mobile-hide">Students</th>
+                                    <th class="mobile-hide">Year Groups</th>
+                                    <th class="mobile-hide">Programs</th>
                                     <th class="mobile-hide">Last Login</th>
                                     <th>Status</th>
                                     <th>Actions</th>
@@ -238,14 +153,13 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                             <tbody id="teacherTableBody">
                                 <?php if (empty($teachers)): ?>
                                     <tr>
-                                        <td colspan="8" class="text-center text-muted py-4">No teacher accounts found.</td>
+                                        <td colspan="7" class="text-center text-muted py-4">No teacher accounts found.</td>
                                     </tr>
                                 <?php else: ?>
                                     <?php 
                                     // Set UK timezone with automatic DST
                                     $ukTimezone = new DateTimeZone('Europe/London');
                                     ?>
-                                    <!-- In the table body section - Update the PHP loop -->
                                     <?php foreach ($teachers as $teacher): ?>
                                     <tr data-name="<?= htmlspecialchars(strtolower($teacher['name'])) ?>" 
                                         data-email="<?= htmlspecialchars(strtolower($teacher['email'])) ?>" 
@@ -255,35 +169,36 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                                         <td><?= htmlspecialchars($teacher['email']) ?></td>
                                         <td class="mobile-hide">
                                             <?php if (!empty($teacher['year_group'])): ?>
-                                                Year <?= htmlspecialchars($teacher['year_group']) ?>
+                                                <div class="year-group-badges">
+                                                    <?php 
+                                                    $yearGroups = explode(',', $teacher['year_group']);
+                                                    foreach ($yearGroups as $year): ?>
+                                                        <span class="badge bg-primary me-1">Year <?= htmlspecialchars(trim($year)) ?></span>
+                                                    <?php endforeach; ?>
+                                                </div>
                                             <?php else: ?>
                                                 <span class="text-muted">Not set</span>
                                             <?php endif; ?>
                                         </td>
                                         <td class="mobile-hide">
                                             <?php if (!empty($teacher['program'])): ?>
-                                                <?= htmlspecialchars(formatProgramName($teacher['program'])) ?>
+                                                <div class="program-badges">
+                                                    <?php 
+                                                    $programs = explode(',', $teacher['program']);
+                                                    foreach ($programs as $program): 
+                                                        $formattedProgram = formatProgramNames($program);
+                                                    ?>
+                                                        <span class="badge bg-info me-1 mb-1"><?= htmlspecialchars($formattedProgram) ?></span>
+                                                    <?php endforeach; ?>
+                                                </div>
                                             <?php else: ?>
                                                 <span class="text-muted">Not set</span>
                                             <?php endif; ?>
                                         </td>
                                         <td class="mobile-hide">
-                                            <?php if (!empty($teacher['assigned_students'])): ?>
-                                                <?php 
-                                                $students = json_decode($teacher['assigned_students'], true);
-                                                if (is_array($students) && count($students) > 0): ?>
-                                                    <?= count($students) ?> student(s)
-                                                <?php else: ?>
-                                                    <span class="text-muted">No students</span>
-                                                <?php endif; ?>
-                                            <?php else: ?>
-                                                <span class="text-muted">No students</span>
-                                            <?php endif; ?>
-                                        </td>
-                                        <td class="mobile-hide">
                                             <?php if ($teacher['last_login']): ?>
                                                 <?php 
-                                                // EXPLICITLY convert from UTC to UK time
+                                                // Convert from UTC to UK time
                                                 $loginDate = new DateTime($teacher['last_login'], new DateTimeZone('UTC'));
                                                 $loginDate->setTimezone(new DateTimeZone('Europe/London'));
                                                 echo $loginDate->format('M j, Y g:i A');
@@ -343,7 +258,7 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
 
         <!-- Edit Teacher Modal -->
         <div class="modal fade modal-blue" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title" id="editModalLabel">Edit Teacher</h5>
@@ -352,43 +267,96 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                     <div class="modal-body">
                         <form id="editTeacherForm">
                             <input type="hidden" id="editTeacherId" name="teacher_id">
-                            <div class="mb-3">
-                                <label for="editName" class="form-label">Name</label>
-                                <input type="text" class="form-control" id="editName" name="name" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="editEmail" class="form-label">Email</label>
-                                <input type="email" class="form-control" id="editEmail" name="email" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="editYearGroup" class="form-label">Year Group</label>
-                                <select class="form-select" id="editYearGroup" name="year_group">
-                                    <option value="">Select Year Group</option>
-                                    <?php for ($i = 1; $i <= 11; $i++): ?>
-                                        <option value="<?= $i ?>">Year <?= $i ?></option>
-                                    <?php endfor; ?>
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <label for="editProgram" class="form-label">Program</label>
-                                <select class="form-select" id="editProgram" name="program">
-                                    <option value="">Select Program</option>
-                                    <option value="weekday_morning_hifdh">Weekday Morning Hifdh</option>
-                                    <option value="weekday_evening_hifdh">Weekday Evening Hifdh</option>
-                                    <option value="weekend_evening_islamic_studies">Weekend Evening Islamic Studies</option>
-                                    <option value="weekend_hifdh">Weekend Hifdh</option>
-                                    <option value="weekend_islamic_studies">Weekend Islamic Studies</option>
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Assigned Students</label>
-                                <div class="border rounded p-3 bg-light">
-                                    <small class="text-muted">Student assignment feature coming soon. This will display assigned students once implemented.</small>
+                            
+                            <!-- Basic Information -->
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="editName" class="form-label">Name <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="editName" name="name" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="editEmail" class="form-label">Email <span class="text-danger">*</span></label>
+                                        <input type="email" class="form-control" id="editEmail" name="email" required>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="mb-3 form-check">
-                                <input type="checkbox" class="form-check-input" id="editApproved" name="is_approved">
-                                <label class="form-check-label" for="editApproved">Approved Account</label>
+
+                            <!-- Year Groups Selection -->
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold">Year Groups</label>
+                                <div class="multi-select-card">
+                                    <div class="multi-select-header">
+                                        <span>Select year groups this teacher can teach</span>
+                                        <small class="text-muted" id="yearGroupCount">0 selected</small>
+                                    </div>
+                                    <div class="multi-select-grid">
+                                        <?php for ($i = 1; $i <= 11; $i++): ?>
+                                            <div class="multi-select-option" data-value="<?= $i ?>">
+                                                <div class="option-checkbox">
+                                                    <i class="bi bi-check-lg"></i>
+                                                </div>
+                                                <span class="option-label">Year <?= $i ?></span>
+                                            </div>
+                                        <?php endfor; ?>
+                                    </div>
+                                    <input type="hidden" id="editYearGroup" name="year_group[]">
+                                </div>
+                            </div>
+
+                            <!-- Programs Selection -->
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold">Programs</label>
+                                <div class="multi-select-card">
+                                    <div class="multi-select-header">
+                                        <span>Select programs this teacher can teach</span>
+                                        <small class="text-muted" id="programCount">0 selected</small>
+                                    </div>
+                                    <div class="multi-select-grid">
+                                        <div class="multi-select-option" data-value="weekday_morning_hifdh">
+                                            <div class="option-checkbox">
+                                                <i class="bi bi-check-lg"></i>
+                                            </div>
+                                            <span class="option-label">Weekday Morning Hifdh</span>
+                                        </div>
+                                        <div class="multi-select-option" data-value="weekday_evening_hifdh">
+                                            <div class="option-checkbox">
+                                                <i class="bi bi-check-lg"></i>
+                                            </div>
+                                            <span class="option-label">Weekday Evening Hifdh</span>
+                                        </div>
+                                        <div class="multi-select-option" data-value="weekend_evening_islamic_studies">
+                                            <div class="option-checkbox">
+                                                <i class="bi bi-check-lg"></i>
+                                            </div>
+                                            <span class="option-label">Weekend Evening Islamic Studies</span>
+                                        </div>
+                                        <div class="multi-select-option" data-value="weekend_hifdh">
+                                            <div class="option-checkbox">
+                                                <i class="bi bi-check-lg"></i>
+                                            </div>
+                                            <span class="option-label">Weekend Hifdh</span>
+                                        </div>
+                                        <div class="multi-select-option" data-value="weekend_islamic_studies">
+                                            <div class="option-checkbox">
+                                                <i class="bi bi-check-lg"></i>
+                                            </div>
+                                            <span class="option-label">Weekend Islamic Studies</span>
+                                        </div>
+                                    </div>
+                                    <input type="hidden" id="editProgram" name="program[]">
+                                </div>
+                            </div>
+
+                            <!-- Approval Status -->
+                            <div class="mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="editApproved" name="is_approved">
+                                    <label class="form-check-label fw-semibold" for="editApproved">Approved Account</label>
+                                </div>
+                                <small class="form-text text-muted">Approved teachers can access the teacher panel and be assigned students.</small>
                             </div>
                         </form>
                     </div>

@@ -1,5 +1,15 @@
 // admin/js/teacher-accounts.js
 document.addEventListener('DOMContentLoaded', function() {
+    // Helper function to escape HTML
+    function escapeHtml(unsafe) {
+        return unsafe
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
     // Toast notification function
     function showToast(message, type = 'success') {
         const toastEl = document.getElementById('liveToast');
@@ -20,11 +30,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const filterBtn = document.getElementById('filterBtn');
     const teacherTableBody = document.getElementById('teacherTableBody');
     const visibleCount = document.getElementById('visibleCount');
+    const totalCount = document.getElementById('totalCount');
     
     // Modal elements
     const filterModal = new bootstrap.Modal(document.getElementById('filterModal'));
     const statusSelect = document.getElementById('statusSelect');
     const yearGroupFilterSelect = document.getElementById('yearGroupFilterSelect');
+    const programFilterSelect = document.getElementById('programFilterSelect');
     const applyFilterBtn = document.getElementById('applyFilterBtn');
     const clearFilterBtn = document.getElementById('clearFilterBtn');
     
@@ -34,8 +46,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const editName = document.getElementById('editName');
     const editEmail = document.getElementById('editEmail');
     const editYearGroup = document.getElementById('editYearGroup');
+    const editProgram = document.getElementById('editProgram');
     const editApproved = document.getElementById('editApproved');
     const saveChangesBtn = document.getElementById('saveChangesBtn');
+    
+    // Multi-select elements
+    const yearGroupCount = document.getElementById('yearGroupCount');
+    const programCount = document.getElementById('programCount');
     
     // Approve/Remove modal elements
     const approveModal = new bootstrap.Modal(document.getElementById('approveModal'));
@@ -50,22 +67,96 @@ document.addEventListener('DOMContentLoaded', function() {
     // Current filter state
     let currentStatusFilter = 'all';
     let currentYearGroupFilter = 'all';
+    let currentProgramFilter = 'all';
     let originalFormData = {};
     let currentActionTeacherId = null;
-    
-    // Add these new elements to your JavaScript
-    const editProgram = document.getElementById('editProgram');
-    const programFilterSelect = document.getElementById('programFilterSelect');
-
-    // Add program filter to current filter state
-    let currentProgramFilter = 'all';
 
     // Get all rows (will be updated on refresh)
-    let rows = teacherTableBody.querySelectorAll('tr[data-name]');
+    let rows = [];
+
+    // Multi-select functionality
+    function initializeMultiSelect() {
+        // Year group options
+        const yearGroupOptions = document.querySelectorAll('.multi-select-card:first-child .multi-select-option');
+        yearGroupOptions.forEach(option => {
+            option.addEventListener('click', function() {
+                this.classList.toggle('selected');
+                updateYearGroupSelection();
+            });
+        });
+
+        // Program options
+        const programOptions = document.querySelectorAll('.multi-select-card:last-child .multi-select-option');
+        programOptions.forEach(option => {
+            option.addEventListener('click', function() {
+                this.classList.toggle('selected');
+                updateProgramSelection();
+            });
+        });
+    }
+
+    function updateYearGroupSelection() {
+        const selectedOptions = document.querySelectorAll('.multi-select-card:first-child .multi-select-option.selected');
+        const yearGroups = Array.from(selectedOptions).map(opt => opt.getAttribute('data-value'));
+        
+        editYearGroup.value = yearGroups.join(',');
+        yearGroupCount.textContent = `${yearGroups.length} selected`;
+        checkFormChanges();
+    }
+
+    function updateProgramSelection() {
+        const selectedOptions = document.querySelectorAll('.multi-select-card:last-child .multi-select-option.selected');
+        const programs = Array.from(selectedOptions).map(opt => opt.getAttribute('data-value'));
+        
+        editProgram.value = programs.join(',');
+        programCount.textContent = `${programs.length} selected`;
+        checkFormChanges();
+    }
+
+    function clearMultiSelectSelections() {
+        // Clear year group selections
+        document.querySelectorAll('.multi-select-card:first-child .multi-select-option').forEach(option => {
+            option.classList.remove('selected');
+        });
+        // Clear program selections
+        document.querySelectorAll('.multi-select-card:last-child .multi-select-option').forEach(option => {
+            option.classList.remove('selected');
+        });
+        
+        yearGroupCount.textContent = '0 selected';
+        programCount.textContent = '0 selected';
+        editYearGroup.value = '';
+        editProgram.value = '';
+    }
+
+    function setMultiSelectEnabled(enabled) {
+        const allOptions = document.querySelectorAll('.multi-select-option');
+        allOptions.forEach(option => {
+            if (enabled) {
+                option.style.pointerEvents = 'auto';
+                option.style.opacity = '1';
+                option.style.cursor = 'pointer';
+            } else {
+                option.style.pointerEvents = 'none';
+                option.style.opacity = '0.6';
+                option.style.cursor = 'not-allowed';
+            }
+        });
+    }
 
     // Refresh table data
     function refreshTableData(shouldShowToast = false) {
         console.log('Refreshing teacher table data...');
+        
+        // Show loading state
+        teacherTableBody.innerHTML = `
+            <tr>
+                <td colspan="7" class="text-center text-muted py-4">
+                    <div class="spinner-border spinner-border-sm" role="status"></div>
+                    <span class="ms-2">Loading teachers...</span>
+                </td>
+            </tr>
+        `;
         
         fetch(`../php/get_teachers.php?bid=${browserInstanceId}`)
             .then(response => response.json())
@@ -77,6 +168,13 @@ document.addEventListener('DOMContentLoaded', function() {
                         showToast('Table refreshed successfully!', 'success');
                     }
                 } else {
+                    teacherTableBody.innerHTML = `
+                        <tr>
+                            <td colspan="7" class="text-center text-danger py-4">
+                                <i class="bi bi-exclamation-triangle"></i> Error loading teachers
+                            </td>
+                        </tr>
+                    `;
                     if (shouldShowToast) {
                         showToast('Error refreshing table', 'error');
                     }
@@ -84,6 +182,13 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .catch(error => {
                 console.error('Error refreshing table:', error);
+                teacherTableBody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="text-center text-danger py-4">
+                            <i class="bi bi-exclamation-triangle"></i> Error loading teachers
+                        </td>
+                    </tr>
+                `;
                 if (shouldShowToast) {
                     showToast('Error refreshing table', 'error');
                 }
@@ -91,10 +196,10 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function formatUKDateTime(dateTimeString) {
+        if (!dateTimeString) return 'Never';
+        
         const date = new Date(dateTimeString);
-
-        // Convert to UK timezone string
-        const ukTimeString = date.toLocaleString('en-GB', {
+        return date.toLocaleString('en-GB', {
             timeZone: 'Europe/London',
             month: 'short',
             day: 'numeric',
@@ -103,50 +208,55 @@ document.addEventListener('DOMContentLoaded', function() {
             minute: '2-digit',
             hour12: true
         });
-
-        // Debug: Check what we're getting
-        console.log('Original:', dateTimeString, 'UK Time:', ukTimeString);
-
-        return ukTimeString;
+    }
+    
+    // Helper function to format program names for display
+    function formatProgramNames(programValues) {
+        const programMap = {
+            'weekday_morning_hifdh': 'Weekday Morning Hifdh',
+            'weekday_evening_hifdh': 'Weekday Evening Hifdh',
+            'weekend_evening_islamic_studies': 'Weekend Evening Islamic Studies',
+            'weekend_hifdh': 'Weekend Hifdh',
+            'weekend_islamic_studies': 'Weekend Islamic Studies'
+        };
+        
+        if (!programValues) return 'Not set';
+        
+        const programs = programValues.split(',');
+        const formattedPrograms = programs.map(program => {
+            return programMap[program.trim()] || program.trim();
+        });
+        
+        return formattedPrograms.join(', ');
     }
 
-    // Update table with new data - FIXED VERSION with correct column order
+    // Update table with new data
     function updateTable(teachers) {
         console.log('Updating table with teachers:', teachers);
         teacherTableBody.innerHTML = '';
 
         if (teachers.length === 0) {
-            teacherTableBody.innerHTML = '<tr><td colspan="8" class="text-center text-muted py-4">No teacher accounts found.</td></tr>';
-            // Update the counts
+            teacherTableBody.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-4">No teacher accounts found.</td></tr>';
             visibleCount.textContent = '0';
-            const totalCount = document.getElementById('totalCount');
-            if (totalCount) {
-                totalCount.textContent = '0';
-            }
+            if (totalCount) totalCount.textContent = '0';
             rows = [];
             return;
         }
 
         // Create document fragment for efficient DOM manipulation
-        var frag = document.createDocumentFragment();
+        const frag = document.createDocumentFragment();
         
         teachers.forEach(teacher => {
-            console.log('Teacher:', teacher.name);
-            console.log('Year Group:', teacher.year_group);
-            console.log('Program:', teacher.program);
-
             const row = document.createElement('tr');
             row.setAttribute('data-name', teacher.name.toLowerCase());
             row.setAttribute('data-email', teacher.email.toLowerCase());
-            // Use proper status value based on is_approved
             const statusValue = teacher.is_approved == 1 ? 'approved' : 'pending';
             row.setAttribute('data-status', statusValue);
             row.setAttribute('data-teacher-id', teacher.id);
             
             // Set year group data attribute for filtering
-            const yearGroupValue = teacher.year_group ? teacher.year_group.toString() : 'not_set';
+            const yearGroupValue = teacher.year_group ? teacher.year_group : 'not_set';
             row.setAttribute('data-year-group', yearGroupValue);
-            
             row.setAttribute('data-program', teacher.program || 'not_set');
 
             const statusBadge = teacher.is_approved == 1 ? 
@@ -154,24 +264,31 @@ document.addEventListener('DOMContentLoaded', function() {
                 '<span class="badge bg-danger">Pending</span>';
 
             const approveButton = teacher.is_approved == 0 ? 
-                `<button type="button" class="btn btn-outline-success approve-btn" data-teacher-id="${teacher.id}" data-teacher-name="${teacher.name}" data-teacher-email="${teacher.email}">
+                `<button type="button" class="btn btn-outline-success approve-btn" data-teacher-id="${teacher.id}" data-teacher-name="${escapeHtml(teacher.name)}" data-teacher-email="${escapeHtml(teacher.email)}">
                     <i class="bi bi-check-lg"></i> Approve
                 </button>` : '';
 
-            // FIXED: Correct column order matching the table headers
             row.innerHTML = `
-                <td class="fw-semibold">${teacher.name}</td>
-                <td>${teacher.email}</td>
+                <td class="fw-semibold">${escapeHtml(teacher.name)}</td>
+                <td>${escapeHtml(teacher.email)}</td>
                 <td class="mobile-hide">
-                    ${teacher.year_group ? 'Year ' + teacher.year_group : '<span class="text-muted">Not set</span>'}
+                    ${teacher.year_group ? `
+                        <div class="year-group-badges">
+                            ${teacher.year_group.split(',').map(year => 
+                                `<span class="badge bg-primary me-1">Year ${escapeHtml(year.trim())}</span>`
+                            ).join('')}
+                        </div>
+                    ` : '<span class="text-muted">Not set</span>'}
                 </td>
                 <td class="mobile-hide">
-                    ${teacher.program ? formatProgramName(teacher.program) : '<span class="text-muted">Not set</span>'}
-                </td>
-                <td class="mobile-hide">
-                    ${teacher.assigned_students ? 
-                        (JSON.parse(teacher.assigned_students).length + ' student(s)') : 
-                        '<span class="text-muted">No students</span>'}
+                    ${teacher.program ? `
+                        <div class="program-badges">
+                            ${teacher.program.split(',').map(program => {
+                                const formattedProgram = formatProgramNames(program);
+                                return `<span class="badge bg-info me-1 mb-1">${escapeHtml(formattedProgram)}</span>`;
+                            }).join('')}
+                        </div>
+                    ` : '<span class="text-muted">Not set</span>'}
                 </td>
                 <td class="mobile-hide">
                     ${teacher.last_login ? formatUKDateTime(teacher.last_login) : '<span class="text-muted">Never</span>'}
@@ -181,8 +298,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     <div class="btn-group btn-group-sm">
                         <button type="button" class="btn btn-outline-primary edit-btn" 
                                 data-teacher-id="${teacher.id}" 
-                                data-teacher-name="${teacher.name}" 
-                                data-teacher-email="${teacher.email}" 
+                                data-teacher-name="${escapeHtml(teacher.name)}" 
+                                data-teacher-email="${escapeHtml(teacher.email)}" 
                                 data-teacher-approved="${teacher.is_approved}"
                                 data-year-group="${teacher.year_group || ''}"
                                 data-program="${teacher.program || ''}">
@@ -191,68 +308,56 @@ document.addEventListener('DOMContentLoaded', function() {
                         ${approveButton}
                         <button type="button" class="btn btn-outline-danger remove-btn" 
                                 data-teacher-id="${teacher.id}" 
-                                data-teacher-name="${teacher.name}" 
-                                data-teacher-email="${teacher.email}">
+                                data-teacher-name="${escapeHtml(teacher.name)}" 
+                                data-teacher-email="${escapeHtml(teacher.email)}">
                             <i class="bi bi-trash"></i> Remove
                         </button>
                     </div>
                 </td>
             `;
 
-            frag.append(row);
+            frag.appendChild(row);
         });
         
         // Append all rows at once using the document fragment
-        document.getElementById('teacherTableBody').append(frag);
+        teacherTableBody.appendChild(frag);
 
-        // Reattach event listeners to new buttons
-        attachEventListeners();
+        // Update counts
+        visibleCount.textContent = teachers.length;
+        if (totalCount) totalCount.textContent = teachers.length;
 
-        // Update rows and filter
+        // Update rows reference and attach event listeners
         rows = teacherTableBody.querySelectorAll('tr[data-name]');
-
-        // Call filterTable to update the counts properly
-        filterTable();
-    }
-
-    // Helper function to format program names for display
-    function formatProgramName(programValue) {
-        const programMap = {
-            'weekday_morning_hifdh': 'Weekday Morning Hifdh',
-            'weekday_evening_hifdh': 'Weekday Evening Hifdh',
-            'weekend_evening_islamic_studies': 'Weekend Evening Islamic Studies',
-            'weekend_hifdh': 'Weekend Hifdh',
-            'weekend_islamic_studies': 'Weekend Islamic Studies'
-        };
-        return programMap[programValue] || programValue;
+        attachEventListeners();
     }
 
     // Attach event listeners to dynamic buttons
     function attachEventListeners() {
         // Edit buttons
         document.querySelectorAll('.edit-btn').forEach(button => {
+            button.removeEventListener('click', handleEditClick);
             button.addEventListener('click', handleEditClick);
         });
         
         // Approve buttons
         document.querySelectorAll('.approve-btn').forEach(button => {
+            button.removeEventListener('click', handleApproveClick);
             button.addEventListener('click', handleApproveClick);
         });
         
         // Remove buttons
         document.querySelectorAll('.remove-btn').forEach(button => {
+            button.removeEventListener('click', handleRemoveClick);
             button.addEventListener('click', handleRemoveClick);
         });
     }
 
-    // Update filterTable function to include program filtering
+    // Filter table function
     function filterTable() {
         const searchTerm = searchInput.value.toLowerCase();
         let visibleRows = 0;
-        let totalRows = 0;
 
         rows.forEach(row => {
-            totalRows++;
             const name = row.getAttribute('data-name');
             const email = row.getAttribute('data-email');
             const status = row.getAttribute('data-status');
@@ -261,12 +366,22 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const matchesSearch = name.includes(searchTerm) || email.includes(searchTerm);
             const matchesStatus = currentStatusFilter === 'all' || status === currentStatusFilter;
-            const matchesYearGroup = currentYearGroupFilter === 'all' || 
-                                   (currentYearGroupFilter === 'not_set' && yearGroup === 'not_set') ||
-                                   yearGroup === currentYearGroupFilter;
-            const matchesProgram = currentProgramFilter === 'all' || 
-                                 (currentProgramFilter === 'not_set' && program === 'not_set') ||
-                                 program === currentProgramFilter;
+            
+            // For year group filtering, check if the year group string contains the filter value
+            let matchesYearGroup = currentYearGroupFilter === 'all';
+            if (currentYearGroupFilter === 'not_set') {
+                matchesYearGroup = yearGroup === 'not_set';
+            } else if (currentYearGroupFilter !== 'all') {
+                matchesYearGroup = yearGroup.includes(currentYearGroupFilter);
+            }
+            
+            // For program filtering, check if the program string contains the filter value
+            let matchesProgram = currentProgramFilter === 'all';
+            if (currentProgramFilter === 'not_set') {
+                matchesProgram = program === 'not_set';
+            } else if (currentProgramFilter !== 'all') {
+                matchesProgram = program.includes(currentProgramFilter);
+            }
 
             if (matchesSearch && matchesStatus && matchesYearGroup && matchesProgram) {
                 row.style.display = '';
@@ -279,21 +394,10 @@ document.addEventListener('DOMContentLoaded', function() {
         // Update visible count
         visibleCount.textContent = visibleRows;
 
-        // Update total count
-        const totalCount = document.getElementById('totalCount');
-        if (totalCount) {
-            totalCount.textContent = totalRows;
-        }
-
-        // Update filter button appearance based on active filter
+        // Update filter button appearance
         const hasActiveFilter = currentStatusFilter !== 'all' || currentYearGroupFilter !== 'all' || currentProgramFilter !== 'all';
-        if (hasActiveFilter) {
-            filterBtn.classList.remove('btn-outline-primary');
-            filterBtn.classList.add('btn-success');
-        } else {
-            filterBtn.classList.remove('btn-success');
-            filterBtn.classList.add('btn-outline-primary');
-        }
+        filterBtn.classList.toggle('btn-success', hasActiveFilter);
+        filterBtn.classList.toggle('btn-outline-primary', !hasActiveFilter);
     }
 
     // Search functionality
@@ -301,13 +405,48 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Refresh functionality
     refreshBtn.addEventListener('click', function() {
-        const refreshIcon = this.querySelector('i');
-        refreshIcon.classList.add('refresh-spin');
-        refreshTableData(true); // true = show toast
-        setTimeout(() => refreshIcon.classList.remove('refresh-spin'), 600);
+        const button = this;
+        const originalHTML = button.innerHTML;
+
+        // Show loading state on button only
+        button.disabled = true;
+        button.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Refreshing...';
+
+        // Add refresh animation to icon
+        const refreshIcon = button.querySelector('.spinner-border') || button.querySelector('i');
+        if (refreshIcon) {
+            refreshIcon.classList.add('refresh-spin');
+        }
+
+        fetch(`../php/get_teachers.php?bid=${browserInstanceId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    updateTable(data.teachers);
+                    showToast('Teachers list refreshed successfully!', 'success');
+                } else {
+                    showToast('Error refreshing table', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error refreshing table:', error);
+                showToast('Error refreshing table', 'error');
+            })
+            .finally(() => {
+                // Restore button state
+                setTimeout(() => {
+                    button.disabled = false;
+                    button.innerHTML = originalHTML;
+
+                    // Remove refresh animation
+                    if (refreshIcon) {
+                        refreshIcon.classList.remove('refresh-spin');
+                    }
+                }, 300);
+            });
     });
     
-    // Update filter modal functionality
+    // Filter modal functionality
     filterBtn.addEventListener('click', function() {
         statusSelect.value = currentStatusFilter;
         yearGroupFilterSelect.value = currentYearGroupFilter;
@@ -323,7 +462,6 @@ document.addEventListener('DOMContentLoaded', function() {
         filterModal.hide();
     });
 
-    // Update clear filter functionality
     clearFilterBtn.addEventListener('click', function() {
         currentStatusFilter = 'all';
         currentYearGroupFilter = 'all';
@@ -335,8 +473,10 @@ document.addEventListener('DOMContentLoaded', function() {
         filterModal.hide();
     });
 
-    // Update the handleEditClick function to include program
+    // Edit teacher functionality - FIXED VERSION
     function handleEditClick() {
+        console.log('Edit button clicked');
+        
         const teacherId = this.getAttribute('data-teacher-id');
         const teacherName = this.getAttribute('data-teacher-name');
         const teacherEmail = this.getAttribute('data-teacher-email');
@@ -344,30 +484,48 @@ document.addEventListener('DOMContentLoaded', function() {
         const yearGroup = this.getAttribute('data-year-group');
         const program = this.getAttribute('data-program');
 
-        console.log('Edit clicked - Program:', program); // Debug
+        console.log('Teacher data:', { teacherId, teacherName, teacherEmail, teacherApproved, yearGroup, program });
 
-        // Populate form
+        // Populate basic form fields
         editTeacherId.value = teacherId;
         editName.value = teacherName;
         editEmail.value = teacherEmail;
-        editYearGroup.value = yearGroup || '';
-        editProgram.value = program || '';
 
-        // Disable year group and program dropdowns if teacher is not approved
-        const isApproved = teacherApproved === '1';
-        if (isApproved) {
-            editYearGroup.disabled = false;
-            editYearGroup.title = '';
-            editProgram.disabled = false;
-            editProgram.title = '';
-        } else {
-            editYearGroup.disabled = true;
-            editYearGroup.title = 'Year group can only be set after teacher is approved';
-            editProgram.disabled = true;
-            editProgram.title = 'Program can only be set after teacher is approved';
+        // Clear previous selections
+        clearMultiSelectSelections();
+
+        // Handle multiple year groups
+        if (yearGroup && yearGroup !== '') {
+            const yearGroups = yearGroup.split(',').map(y => y.trim());
+            console.log('Setting year groups:', yearGroups);
+            
+            document.querySelectorAll('.multi-select-card:first-child .multi-select-option').forEach(option => {
+                const value = option.getAttribute('data-value');
+                if (yearGroups.includes(value)) {
+                    option.classList.add('selected');
+                }
+            });
+            updateYearGroupSelection();
         }
 
+        // Handle multiple programs
+        if (program && program !== '') {
+            const programs = program.split(',').map(p => p.trim());
+            console.log('Setting programs:', programs);
+            
+            document.querySelectorAll('.multi-select-card:last-child .multi-select-option').forEach(option => {
+                const value = option.getAttribute('data-value');
+                if (programs.includes(value)) {
+                    option.classList.add('selected');
+                }
+            });
+            updateProgramSelection();
+        }
+
+        // Set approval status and enable/disable multi-select
+        const isApproved = teacherApproved === '1';
         editApproved.checked = isApproved;
+        setMultiSelectEnabled(isApproved);
 
         // Store original data for comparison
         originalFormData = {
@@ -381,43 +539,35 @@ document.addEventListener('DOMContentLoaded', function() {
         // Reset save button
         saveChangesBtn.disabled = true;
 
+        // Show the modal
+        console.log('Showing edit modal');
         editModal.show();
     }
 
-    // Update form change detection to include program
-    [editName, editEmail, editApproved, editYearGroup, editProgram].forEach(element => {
+    // Form change detection
+    [editName, editEmail].forEach(element => {
         element.addEventListener('input', checkFormChanges);
-        element.addEventListener('change', checkFormChanges);
     });
 
-    // Update approval checkbox handler to enable/disable both year group and program
     editApproved.addEventListener('change', function() {
-        if (this.checked) {
-            // When approved, enable year group and program dropdowns
-            editYearGroup.disabled = false;
-            editYearGroup.title = '';
-            editProgram.disabled = false;
-            editProgram.title = '';
-        } else {
-            // When not approved, disable year group and program and clear them
-            editYearGroup.disabled = true;
-            editYearGroup.title = 'Year group can only be set after teacher is approved';
-            editYearGroup.value = '';
-            editProgram.disabled = true;
-            editProgram.title = 'Program can only be set after teacher is approved';
-            editProgram.value = '';
+        setMultiSelectEnabled(this.checked);
+        if (!this.checked) {
+            clearMultiSelectSelections();
         }
         checkFormChanges();
     });
 
-    // Update checkFormChanges function - FIXED to detect program changes
+    // Check form changes
     function checkFormChanges() {
+        const currentYearGroups = editYearGroup.value;
+        const currentPrograms = editProgram.value;
+
         const currentData = {
             name: editName.value,
             email: editEmail.value,
             is_approved: editApproved.checked,
-            year_group: editYearGroup.value,
-            program: editProgram.value
+            year_group: currentYearGroups,
+            program: currentPrograms
         };
 
         const hasChanges = currentData.name !== originalFormData.name ||
@@ -429,17 +579,28 @@ document.addEventListener('DOMContentLoaded', function() {
         saveChangesBtn.disabled = !hasChanges;
     }
 
-    // Update save functionality to include program
+    // Save teacher changes
     saveChangesBtn.addEventListener('click', function() {
         const formData = new FormData();
         const isApproved = editApproved.checked ? '1' : '0';
+        
+        // Get selected year groups and programs
+        const selectedYearGroups = editYearGroup.value ? editYearGroup.value.split(',') : [];
+        const selectedPrograms = editProgram.value ? editProgram.value.split(',') : [];
 
         formData.append('teacher_id', editTeacherId.value);
         formData.append('name', editName.value);
         formData.append('email', editEmail.value);
-        formData.append('year_group', editYearGroup.value);
-        formData.append('program', editProgram.value);
         formData.append('is_approved', isApproved);
+        
+        // Append year groups and programs as arrays
+        selectedYearGroups.forEach(yearGroup => {
+            formData.append('year_group[]', yearGroup);
+        });
+        
+        selectedPrograms.forEach(program => {
+            formData.append('program[]', program);
+        });
 
         // Show loading state
         saveChangesBtn.disabled = true;
@@ -451,7 +612,6 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(response => response.json())
         .then(data => {
-            console.log('Server response:', data);
             if (data.success) {
                 editModal.hide();
                 showToast('Teacher updated successfully!', 'success');
@@ -562,10 +722,17 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Initialize
-    attachEventListeners();
-    filterTable();
+    // Initialize everything
+    function initializePage() {
+        console.log('Initializing teacher accounts page...');
+        initializeMultiSelect();
+        refreshTableData(false);
+        attachEventListeners();
+    }
+
+    // Start the page
+    initializePage();
     
     // Debug: Check if variables are properly set
-    console.log('Initialization complete - Browser Instance ID:', browserInstanceId);
+    console.log('Teacher accounts page initialized - Browser Instance ID:', browserInstanceId);
 });

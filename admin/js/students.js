@@ -609,6 +609,33 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
         `;
     }
+        
+    function handleUrlSearchParam() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const searchParam = urlParams.get('search');
+        const viewStudent = urlParams.get('view_student');
+
+        if (searchParam && searchInput) {
+            searchInput.value = searchParam;
+            searchAndFilterStudents(searchParam.toLowerCase());
+
+            // If we're viewing a specific student, scroll to them after a brief delay
+            if (viewStudent) {
+                setTimeout(() => {
+                    const studentRow = document.querySelector(`tr[data-student-id="${viewStudent}"]`);
+                    if (studentRow) {
+                        studentRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+                        // Add highlight effect
+                        studentRow.style.backgroundColor = '#e7f1ff';
+                        setTimeout(() => {
+                            studentRow.style.backgroundColor = '';
+                        }, 2000);
+                    }
+                }, 500);
+            }
+        }
+    }
 
     // Edit student
     function handleEditClick() {
@@ -791,6 +818,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Initialize
     attachEventListeners();
+        
+    handleUrlSearchParam();
     
     // Debug: Check if variables are properly set
     console.log('Students page initialized - Browser Instance ID:', browserInstanceId);
