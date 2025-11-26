@@ -92,6 +92,26 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (shouldShow) {
                 visibleRows++;
+
+                // Hide details row
+                const detailsRow = row.nextElementSibling;
+                if (detailsRow && detailsRow.classList.contains('student-details-row')) {
+                    detailsRow.style.display = 'none';
+                    const detailsDiv = detailsRow.querySelector('.student-details');
+                    if (detailsDiv) {
+                        detailsDiv.classList.remove('show');
+                    }
+                }
+            } else {
+                // Also hide the details row
+                const detailsRow = row.nextElementSibling;
+                if (detailsRow && detailsRow.classList.contains('student-details-row')) {
+                    detailsRow.style.display = 'none';
+                    const detailsDiv = detailsRow.querySelector('.student-details');
+                    if (detailsDiv) {
+                        detailsDiv.classList.remove('show');
+                    }
+                }
             }
         });
 
@@ -177,6 +197,7 @@ document.addEventListener('DOMContentLoaded', function() {
             row.setAttribute('data-year-group', (student.year_group || '').toLowerCase());
             row.setAttribute('data-teacher', (student.teacher_name || 'Unassigned').toLowerCase());
             row.setAttribute('data-age', student.student_age || '0');
+            row.setAttribute('data-student-id', student.id);
 
             row.innerHTML = `
                 <td class="fw-semibold">
@@ -193,6 +214,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 </td>
                 <td>
                     <div class="btn-group btn-group-sm">
+                        <button type="button" 
+                                class="btn btn-outline-primary view-btn" 
+                                data-student-id="${student.id}">
+                            <i class="bi bi-eye"></i> View
+                        </button>
                         <button type="button" 
                                 class="btn btn-outline-primary edit-btn" 
                                 data-student-id="${student.id}"
@@ -211,6 +237,21 @@ document.addEventListener('DOMContentLoaded', function() {
             `;
 
             frag.append(row);
+
+            // Create details row
+            const detailsRow = document.createElement('tr');
+            detailsRow.className = 'student-details-row';
+            detailsRow.style.display = 'none';
+            detailsRow.innerHTML = `
+                <td colspan="6">
+                    <div class="student-details" id="details-${student.id}">
+                        <div class="text-center text-muted py-3">
+                            <i class="bi bi-hourglass-split"></i> Click "View" to load details
+                        </div>
+                    </div>
+                </td>
+            `;
+            frag.append(detailsRow);
         });
         
         // Append all rows at once using the document fragment
@@ -234,6 +275,339 @@ document.addEventListener('DOMContentLoaded', function() {
             .replace(/>/g, "&gt;")
             .replace(/"/g, "&quot;")
             .replace(/'/g, "&#039;");
+    }
+
+    // View student details - EXACT SAME FUNCTIONALITY AS APPLICATIONS PAGE
+    function handleViewClick() {
+        const studentId = this.getAttribute('data-student-id');
+        const detailsRow = this.closest('tr').nextElementSibling;
+        const detailsDiv = document.getElementById(`details-${studentId}`);
+        const isOpening = detailsRow.style.display === 'none';
+
+        // Close all other open details first
+        document.querySelectorAll('.student-details-row').forEach(row => {
+            if (row !== detailsRow) {
+                const otherDiv = row.querySelector('.student-details');
+                if (otherDiv) {
+                    otherDiv.classList.remove('show');
+                    setTimeout(() => {
+                        row.style.display = 'none';
+                    }, 300);
+                }
+            }
+        });
+
+        // Remove active state from all view buttons
+        document.querySelectorAll('.view-btn').forEach(btn => {
+            btn.classList.remove('active');
+            btn.classList.remove('btn-primary');
+            btn.classList.add('btn-outline-primary');
+        });
+
+        if (isOpening) {
+            // Load details content dynamically
+            loadStudentDetails(studentId, detailsDiv);
+
+            // Open this one
+            detailsRow.style.display = 'table-row';
+            setTimeout(() => {
+                detailsDiv.classList.add('show');
+            }, 10);
+
+            // Add active state to this button
+            this.classList.remove('btn-outline-primary');
+            this.classList.add('btn-primary', 'active');
+        } else {
+            // Close this one
+            detailsDiv.classList.remove('show');
+            setTimeout(() => {
+                detailsRow.style.display = 'none';
+            }, 300);
+
+            // Remove active state
+            this.classList.remove('btn-primary', 'active');
+            this.classList.add('btn-outline-primary');
+        }
+    }
+
+    // Function to load student details - EXACT SAME AS APPLICATIONS
+    function loadStudentDetails(studentId, detailsDiv) {
+        // Show loading state
+        detailsDiv.innerHTML = '<div class="text-center text-muted py-3"><i class="bi bi-hourglass-split"></i> Loading details...</div>';
+
+        fetch(`../php/get_student_full_details.php?id=${studentId}&bid=${browserInstanceId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    detailsDiv.innerHTML = generateDetailsHTML(data.student);
+                } else {
+                    detailsDiv.innerHTML = '<div class="text-center text-danger py-3"><i class="bi bi-exclamation-triangle"></i> Error loading details</div>';
+                }
+            })
+            .catch(error => {
+                console.error('Error loading student details:', error);
+                detailsDiv.innerHTML = '<div class="text-center text-danger py-3"><i class="bi bi-exclamation-triangle"></i> Error loading details</div>';
+            });
+    }
+
+    // Function to generate detailed HTML from student data - EXACT SAME DESIGN AS APPLICATIONS
+    function generateDetailsHTML(student) {
+        // Helper function to check if medical info should be shown
+        const hasMedicalInfo = (student.illness === 'Yes' && student.illness_details) || 
+                              (student.special_needs === 'Yes' && student.special_needs_details) || 
+                              (student.allergies === 'Yes' && student.allergies_details);
+
+        return `
+            <!-- Student & Program Header -->
+            <div class="detail-section">
+                <div class="row compact-layout">
+                    <div class="col-md-8">
+                        <h5 class="detail-label">
+                            <i class="bi bi-person-badge"></i>
+                            Student Information - ${escapeHtml(student.student_first_name + ' ' + student.student_last_name)}
+                        </h5>
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <strong>Full Name</strong>
+                                <span>${escapeHtml(student.student_first_name + ' ' + student.student_last_name)}</span>
+                            </div>
+                            <div class="detail-item">
+                                <strong>Age</strong>
+                                <span>${student.student_age || 'N/A'}</span>
+                            </div>
+                            <div class="detail-item">
+                                <strong>Gender</strong>
+                                <span>${escapeHtml(student.student_gender || 'N/A')}</span>
+                            </div>
+                            <div class="detail-item">
+                                <strong>Date of Birth</strong>
+                                <span>${student.student_dob ? escapeHtml(student.student_dob) : 'N/A'}</span>
+                            </div>
+                            <div class="detail-item">
+                                <strong>Current School</strong>
+                                <span>${escapeHtml(student.student_school || 'N/A')}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="parent-card">
+                            <h6><i class="bi bi-info-circle"></i> Program Details</h6>
+                            <div class="contact-info">
+                                <div class="contact-item">
+                                    <i class="bi bi-book"></i>
+                                    <span><strong>Program:</strong> ${escapeHtml(student.interested_program || 'N/A')}</span>
+                                </div>
+                                <div class="contact-item">
+                                    <i class="bi bi-mortarboard"></i>
+                                    <span><strong>Year Group:</strong> ${escapeHtml(student.year_group || 'N/A')}</span>
+                                </div>
+                                ${student.year_group_other ? `
+                                <div class="contact-item">
+                                    <i class="bi bi-pencil"></i>
+                                    <span><strong>Other:</strong> ${escapeHtml(student.year_group_other)}</span>
+                                </div>
+                                ` : ''}
+                                ${student.teacher_name ? `
+                                <div class="contact-item">
+                                    <i class="bi bi-person-badge"></i>
+                                    <span><strong>Assigned Teacher:</strong> ${escapeHtml(student.teacher_name)}</span>
+                                </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Parent Information -->
+            <div class="detail-section">
+                <h6 class="detail-label"><i class="bi bi-people"></i> Parent/Guardian Information</h6>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="parent-card">
+                            <h6><i class="bi bi-person-check"></i> Primary Parent</h6>
+                            <div class="contact-info">
+                                <div class="contact-item">
+                                    <i class="bi bi-person"></i>
+                                    <span>${escapeHtml(student.parent1_first_name + ' ' + student.parent1_last_name)}</span>
+                                </div>
+                                <div class="contact-item">
+                                    <i class="bi bi-diagram-3"></i>
+                                    <span>${escapeHtml(student.parent1_relationship || 'N/A')}</span>
+                                    ${student.parent1_relationship_other ? `
+                                    <br><small class="text-muted">(${escapeHtml(student.parent1_relationship_other)})</small>
+                                    ` : ''}
+                                </div>
+                                <div class="contact-item">
+                                    <i class="bi bi-phone"></i>
+                                    <span>${escapeHtml(student.parent1_mobile || 'N/A')}</span>
+                                </div>
+                                <div class="contact-item">
+                                    <i class="bi bi-envelope"></i>
+                                    <span>${escapeHtml(student.parent1_email || 'N/A')}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    ${student.parent2_first_name ? `
+                    <div class="col-md-6">
+                        <div class="parent-card">
+                            <h6><i class="bi bi-person-plus"></i> Additional Parent</h6>
+                            <div class="contact-info">
+                                <div class="contact-item">
+                                    <i class="bi bi-person"></i>
+                                    <span>${escapeHtml(student.parent2_first_name + ' ' + student.parent2_last_name)}</span>
+                                </div>
+                                <div class="contact-item">
+                                    <i class="bi bi-diagram-3"></i>
+                                    <span>${escapeHtml(student.parent2_relationship || 'N/A')}</span>
+                                    ${student.parent2_relationship_other ? `
+                                    <br><small class="text-muted">(${escapeHtml(student.parent2_relationship_other)})</small>
+                                    ` : ''}
+                                </div>
+                                ${student.parent2_mobile ? `
+                                <div class="contact-item">
+                                    <i class="bi bi-phone"></i>
+                                    <span>${escapeHtml(student.parent2_mobile)}</span>
+                                </div>
+                                ` : ''}
+                                ${student.parent2_email ? `
+                                <div class="contact-item">
+                                    <i class="bi bi-envelope"></i>
+                                    <span>${escapeHtml(student.parent2_email)}</span>
+                                </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+                    ` : ''}
+                </div>
+                <div class="mt-3">
+                    <div class="parent-card emergency-contact-card">
+                        <h6><i class="bi bi-exclamation-triangle"></i> Emergency Contact</h6>
+                        <div class="contact-item">
+                            <i class="bi bi-telephone-forward"></i>
+                            <span class="fw-bold">${escapeHtml(student.emergency_contact || 'N/A')}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Address -->
+            <div class="detail-section">
+                <h6 class="detail-label"><i class="bi bi-geo-alt"></i> Address</h6>
+                <div class="parent-card">
+                    <div class="contact-info">
+                        <div class="contact-item">
+                            <i class="bi bi-house"></i>
+                            <span>${escapeHtml(student.address || 'N/A')}</span>
+                        </div>
+                        <div class="contact-item">
+                            <i class="bi bi-building"></i>
+                            <span>${escapeHtml(student.city || 'N/A')}${student.county ? ', ' + escapeHtml(student.county) : ''}</span>
+                        </div>
+                        <div class="contact-item">
+                            <i class="bi bi-mailbox"></i>
+                            <span>${escapeHtml(student.postal_code || 'N/A')}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Medical & Additional Info -->
+            ${hasMedicalInfo ? `
+            <div class="detail-section">
+                <h6 class="detail-label"><i class="bi bi-heart-pulse"></i> Health Information</h6>
+                <div class="row">
+                    ${student.illness === 'Yes' && student.illness_details ? `
+                    <div class="col-md-4">
+                        <div class="parent-card medical-info">
+                            <h6><i class="bi bi-heart-pulse"></i> Medical Conditions</h6>
+                            <p class="mb-0 small">${escapeHtml(student.illness_details)}</p>
+                        </div>
+                    </div>
+                    ` : ''}
+
+                    ${student.special_needs === 'Yes' && student.special_needs_details ? `
+                    <div class="col-md-4">
+                        <div class="parent-card special-needs-info">
+                            <h6><i class="bi bi-person-badge"></i> Special Needs</h6>
+                            <p class="mb-0 small">${escapeHtml(student.special_needs_details)}</p>
+                        </div>
+                    </div>
+                    ` : ''}
+
+                    ${student.allergies === 'Yes' && student.allergies_details ? `
+                    <div class="col-md-4">
+                        <div class="parent-card allergy-info">
+                            <h6><i class="bi bi-exclamation-triangle"></i> Allergies</h6>
+                            <p class="mb-0 small">${escapeHtml(student.allergies_details)}</p>
+                        </div>
+                    </div>
+                    ` : ''}
+                </div>
+            </div>
+            ` : ''}
+
+            <!-- Permissions -->
+            <div class="detail-section">
+                <h6 class="detail-label"><i class="bi bi-shield-check"></i> Permissions & Information</h6>
+                <div class="permissions-grid">
+                    <div class="permission-item">
+                        <i class="bi bi-water"></i>
+                        <span>Swimming: ${escapeHtml(student.knows_swimming || 'N/A')}</span>
+                    </div>
+                    <div class="permission-item">
+                        <i class="bi bi-car-front"></i>
+                        <span>Travel Sickness: ${escapeHtml(student.travel_sickness || 'N/A')}</span>
+                    </div>
+                    <div class="permission-item">
+                        <i class="bi bi-geo-alt"></i>
+                        <span>Travel Permission: ${escapeHtml(student.travel_permission || 'N/A')}</span>
+                    </div>
+                    <div class="permission-item">
+                        <i class="bi bi-camera"></i>
+                        <span>Photo Permission: ${escapeHtml(student.photo_permission || 'N/A')}</span>
+                    </div>
+                    <div class="permission-item">
+                        <i class="bi bi-bus-front"></i>
+                        <span>Transport: ${escapeHtml(student.transport_mode || 'N/A')}</span>
+                    </div>
+                    <div class="permission-item">
+                        <i class="bi bi-house-door"></i>
+                        <span>Home Alone: ${escapeHtml(student.go_home_alone || 'N/A')}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Islamic Education -->
+            ${student.attended_islamic_education === 'Yes' ? `
+            <div class="detail-section">
+                <h6 class="detail-label"><i class="bi bi-book-half"></i> Islamic Education History</h6>
+                <div class="parent-card">
+                    <div class="contact-info">
+                        ${student.islamic_years ? `
+                        <div class="contact-item">
+                            <i class="bi bi-calendar"></i>
+                            <span><strong>Years Attended:</strong> ${escapeHtml(student.islamic_years)}</span>
+                        </div>
+                        ` : ''}
+                        ${student.islamic_education_details ? `
+                        <div class="contact-item">
+                            <i class="bi bi-journal-text"></i>
+                            <span><strong>Details:</strong> ${escapeHtml(student.islamic_education_details)}</span>
+                        </div>
+                        ` : ''}
+                    </div>
+                </div>
+            </div>
+            ` : ''}
+
+            <!-- Submission Date -->
+            <div class="text-center mt-3">
+                <small class="text-muted">Application submitted on: ${student.submitted_at ? new Date(student.submitted_at).toLocaleString() : 'N/A'}</small>
+            </div>
+        `;
     }
 
     // Edit student
@@ -399,6 +773,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Attach event listeners
     function attachEventListeners() {
+        // View buttons
+        document.querySelectorAll('.view-btn').forEach(button => {
+            button.addEventListener('click', handleViewClick);
+        });
+
         // Edit buttons
         document.querySelectorAll('.edit-btn').forEach(button => {
             button.addEventListener('click', handleEditClick);

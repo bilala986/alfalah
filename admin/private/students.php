@@ -17,6 +17,39 @@ $stmt = $pdo->prepare("SELECT
     ia.student_gender,
     ia.student_dob,
     ia.student_school,
+    ia.parent1_first_name,
+    ia.parent1_last_name,
+    ia.parent1_relationship,
+    ia.parent1_relationship_other,
+    ia.parent1_mobile,
+    ia.parent1_email,
+    ia.parent2_first_name,
+    ia.parent2_last_name,
+    ia.parent2_relationship,
+    ia.parent2_relationship_other,
+    ia.parent2_mobile,
+    ia.parent2_email,
+    ia.emergency_contact,
+    ia.address,
+    ia.city,
+    ia.county,
+    ia.postal_code,
+    ia.illness,
+    ia.illness_details,
+    ia.special_needs,
+    ia.special_needs_details,
+    ia.allergies,
+    ia.allergies_details,
+    ia.knows_swimming,
+    ia.travel_sickness,
+    ia.travel_permission,
+    ia.photo_permission,
+    ia.transport_mode,
+    ia.go_home_alone,
+    ia.attended_islamic_education,
+    ia.islamic_years,
+    ia.islamic_education_details,
+    ia.submitted_at,
     tu.name as teacher_name,
     tu.id as teacher_id
 FROM students s
@@ -73,6 +106,42 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                 }
             }
             
+            .student-details {
+                max-height: 0;
+                overflow: hidden;
+                transition: max-height 0.3s ease-out;
+                background-color: #f8f9fa;
+                border-radius: 0.375rem;
+            }
+
+            .student-details.show {
+                max-height: none; /* ← REMOVE HEIGHT RESTRICTION */
+                height: auto;     /* ← ALLOW NATURAL HEIGHT */
+                padding: 1rem;
+                margin-top: 0.5rem;
+                border: 1px solid #dee2e6;
+            }
+            
+            .detail-section {
+                margin-bottom: 1rem;
+                padding-bottom: 1rem;
+                border-bottom: 1px solid #e9ecef;
+            }
+            
+            .detail-section:last-child {
+                border-bottom: none;
+                margin-bottom: 0;
+            }
+            
+            .detail-label {
+                font-weight: 600;
+                color: #495057;
+            }
+            
+            .detail-value {
+                color: #6c757d;
+            }
+            
             /* Toast positioning */
             .toast-container {
                 z-index: 9999;
@@ -107,6 +176,104 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
             .toast.bg-danger .toast-header {
                 background-color: #dc3545 !important;
                 color: white;
+            }
+
+            /* Detail grid styles from applications page */
+            .detail-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 1rem;
+                margin-top: 0.5rem;
+            }
+            
+            .detail-item {
+                display: flex;
+                flex-direction: column;
+            }
+            
+            .detail-item strong {
+                font-size: 0.875rem;
+                color: #6c757d;
+                margin-bottom: 0.25rem;
+            }
+            
+            .compact-layout {
+                align-items: start;
+            }
+            
+            .parent-card {
+                background: white;
+                border: 1px solid #e9ecef;
+                border-radius: 0.375rem;
+                padding: 1rem;
+                height: 100%;
+            }
+            
+            .parent-card h6 {
+                color: #495057;
+                margin-bottom: 0.75rem;
+                font-size: 0.9rem;
+            }
+            
+            .contact-info {
+                display: flex;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .contact-item {
+                display: flex;
+                align-items: flex-start;
+                gap: 0.5rem;
+                font-size: 0.875rem;
+            }
+            
+            .contact-item i {
+                color: #6c757d;
+                margin-top: 0.125rem;
+                flex-shrink: 0;
+            }
+            
+            .emergency-contact-card {
+                background: #fff3cd;
+                border-color: #ffeaa7;
+            }
+            
+            .medical-info {
+                background: #f8d7da;
+                border-color: #f5c6cb;
+            }
+            
+            .special-needs-info {
+                background: #d1ecf1;
+                border-color: #bee5eb;
+            }
+            
+            .allergy-info {
+                background: #fff3cd;
+                border-color: #ffeaa7;
+            }
+            
+            .permissions-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: 1rem;
+                margin-top: 0.5rem;
+            }
+            
+            .permission-item {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                padding: 0.5rem;
+                background: white;
+                border: 1px solid #e9ecef;
+                border-radius: 0.375rem;
+                font-size: 0.875rem;
+            }
+            
+            .permission-item i {
+                color: #6c757d;
             }
         </style>
     </head>
@@ -218,7 +385,8 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                                         data-program="<?= htmlspecialchars(strtolower($student['interested_program'])) ?>"
                                         data-year-group="<?= htmlspecialchars(strtolower($student['year_group'])) ?>"
                                         data-teacher="<?= htmlspecialchars(strtolower($student['teacher_name'] ?? 'Unassigned')) ?>"
-                                        data-age="<?= $student['student_age'] ?? '0' ?>">
+                                        data-age="<?= $student['student_age'] ?? '0' ?>"
+                                        data-student-id="<?= $student['id'] ?>">
                                         <td class="fw-semibold">
                                             <?= htmlspecialchars($student['student_first_name'] . ' ' . $student['student_last_name']) ?>
                                         </td>
@@ -240,6 +408,11 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                                         <td>
                                             <div class="btn-group btn-group-sm">
                                                 <button type="button" 
+                                                        class="btn btn-outline-primary view-btn" 
+                                                        data-student-id="<?= $student['id'] ?>">
+                                                    <i class="bi bi-eye"></i> View
+                                                </button>
+                                                <button type="button" 
                                                         class="btn btn-outline-primary edit-btn" 
                                                         data-student-id="<?= $student['id'] ?>"
                                                         data-student-name="<?= htmlspecialchars($student['student_first_name'] . ' ' . $student['student_last_name']) ?>">
@@ -251,6 +424,16 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                                                         data-student-name="<?= htmlspecialchars($student['student_first_name'] . ' ' . $student['student_last_name']) ?>">
                                                     <i class="bi bi-person-dash"></i> Remove
                                                 </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <!-- Student Details Row - Same design as applications page -->
+                                    <tr class="student-details-row" style="display: none;">
+                                        <td colspan="6">
+                                            <div class="student-details" id="details-<?= $student['id'] ?>">
+                                                <div class="text-center text-muted py-3">
+                                                    <i class="bi bi-hourglass-split"></i> Click "View" to load details
+                                                </div>
                                             </div>
                                         </td>
                                     </tr>
