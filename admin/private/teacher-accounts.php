@@ -11,6 +11,18 @@ if ($_SESSION['pending_approval']) {
 // Include database connection
 require_once $_SERVER['DOCUMENT_ROOT'] . '/alfalah/php/db_connect.php';
 
+// Function to format program names for display
+function formatProgramName($programValue) {
+    $programMap = [
+        'weekday_morning_hifdh' => 'Weekday Morning Hifdh',
+        'weekday_evening_hifdh' => 'Weekday Evening Hifdh',
+        'weekend_evening_islamic_studies' => 'Weekend Evening Islamic Studies',
+        'weekend_hifdh' => 'Weekend Hifdh',
+        'weekend_islamic_studies' => 'Weekend Islamic Studies'
+    ];
+    return $programMap[$programValue] ?? $programValue;
+}
+
 // Fetch all teacher users - UPDATED QUERY
 $stmt = $pdo->prepare("SELECT id, name, email, year_group, program, assigned_students, created_at, last_login, is_approved FROM teacher_users ORDER BY created_at DESC");
 $stmt->execute();
@@ -226,7 +238,7 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                             <tbody id="teacherTableBody">
                                 <?php if (empty($teachers)): ?>
                                     <tr>
-                                        <td colspan="6" class="text-center text-muted py-4">No teacher accounts found.</td>
+                                        <td colspan="8" class="text-center text-muted py-4">No teacher accounts found.</td>
                                     </tr>
                                 <?php else: ?>
                                     <?php 
@@ -250,7 +262,7 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                                         </td>
                                         <td class="mobile-hide">
                                             <?php if (!empty($teacher['program'])): ?>
-                                                <?= htmlspecialchars($teacher['program']) ?>
+                                                <?= htmlspecialchars(formatProgramName($teacher['program'])) ?>
                                             <?php else: ?>
                                                 <span class="text-muted">Not set</span>
                                             <?php endif; ?>
