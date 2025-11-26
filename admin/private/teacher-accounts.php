@@ -287,12 +287,12 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                             <!-- Year Groups Selection -->
                             <div class="mb-4">
                                 <label class="form-label fw-semibold">Year Groups</label>
-                                <div class="multi-select-card">
+                                <div class="multi-select-card" id="yearGroupSelectCard">
                                     <div class="multi-select-header">
                                         <span>Select year groups this teacher can teach</span>
                                         <small class="text-muted" id="yearGroupCount">0 selected</small>
                                     </div>
-                                    <div class="multi-select-grid">
+                                    <div class="multi-select-grid" id="yearGroupGrid">
                                         <?php for ($i = 1; $i <= 11; $i++): ?>
                                             <div class="multi-select-option" data-value="<?= $i ?>">
                                                 <div class="option-checkbox">
@@ -309,12 +309,12 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                             <!-- Programs Selection -->
                             <div class="mb-4">
                                 <label class="form-label fw-semibold">Programs</label>
-                                <div class="multi-select-card">
+                                <div class="multi-select-card" id="programSelectCard">
                                     <div class="multi-select-header">
                                         <span>Select programs this teacher can teach</span>
                                         <small class="text-muted" id="programCount">0 selected</small>
                                     </div>
-                                    <div class="multi-select-grid">
+                                    <div class="multi-select-grid" id="programGrid">
                                         <div class="multi-select-option" data-value="weekday_morning_hifdh">
                                             <div class="option-checkbox">
                                                 <i class="bi bi-check-lg"></i>

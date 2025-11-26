@@ -17,16 +17,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = trim($_POST['name'] ?? '');
     $email = trim($_POST['email'] ?? '');
     
-    // Handle multiple year groups
+    // Handle multiple year groups - FIXED: Check if array exists and is not empty
     $year_groups = '';
-    if (isset($_POST['year_group']) && is_array($_POST['year_group'])) {
-        $year_groups = implode(',', array_map('intval', $_POST['year_group']));
+    if (isset($_POST['year_group']) && is_array($_POST['year_group']) && !empty($_POST['year_group'])) {
+        // Validate each year group
+        $valid_years = [];
+        foreach ($_POST['year_group'] as $year) {
+            $year_int = intval($year);
+            if ($year_int >= 1 && $year_int <= 11) {
+                $valid_years[] = $year_int;
+            }
+        }
+        $year_groups = implode(',', $valid_years);
     }
     
-    // Handle multiple programs
+    // Handle multiple programs - FIXED: Check if array exists and is not empty
     $programs = '';
-    if (isset($_POST['program']) && is_array($_POST['program'])) {
-        $valid_programs = [
+    if (isset($_POST['program']) && is_array($_POST['program']) && !empty($_POST['program'])) {
+        $valid_programs_list = [
             'weekday_morning_hifdh',
             'weekday_evening_hifdh', 
             'weekend_evening_islamic_studies',
@@ -34,8 +42,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'weekend_islamic_studies'
         ];
         
-        $filtered_programs = array_filter($_POST['program'], function($program) use ($valid_programs) {
-            return in_array($program, $valid_programs);
+        $filtered_programs = array_filter($_POST['program'], function($program) use ($valid_programs_list) {
+            return in_array($program, $valid_programs_list);
         });
         
         $programs = implode(',', $filtered_programs);
@@ -68,6 +76,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Update teacher with year_groups and programs
         $stmt = $pdo->prepare("UPDATE teacher_users SET name = ?, email = ?, year_group = ?, program = ?, is_approved = ?, updated_at = NOW() WHERE id = ?");
         $stmt->execute([$name, $email, $year_groups, $programs, $is_approved, $teacher_id]);
+        
+        // Log the update for debugging
+        error_log("Teacher updated - ID: $teacher_id, Year Groups: $year_groups, Programs: $programs");
         
         echo json_encode([
             "success" => true, 

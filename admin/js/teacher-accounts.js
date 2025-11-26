@@ -1,5 +1,10 @@
 // admin/js/teacher-accounts.js
 document.addEventListener('DOMContentLoaded', function() {
+    
+    // TEMPORARY DEBUG - Add this at the very top of teacher-accounts.js
+    console.log('=== TEACHER ACCOUNTS JS LOADED ===');
+    console.log('Script version: 2.0 - Year Groups Debug');
+    
     // Helper function to escape HTML
     function escapeHtml(unsafe) {
         return unsafe
@@ -74,55 +79,98 @@ document.addEventListener('DOMContentLoaded', function() {
     // Get all rows (will be updated on refresh)
     let rows = [];
 
-    // Multi-select functionality
+    // Multi-select functionality - FIXED VERSION
     function initializeMultiSelect() {
-        // Year group options
-        const yearGroupOptions = document.querySelectorAll('.multi-select-card:first-child .multi-select-option');
-        yearGroupOptions.forEach(option => {
-            option.addEventListener('click', function() {
-                this.classList.toggle('selected');
-                updateYearGroupSelection();
-            });
-        });
+        console.log('Initializing multi-select...');
 
-        // Program options
-        const programOptions = document.querySelectorAll('.multi-select-card:last-child .multi-select-option');
-        programOptions.forEach(option => {
-            option.addEventListener('click', function() {
-                this.classList.toggle('selected');
-                updateProgramSelection();
+        // Year group options - use specific IDs
+        const yearGroupGrid = document.getElementById('yearGroupGrid');
+        if (yearGroupGrid) {
+            const yearGroupOptions = yearGroupGrid.querySelectorAll('.multi-select-option');
+            console.log('Year group options found:', yearGroupOptions.length);
+
+            yearGroupOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    console.log('Year group clicked:', this.getAttribute('data-value'));
+                    this.classList.toggle('selected');
+                    updateYearGroupSelection();
+                });
             });
-        });
+        } else {
+            console.error('Year group grid not found!');
+        }
+
+        // Program options - use specific IDs
+        const programGrid = document.getElementById('programGrid');
+        if (programGrid) {
+            const programOptions = programGrid.querySelectorAll('.multi-select-option');
+            console.log('Program options found:', programOptions.length);
+
+            programOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    console.log('Program clicked:', this.getAttribute('data-value'));
+                    this.classList.toggle('selected');
+                    updateProgramSelection();
+                });
+            });
+        } else {
+            console.error('Program grid not found!');
+        }
     }
 
     function updateYearGroupSelection() {
-        const selectedOptions = document.querySelectorAll('.multi-select-card:first-child .multi-select-option.selected');
+        const yearGroupGrid = document.getElementById('yearGroupGrid');
+        if (!yearGroupGrid) {
+            console.error('Year group grid not found for selection update!');
+            return;
+        }
+
+        const selectedOptions = yearGroupGrid.querySelectorAll('.multi-select-option.selected');
         const yearGroups = Array.from(selectedOptions).map(opt => opt.getAttribute('data-value'));
-        
+
+        console.log('Year groups selected:', yearGroups);
+
         editYearGroup.value = yearGroups.join(',');
         yearGroupCount.textContent = `${yearGroups.length} selected`;
         checkFormChanges();
     }
 
     function updateProgramSelection() {
-        const selectedOptions = document.querySelectorAll('.multi-select-card:last-child .multi-select-option.selected');
+        const programGrid = document.getElementById('programGrid');
+        if (!programGrid) {
+            console.error('Program grid not found for selection update!');
+            return;
+        }
+
+        const selectedOptions = programGrid.querySelectorAll('.multi-select-option.selected');
         const programs = Array.from(selectedOptions).map(opt => opt.getAttribute('data-value'));
-        
+
+        console.log('Programs selected:', programs);
+
         editProgram.value = programs.join(',');
         programCount.textContent = `${programs.length} selected`;
         checkFormChanges();
     }
 
     function clearMultiSelectSelections() {
+        console.log('Clearing multi-select selections...');
+
         // Clear year group selections
-        document.querySelectorAll('.multi-select-card:first-child .multi-select-option').forEach(option => {
-            option.classList.remove('selected');
-        });
+        const yearGroupGrid = document.getElementById('yearGroupGrid');
+        if (yearGroupGrid) {
+            yearGroupGrid.querySelectorAll('.multi-select-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+        }
+
         // Clear program selections
-        document.querySelectorAll('.multi-select-card:last-child .multi-select-option').forEach(option => {
-            option.classList.remove('selected');
-        });
-        
+        const programGrid = document.getElementById('programGrid');
+        if (programGrid) {
+            programGrid.querySelectorAll('.multi-select-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+        }
+
         yearGroupCount.textContent = '0 selected';
         programCount.textContent = '0 selected';
         editYearGroup.value = '';
@@ -130,24 +178,35 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function setMultiSelectEnabled(enabled) {
-        const allOptions = document.querySelectorAll('.multi-select-option');
-        allOptions.forEach(option => {
-            if (enabled) {
-                option.style.pointerEvents = 'auto';
-                option.style.opacity = '1';
-                option.style.cursor = 'pointer';
-            } else {
-                option.style.pointerEvents = 'none';
-                option.style.opacity = '0.6';
-                option.style.cursor = 'not-allowed';
-            }
-        });
+        console.log('Setting multi-select enabled:', enabled);
+
+        const yearGroupGrid = document.getElementById('yearGroupGrid');
+        const programGrid = document.getElementById('programGrid');
+
+        if (yearGroupGrid && programGrid) {
+            const allOptions = [
+                ...yearGroupGrid.querySelectorAll('.multi-select-option'),
+                ...programGrid.querySelectorAll('.multi-select-option')
+            ];
+
+            allOptions.forEach(option => {
+                if (enabled) {
+                    option.style.pointerEvents = 'auto';
+                    option.style.opacity = '1';
+                    option.style.cursor = 'pointer';
+                } else {
+                    option.style.pointerEvents = 'none';
+                    option.style.opacity = '0.6';
+                    option.style.cursor = 'not-allowed';
+                }
+            });
+        }
     }
 
-    // Refresh table data
+    // In the refreshTableData function - add cache buster
     function refreshTableData(shouldShowToast = false) {
         console.log('Refreshing teacher table data...');
-        
+
         // Show loading state
         teacherTableBody.innerHTML = `
             <tr>
@@ -157,8 +216,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 </td>
             </tr>
         `;
-        
-        fetch(`../php/get_teachers.php?bid=${browserInstanceId}`)
+
+        // Add cache buster to prevent caching
+        const timestamp = new Date().getTime();
+        fetch(`../php/get_teachers.php?bid=${browserInstanceId}&_=${timestamp}`)
             .then(response => response.json())
             .then(data => {
                 console.log('Received data from server:', data);
@@ -230,7 +291,7 @@ document.addEventListener('DOMContentLoaded', function() {
         return formattedPrograms.join(', ');
     }
 
-    // Update table with new data
+    // In the updateTable function - make sure year groups are properly displayed
     function updateTable(teachers) {
         console.log('Updating table with teachers:', teachers);
         teacherTableBody.innerHTML = '';
@@ -245,7 +306,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Create document fragment for efficient DOM manipulation
         const frag = document.createDocumentFragment();
-        
+
         teachers.forEach(teacher => {
             const row = document.createElement('tr');
             row.setAttribute('data-name', teacher.name.toLowerCase());
@@ -253,7 +314,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const statusValue = teacher.is_approved == 1 ? 'approved' : 'pending';
             row.setAttribute('data-status', statusValue);
             row.setAttribute('data-teacher-id', teacher.id);
-            
+
             // Set year group data attribute for filtering
             const yearGroupValue = teacher.year_group ? teacher.year_group : 'not_set';
             row.setAttribute('data-year-group', yearGroupValue);
@@ -268,11 +329,18 @@ document.addEventListener('DOMContentLoaded', function() {
                     <i class="bi bi-check-lg"></i> Approve
                 </button>` : '';
 
+            // DEBUG: Log the teacher data to see what we're getting
+            console.log('Teacher data for display:', {
+                name: teacher.name,
+                year_group: teacher.year_group,
+                program: teacher.program
+            });
+
             row.innerHTML = `
                 <td class="fw-semibold">${escapeHtml(teacher.name)}</td>
                 <td>${escapeHtml(teacher.email)}</td>
                 <td class="mobile-hide">
-                    ${teacher.year_group ? `
+                    ${teacher.year_group && teacher.year_group !== '' ? `
                         <div class="year-group-badges">
                             ${teacher.year_group.split(',').map(year => 
                                 `<span class="badge bg-primary me-1">Year ${escapeHtml(year.trim())}</span>`
@@ -281,7 +349,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     ` : '<span class="text-muted">Not set</span>'}
                 </td>
                 <td class="mobile-hide">
-                    ${teacher.program ? `
+                    ${teacher.program && teacher.program !== '' ? `
                         <div class="program-badges">
                             ${teacher.program.split(',').map(program => {
                                 const formattedProgram = formatProgramNames(program);
@@ -318,7 +386,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             frag.appendChild(row);
         });
-        
+
         // Append all rows at once using the document fragment
         teacherTableBody.appendChild(frag);
 
@@ -476,7 +544,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Edit teacher functionality - FIXED VERSION
     function handleEditClick() {
         console.log('Edit button clicked');
-        
+
         const teacherId = this.getAttribute('data-teacher-id');
         const teacherName = this.getAttribute('data-teacher-name');
         const teacherEmail = this.getAttribute('data-teacher-email');
@@ -495,31 +563,37 @@ document.addEventListener('DOMContentLoaded', function() {
         clearMultiSelectSelections();
 
         // Handle multiple year groups
-        if (yearGroup && yearGroup !== '') {
+        if (yearGroup && yearGroup !== '' && yearGroup !== 'null') {
             const yearGroups = yearGroup.split(',').map(y => y.trim());
             console.log('Setting year groups:', yearGroups);
-            
-            document.querySelectorAll('.multi-select-card:first-child .multi-select-option').forEach(option => {
-                const value = option.getAttribute('data-value');
-                if (yearGroups.includes(value)) {
-                    option.classList.add('selected');
-                }
-            });
-            updateYearGroupSelection();
+
+            const yearGroupGrid = document.getElementById('yearGroupGrid');
+            if (yearGroupGrid) {
+                yearGroupGrid.querySelectorAll('.multi-select-option').forEach(option => {
+                    const value = option.getAttribute('data-value');
+                    if (yearGroups.includes(value)) {
+                        option.classList.add('selected');
+                    }
+                });
+                updateYearGroupSelection();
+            }
         }
 
         // Handle multiple programs
         if (program && program !== '') {
             const programs = program.split(',').map(p => p.trim());
             console.log('Setting programs:', programs);
-            
-            document.querySelectorAll('.multi-select-card:last-child .multi-select-option').forEach(option => {
-                const value = option.getAttribute('data-value');
-                if (programs.includes(value)) {
-                    option.classList.add('selected');
-                }
-            });
-            updateProgramSelection();
+
+            const programGrid = document.getElementById('programGrid');
+            if (programGrid) {
+                programGrid.querySelectorAll('.multi-select-option').forEach(option => {
+                    const value = option.getAttribute('data-value');
+                    if (programs.includes(value)) {
+                        option.classList.add('selected');
+                    }
+                });
+                updateProgramSelection();
+            }
         }
 
         // Set approval status and enable/disable multi-select
@@ -579,27 +653,42 @@ document.addEventListener('DOMContentLoaded', function() {
         saveChangesBtn.disabled = !hasChanges;
     }
 
-    // Save teacher changes
+    // In the save teacher changes function - add more detailed debugging
     saveChangesBtn.addEventListener('click', function() {
+        console.log('=== SAVE TEACHER DEBUG ===');
+
         const formData = new FormData();
         const isApproved = editApproved.checked ? '1' : '0';
-        
+
         // Get selected year groups and programs
         const selectedYearGroups = editYearGroup.value ? editYearGroup.value.split(',') : [];
         const selectedPrograms = editProgram.value ? editProgram.value.split(',') : [];
+
+        console.log('Selected Year Groups:', selectedYearGroups);
+        console.log('Selected Programs:', selectedPrograms);
+        console.log('Year Group Input Value:', editYearGroup.value);
+        console.log('Program Input Value:', editProgram.value);
 
         formData.append('teacher_id', editTeacherId.value);
         formData.append('name', editName.value);
         formData.append('email', editEmail.value);
         formData.append('is_approved', isApproved);
-        
+
+        // Debug: Check what's being appended to FormData
+        console.log('FormData contents:');
+        for (let [key, value] of formData.entries()) {
+            console.log(`${key}:`, value);
+        }
+
         // Append year groups and programs as arrays
         selectedYearGroups.forEach(yearGroup => {
             formData.append('year_group[]', yearGroup);
+            console.log('Appending year group:', yearGroup);
         });
-        
+
         selectedPrograms.forEach(program => {
             formData.append('program[]', program);
+            console.log('Appending program:', program);
         });
 
         // Show loading state
@@ -612,6 +701,7 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(response => response.json())
         .then(data => {
+            console.log('Save response:', data);
             if (data.success) {
                 editModal.hide();
                 showToast('Teacher updated successfully!', 'success');
