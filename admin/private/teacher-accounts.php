@@ -11,8 +11,8 @@ if ($_SESSION['pending_approval']) {
 // Include database connection
 require_once $_SERVER['DOCUMENT_ROOT'] . '/alfalah/php/db_connect.php';
 
-// Fetch all teacher users
-$stmt = $pdo->prepare("SELECT id, name, email, created_at, last_login, is_approved FROM teacher_users ORDER BY created_at DESC");
+// Fetch all teacher users - UPDATED QUERY
+$stmt = $pdo->prepare("SELECT id, name, email, year_group, program, assigned_students, created_at, last_login, is_approved FROM teacher_users ORDER BY created_at DESC");
 $stmt->execute();
 $teachers = $stmt->fetchAll();
 
@@ -215,7 +215,9 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                                 <tr>
                                     <th>Name</th>
                                     <th>Email</th>
-                                    <th class="mobile-hide">Account Created</th>
+                                    <th class="mobile-hide">Year Group</th>
+                                    <th class="mobile-hide">Program</th>
+                                    <th class="mobile-hide">Students</th>
                                     <th class="mobile-hide">Last Login</th>
                                     <th>Status</th>
                                     <th>Actions</th>
@@ -231,6 +233,7 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                                     // Set UK timezone with automatic DST
                                     $ukTimezone = new DateTimeZone('Europe/London');
                                     ?>
+                                    <!-- In the table body section - Update the PHP loop -->
                                     <?php foreach ($teachers as $teacher): ?>
                                     <tr data-name="<?= htmlspecialchars(strtolower($teacher['name'])) ?>" 
                                         data-email="<?= htmlspecialchars(strtolower($teacher['email'])) ?>" 
@@ -239,15 +242,30 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                                         <td class="fw-semibold"><?= htmlspecialchars($teacher['name']) ?></td>
                                         <td><?= htmlspecialchars($teacher['email']) ?></td>
                                         <td class="mobile-hide">
-                                            <?php if ($teacher['created_at']): ?>
-                                                <?php 
-                                                // EXPLICITLY convert from UTC to UK time
-                                                $createdDate = new DateTime($teacher['created_at'], new DateTimeZone('UTC'));
-                                                $createdDate->setTimezone(new DateTimeZone('Europe/London'));
-                                                echo $createdDate->format('M j, Y g:i A');
-                                                ?>
+                                            <?php if (!empty($teacher['year_group'])): ?>
+                                                Year <?= htmlspecialchars($teacher['year_group']) ?>
                                             <?php else: ?>
-                                                N/A
+                                                <span class="text-muted">Not set</span>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td class="mobile-hide">
+                                            <?php if (!empty($teacher['program'])): ?>
+                                                <?= htmlspecialchars($teacher['program']) ?>
+                                            <?php else: ?>
+                                                <span class="text-muted">Not set</span>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td class="mobile-hide">
+                                            <?php if (!empty($teacher['assigned_students'])): ?>
+                                                <?php 
+                                                $students = json_decode($teacher['assigned_students'], true);
+                                                if (is_array($students) && count($students) > 0): ?>
+                                                    <?= count($students) ?> student(s)
+                                                <?php else: ?>
+                                                    <span class="text-muted">No students</span>
+                                                <?php endif; ?>
+                                            <?php else: ?>
+                                                <span class="text-muted">No students</span>
                                             <?php endif; ?>
                                         </td>
                                         <td class="mobile-hide">
@@ -276,7 +294,9 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                                                         data-teacher-id="<?= $teacher['id'] ?>"
                                                         data-teacher-name="<?= htmlspecialchars($teacher['name']) ?>"
                                                         data-teacher-email="<?= htmlspecialchars($teacher['email']) ?>"
-                                                        data-teacher-approved="<?= $teacher['is_approved'] ?>">
+                                                        data-teacher-approved="<?= $teacher['is_approved'] ?>"
+                                                        data-year-group="<?= $teacher['year_group'] ?? '' ?>"
+                                                        data-program="<?= $teacher['program'] ?? '' ?>">
                                                     <i class="bi bi-pencil"></i> Edit
                                                 </button>
 
@@ -328,6 +348,32 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                                 <label for="editEmail" class="form-label">Email</label>
                                 <input type="email" class="form-control" id="editEmail" name="email" required>
                             </div>
+                            <div class="mb-3">
+                                <label for="editYearGroup" class="form-label">Year Group</label>
+                                <select class="form-select" id="editYearGroup" name="year_group">
+                                    <option value="">Select Year Group</option>
+                                    <?php for ($i = 1; $i <= 11; $i++): ?>
+                                        <option value="<?= $i ?>">Year <?= $i ?></option>
+                                    <?php endfor; ?>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="editProgram" class="form-label">Program</label>
+                                <select class="form-select" id="editProgram" name="program">
+                                    <option value="">Select Program</option>
+                                    <option value="weekday_morning_hifdh">Weekday Morning Hifdh</option>
+                                    <option value="weekday_evening_hifdh">Weekday Evening Hifdh</option>
+                                    <option value="weekend_evening_islamic_studies">Weekend Evening Islamic Studies</option>
+                                    <option value="weekend_hifdh">Weekend Hifdh</option>
+                                    <option value="weekend_islamic_studies">Weekend Islamic Studies</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Assigned Students</label>
+                                <div class="border rounded p-3 bg-light">
+                                    <small class="text-muted">Student assignment feature coming soon. This will display assigned students once implemented.</small>
+                                </div>
+                            </div>
                             <div class="mb-3 form-check">
                                 <input type="checkbox" class="form-check-input" id="editApproved" name="is_approved">
                                 <label class="form-check-label" for="editApproved">Approved Account</label>
@@ -357,6 +403,28 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                                 <option value="all">All Teachers</option>
                                 <option value="approved">Approved Only</option>
                                 <option value="pending">Pending Only</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="yearGroupFilterSelect" class="form-label">Filter by Year Group</label>
+                            <select id="yearGroupFilterSelect" class="form-select">
+                                <option value="all">All Year Groups</option>
+                                <?php for ($i = 1; $i <= 11; $i++): ?>
+                                    <option value="<?= $i ?>">Year <?= $i ?></option>
+                                <?php endfor; ?>
+                                <option value="not_set">Not Set</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="programFilterSelect" class="form-label">Filter by Program</label>
+                            <select id="programFilterSelect" class="form-select">
+                                <option value="all">All Programs</option>
+                                <option value="weekday_morning_hifdh">Weekday Morning Hifdh</option>
+                                <option value="weekday_evening_hifdh">Weekday Evening Hifdh</option>
+                                <option value="weekend_evening_islamic_studies">Weekend Evening Islamic Studies</option>
+                                <option value="weekend_hifdh">Weekend Hifdh</option>
+                                <option value="weekend_islamic_studies">Weekend Islamic Studies</option>
+                                <option value="not_set">Not Set</option>
                             </select>
                         </div>
                     </div>

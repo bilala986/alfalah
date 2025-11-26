@@ -24,6 +24,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Modal elements
     const filterModal = new bootstrap.Modal(document.getElementById('filterModal'));
     const statusSelect = document.getElementById('statusSelect');
+    const yearGroupFilterSelect = document.getElementById('yearGroupFilterSelect');
     const applyFilterBtn = document.getElementById('applyFilterBtn');
     const clearFilterBtn = document.getElementById('clearFilterBtn');
     
@@ -32,6 +33,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const editTeacherId = document.getElementById('editTeacherId');
     const editName = document.getElementById('editName');
     const editEmail = document.getElementById('editEmail');
+    const editYearGroup = document.getElementById('editYearGroup');
     const editApproved = document.getElementById('editApproved');
     const saveChangesBtn = document.getElementById('saveChangesBtn');
     
@@ -47,8 +49,16 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Current filter state
     let currentStatusFilter = 'all';
+    let currentYearGroupFilter = 'all';
     let originalFormData = {};
     let currentActionTeacherId = null;
+    
+    // Add these new elements to your JavaScript
+    const editProgram = document.getElementById('editProgram');
+    const programFilterSelect = document.getElementById('programFilterSelect');
+
+    // Add program filter to current filter state
+    let currentProgramFilter = 'all';
 
     // Get all rows (will be updated on refresh)
     let rows = teacherTableBody.querySelectorAll('tr[data-name]');
@@ -100,13 +110,13 @@ document.addEventListener('DOMContentLoaded', function() {
         return ukTimeString;
     }
 
-    // Update table with new data
+    // Update table with new data - FIXED VERSION with correct column order
     function updateTable(teachers) {
         console.log('Updating table with teachers:', teachers);
         teacherTableBody.innerHTML = '';
 
         if (teachers.length === 0) {
-            teacherTableBody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">No teacher accounts found.</td></tr>';
+            teacherTableBody.innerHTML = '<tr><td colspan="8" class="text-center text-muted py-4">No teacher accounts found.</td></tr>';
             // Update the counts
             visibleCount.textContent = '0';
             const totalCount = document.getElementById('totalCount');
@@ -122,10 +132,8 @@ document.addEventListener('DOMContentLoaded', function() {
         
         teachers.forEach(teacher => {
             console.log('Teacher:', teacher.name);
-            console.log('Created (raw):', teacher.created_at);
-            console.log('Created (UK):', teacher.created_at ? formatUKDateTime(teacher.created_at) : 'N/A');
-            console.log('Last Login (raw):', teacher.last_login);
-            console.log('Last Login (UK):', teacher.last_login ? formatUKDateTime(teacher.last_login) : 'Never');
+            console.log('Year Group:', teacher.year_group);
+            console.log('Program:', teacher.program);
 
             const row = document.createElement('tr');
             row.setAttribute('data-name', teacher.name.toLowerCase());
@@ -134,6 +142,12 @@ document.addEventListener('DOMContentLoaded', function() {
             const statusValue = teacher.is_approved == 1 ? 'approved' : 'pending';
             row.setAttribute('data-status', statusValue);
             row.setAttribute('data-teacher-id', teacher.id);
+            
+            // Set year group data attribute for filtering
+            const yearGroupValue = teacher.year_group ? teacher.year_group.toString() : 'not_set';
+            row.setAttribute('data-year-group', yearGroupValue);
+            
+            row.setAttribute('data-program', teacher.program || 'not_set');
 
             const statusBadge = teacher.is_approved == 1 ? 
                 '<span class="badge bg-success">Approved</span>' : 
@@ -144,21 +158,41 @@ document.addEventListener('DOMContentLoaded', function() {
                     <i class="bi bi-check-lg"></i> Approve
                 </button>` : '';
 
+            // FIXED: Correct column order matching the table headers
             row.innerHTML = `
                 <td class="fw-semibold">${teacher.name}</td>
                 <td>${teacher.email}</td>
-                <td class="mobile-hide">${teacher.created_at ? formatUKDateTime(teacher.created_at) : 'N/A'}</td>
+                <td class="mobile-hide">
+                    ${teacher.year_group ? 'Year ' + teacher.year_group : '<span class="text-muted">Not set</span>'}
+                </td>
+                <td class="mobile-hide">
+                    ${teacher.program ? formatProgramName(teacher.program) : '<span class="text-muted">Not set</span>'}
+                </td>
+                <td class="mobile-hide">
+                    ${teacher.assigned_students ? 
+                        (JSON.parse(teacher.assigned_students).length + ' student(s)') : 
+                        '<span class="text-muted">No students</span>'}
+                </td>
                 <td class="mobile-hide">
                     ${teacher.last_login ? formatUKDateTime(teacher.last_login) : '<span class="text-muted">Never</span>'}
                 </td>
                 <td>${statusBadge}</td>
                 <td>
                     <div class="btn-group btn-group-sm">
-                        <button type="button" class="btn btn-outline-primary edit-btn" data-teacher-id="${teacher.id}" data-teacher-name="${teacher.name}" data-teacher-email="${teacher.email}" data-teacher-approved="${teacher.is_approved}">
+                        <button type="button" class="btn btn-outline-primary edit-btn" 
+                                data-teacher-id="${teacher.id}" 
+                                data-teacher-name="${teacher.name}" 
+                                data-teacher-email="${teacher.email}" 
+                                data-teacher-approved="${teacher.is_approved}"
+                                data-year-group="${teacher.year_group || ''}"
+                                data-program="${teacher.program || ''}">
                             <i class="bi bi-pencil"></i> Edit
                         </button>
                         ${approveButton}
-                        <button type="button" class="btn btn-outline-danger remove-btn" data-teacher-id="${teacher.id}" data-teacher-name="${teacher.name}" data-teacher-email="${teacher.email}">
+                        <button type="button" class="btn btn-outline-danger remove-btn" 
+                                data-teacher-id="${teacher.id}" 
+                                data-teacher-name="${teacher.name}" 
+                                data-teacher-email="${teacher.email}">
                             <i class="bi bi-trash"></i> Remove
                         </button>
                     </div>
@@ -181,6 +215,18 @@ document.addEventListener('DOMContentLoaded', function() {
         filterTable();
     }
 
+    // Helper function to format program names for display
+    function formatProgramName(programValue) {
+        const programMap = {
+            'weekday_morning_hifdh': 'Weekday Morning Hifdh',
+            'weekday_evening_hifdh': 'Weekday Evening Hifdh',
+            'weekend_evening_islamic_studies': 'Weekend Evening Islamic Studies',
+            'weekend_hifdh': 'Weekend Hifdh',
+            'weekend_islamic_studies': 'Weekend Islamic Studies'
+        };
+        return programMap[programValue] || programValue;
+    }
+
     // Attach event listeners to dynamic buttons
     function attachEventListeners() {
         // Edit buttons
@@ -199,7 +245,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Filter function
+    // Update filterTable function to include program filtering
     function filterTable() {
         const searchTerm = searchInput.value.toLowerCase();
         let visibleRows = 0;
@@ -210,11 +256,19 @@ document.addEventListener('DOMContentLoaded', function() {
             const name = row.getAttribute('data-name');
             const email = row.getAttribute('data-email');
             const status = row.getAttribute('data-status');
+            const yearGroup = row.getAttribute('data-year-group');
+            const program = row.getAttribute('data-program') || 'not_set';
 
             const matchesSearch = name.includes(searchTerm) || email.includes(searchTerm);
             const matchesStatus = currentStatusFilter === 'all' || status === currentStatusFilter;
+            const matchesYearGroup = currentYearGroupFilter === 'all' || 
+                                   (currentYearGroupFilter === 'not_set' && yearGroup === 'not_set') ||
+                                   yearGroup === currentYearGroupFilter;
+            const matchesProgram = currentProgramFilter === 'all' || 
+                                 (currentProgramFilter === 'not_set' && program === 'not_set') ||
+                                 program === currentProgramFilter;
 
-            if (matchesSearch && matchesStatus) {
+            if (matchesSearch && matchesStatus && matchesYearGroup && matchesProgram) {
                 row.style.display = '';
                 visibleRows++;
             } else {
@@ -232,12 +286,13 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         // Update filter button appearance based on active filter
-        if (currentStatusFilter === 'all') {
-            filterBtn.classList.remove('btn-success');
-            filterBtn.classList.add('btn-outline-primary');
-        } else {
+        const hasActiveFilter = currentStatusFilter !== 'all' || currentYearGroupFilter !== 'all' || currentProgramFilter !== 'all';
+        if (hasActiveFilter) {
             filterBtn.classList.remove('btn-outline-primary');
             filterBtn.classList.add('btn-success');
+        } else {
+            filterBtn.classList.remove('btn-success');
+            filterBtn.classList.add('btn-outline-primary');
         }
     }
 
@@ -252,65 +307,75 @@ document.addEventListener('DOMContentLoaded', function() {
         setTimeout(() => refreshIcon.classList.remove('refresh-spin'), 600);
     });
     
-    // Filter modal functionality
+    // Update filter modal functionality
     filterBtn.addEventListener('click', function() {
         statusSelect.value = currentStatusFilter;
+        yearGroupFilterSelect.value = currentYearGroupFilter;
+        programFilterSelect.value = currentProgramFilter;
         filterModal.show();
     });
-    
+
     applyFilterBtn.addEventListener('click', function() {
         currentStatusFilter = statusSelect.value;
+        currentYearGroupFilter = yearGroupFilterSelect.value;
+        currentProgramFilter = programFilterSelect.value;
         filterTable();
         filterModal.hide();
     });
 
-    // Clear filter functionality
+    // Update clear filter functionality
     clearFilterBtn.addEventListener('click', function() {
         currentStatusFilter = 'all';
+        currentYearGroupFilter = 'all';
+        currentProgramFilter = 'all';
         statusSelect.value = 'all';
+        yearGroupFilterSelect.value = 'all';
+        programFilterSelect.value = 'all';
         filterTable();
         filterModal.hide();
     });
 
-    // Edit modal functionality - WITH DEBUG LOGGING
+    // Update the handleEditClick function to include program
     function handleEditClick() {
         const teacherId = this.getAttribute('data-teacher-id');
         const teacherName = this.getAttribute('data-teacher-name');
         const teacherEmail = this.getAttribute('data-teacher-email');
         const teacherApproved = this.getAttribute('data-teacher-approved');
+        const yearGroup = this.getAttribute('data-year-group');
+        const program = this.getAttribute('data-program');
 
-        // DEBUG LOGGING - CRITICAL
-        console.log('=== EDIT MODAL DEBUG ===');
-        console.log('Teacher ID:', teacherId);
-        console.log('Teacher Name:', teacherName);
-        console.log('Teacher Email:', teacherEmail);
-        console.log('Teacher Approved (raw from data attribute):', teacherApproved);
-        console.log('Type of teacherApproved:', typeof teacherApproved);
-        console.log('teacherApproved === "1":', teacherApproved === '1');
-        console.log('teacherApproved === "0":', teacherApproved === '0');
-        console.log('teacherApproved == 1:', teacherApproved == 1);
-        console.log('teacherApproved == 0:', teacherApproved == 0);
+        console.log('Edit clicked - Program:', program); // Debug
 
         // Populate form
         editTeacherId.value = teacherId;
         editName.value = teacherName;
         editEmail.value = teacherEmail;
+        editYearGroup.value = yearGroup || '';
+        editProgram.value = program || '';
 
-        // Check what the checkbox state will be
-        const checkboxWillBeChecked = teacherApproved === '1';
-        console.log('Checkbox will be set to:', checkboxWillBeChecked ? 'CHECKED' : 'UNCHECKED');
+        // Disable year group and program dropdowns if teacher is not approved
+        const isApproved = teacherApproved === '1';
+        if (isApproved) {
+            editYearGroup.disabled = false;
+            editYearGroup.title = '';
+            editProgram.disabled = false;
+            editProgram.title = '';
+        } else {
+            editYearGroup.disabled = true;
+            editYearGroup.title = 'Year group can only be set after teacher is approved';
+            editProgram.disabled = true;
+            editProgram.title = 'Program can only be set after teacher is approved';
+        }
 
-        editApproved.checked = checkboxWillBeChecked;
-
-        // Verify the actual checkbox state
-        console.log('Actual checkbox state after setting:', editApproved.checked);
-        console.log('=== END DEBUG ===');
+        editApproved.checked = isApproved;
 
         // Store original data for comparison
         originalFormData = {
             name: teacherName,
             email: teacherEmail,
-            is_approved: checkboxWillBeChecked
+            is_approved: isApproved,
+            year_group: yearGroup || '',
+            program: program || ''
         };
 
         // Reset save button
@@ -319,43 +384,61 @@ document.addEventListener('DOMContentLoaded', function() {
         editModal.show();
     }
 
-    // Form change detection
-    [editName, editEmail, editApproved].forEach(element => {
+    // Update form change detection to include program
+    [editName, editEmail, editApproved, editYearGroup, editProgram].forEach(element => {
         element.addEventListener('input', checkFormChanges);
         element.addEventListener('change', checkFormChanges);
     });
 
+    // Update approval checkbox handler to enable/disable both year group and program
+    editApproved.addEventListener('change', function() {
+        if (this.checked) {
+            // When approved, enable year group and program dropdowns
+            editYearGroup.disabled = false;
+            editYearGroup.title = '';
+            editProgram.disabled = false;
+            editProgram.title = '';
+        } else {
+            // When not approved, disable year group and program and clear them
+            editYearGroup.disabled = true;
+            editYearGroup.title = 'Year group can only be set after teacher is approved';
+            editYearGroup.value = '';
+            editProgram.disabled = true;
+            editProgram.title = 'Program can only be set after teacher is approved';
+            editProgram.value = '';
+        }
+        checkFormChanges();
+    });
+
+    // Update checkFormChanges function - FIXED to detect program changes
     function checkFormChanges() {
         const currentData = {
             name: editName.value,
             email: editEmail.value,
-            is_approved: editApproved.checked
+            is_approved: editApproved.checked,
+            year_group: editYearGroup.value,
+            program: editProgram.value
         };
-        
+
         const hasChanges = currentData.name !== originalFormData.name ||
                           currentData.email !== originalFormData.email ||
-                          currentData.is_approved !== originalFormData.is_approved;
-        
+                          currentData.is_approved !== originalFormData.is_approved ||
+                          currentData.year_group !== originalFormData.year_group ||
+                          currentData.program !== originalFormData.program;
+
         saveChangesBtn.disabled = !hasChanges;
     }
 
-    // Save changes functionality - WITH DEBUG LOGGING
+    // Update save functionality to include program
     saveChangesBtn.addEventListener('click', function() {
         const formData = new FormData();
         const isApproved = editApproved.checked ? '1' : '0';
 
-        // DEBUG: What are we sending to the server?
-        console.log('=== SAVE DEBUG ===');
-        console.log('Teacher ID:', editTeacherId.value);
-        console.log('Name:', editName.value);
-        console.log('Email:', editEmail.value);
-        console.log('Is Approved (checkbox checked):', editApproved.checked);
-        console.log('Is Approved (value being sent):', isApproved);
-        console.log('=== END SAVE DEBUG ===');
-
         formData.append('teacher_id', editTeacherId.value);
         formData.append('name', editName.value);
         formData.append('email', editEmail.value);
+        formData.append('year_group', editYearGroup.value);
+        formData.append('program', editProgram.value);
         formData.append('is_approved', isApproved);
 
         // Show loading state
@@ -368,7 +451,7 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(response => response.json())
         .then(data => {
-            console.log('Server response:', data); // Debug server response
+            console.log('Server response:', data);
             if (data.success) {
                 editModal.hide();
                 showToast('Teacher updated successfully!', 'success');
