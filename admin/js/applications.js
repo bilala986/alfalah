@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let currentProgramFilter = 'all';
     let currentMinAge = null;
     let currentMaxAge = null;
-    let currentStatusFilter = 'all';
+    let currentStatusFilter = 'pending_and_rejection';
     let currentAccountStatusFilter = 'all';
 
     // Get all rows
@@ -140,7 +140,6 @@ document.addEventListener('DOMContentLoaded', function() {
         visibleCount.textContent = visibleRows;
     }
 
-    // Enhanced filter function
     function filterTable() {
         const searchTerm = searchInput.value.toLowerCase();
         const rows = applicationsTableBody.querySelectorAll('tr[data-student]');
@@ -167,10 +166,8 @@ document.addEventListener('DOMContentLoaded', function() {
             let matchesSearch = false;
 
             if (searchTerm === '') {
-                // If no search term, show all rows (but still apply filters)
                 matchesSearch = true;
             } else {
-                // Search based on selected options ONLY
                 if (searchInStudent && studentName.includes(searchTerm)) {
                     matchesSearch = true;
                 }
@@ -182,8 +179,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
 
-            // Apply filters
-            const statusFilter = currentStatusFilter === 'all' || status === currentStatusFilter;
+            // Apply filters - UPDATED STATUS FILTER
+            const statusFilter = currentStatusFilter === 'all' || 
+                                (currentStatusFilter === 'pending_and_rejection' && 
+                                 (status === 'pending' || status === 'pending_rejection')) ||
+                                status === currentStatusFilter;
+
             const accountStatusFilter = currentAccountStatusFilter === 'all' || accountStatus === currentAccountStatusFilter;
             const programFilter = currentProgramFilter === 'all' || program === currentProgramFilter;
             const ageFilter = (currentMinAge === null || age >= currentMinAge) && 
@@ -194,33 +195,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (shouldShow) {
                 visibleRows++;
-
-                // Hide details row
-                const detailsRow = row.nextElementSibling;
-                if (detailsRow && detailsRow.classList.contains('application-details-row')) {
-                    detailsRow.style.display = 'none';
-                    const detailsDiv = detailsRow.querySelector('.application-details');
-                    if (detailsDiv) {
-                        detailsDiv.classList.remove('show');
-                    }
-                }
+                // Hide details row logic...
             } else {
-                // Also hide the details row
-                const detailsRow = row.nextElementSibling;
-                if (detailsRow && detailsRow.classList.contains('application-details-row')) {
-                    detailsRow.style.display = 'none';
-                    const detailsDiv = detailsRow.querySelector('.application-details');
-                    if (detailsDiv) {
-                        detailsDiv.classList.remove('show');
-                    }
-                }
+                // Hide details row logic...
             }
         });
 
-        // Update visible count
         visibleCount.textContent = visibleRows;
 
-        // Update filter button appearance - check if any filter is active
+        // Update filter button appearance
         const isAnyFilterActive = currentProgramFilter !== 'all' || 
                                  currentMinAge !== null || 
                                  currentMaxAge !== null ||
@@ -327,7 +310,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         <button type="button" class="btn ${approveBtnClass} approve-btn" data-application-id="${app.id}" data-student-name="${escapeHtml(app.student_first_name + ' ' + app.student_last_name)}" ${isApproved ? 'disabled' : ''}>
                             <i class="bi bi-check-lg"></i> ${approveBtnText}
                         </button>
-                        <button type="button" class="btn btn-outline-danger reject-btn" data-application-id="${app.id}" data-student-name="${escapeHtml(app.student_first_name + ' ' + app.student_last_name)}" ${isApproved ? 'disabled' : ''}>
+                        <button type="button" class="btn btn-outline-danger reject-btn" data-application-id="${app.id}" data-student-name="${escapeHtml(app.student_first_name + ' ' + app.student_last_name)}">
                             <i class="bi bi-x-lg"></i> ${isApproved ? 'Reject' : 'Reject'}
                         </button>
                     </div>
@@ -422,21 +405,25 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const now = new Date();
         const deletionDate = new Date(deletionTime);
-        const timeLeft = deletionDate - now;
+
+        // Treat both times as UTC to avoid timezone confusion
+        const nowUTC = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 
+                               now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds());
+        const deletionUTC = deletionDate.getTime();
+
+        const timeLeft = deletionUTC - nowUTC;
 
         if (timeLeft <= 0) {
-            countdownElement.textContent = '(0h)';
+            countdownElement.textContent = '(0h 0m)';
+            // Auto-refresh the table to remove expired applications
+            refreshTableData(false);
             return;
         }
 
         const hoursLeft = Math.floor(timeLeft / (1000 * 60 * 60));
-        countdownElement.textContent = `(${hoursLeft}h)`;
+        const minutesLeft = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
 
-        // Show minutes when less than 1 hour remaining
-        if (hoursLeft < 1) {
-            const minutesLeft = Math.floor(timeLeft / (1000 * 60));
-            countdownElement.textContent = `(${minutesLeft}m)`;
-        }
+        countdownElement.textContent = `(${hoursLeft}h ${minutesLeft}m)`;
     }
 
     // Undo rejection functionality

@@ -21,9 +21,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['application_id'])) {
             exit;
         }
         
-        // Update application status to pending_rejection and set deletion time
-        $stmt = $pdo->prepare("UPDATE initial_admission SET status = 'pending_rejection', scheduled_for_deletion_at = DATE_ADD(NOW(), INTERVAL 24 HOUR) WHERE id = ?");
+        // Use UTC time to avoid timezone issues
+        $stmt = $pdo->prepare("UPDATE initial_admission SET status = 'pending_rejection', scheduled_for_deletion_at = UTC_TIMESTAMP() + INTERVAL 24 HOUR WHERE id = ?");
         $stmt->execute([$application_id]);
+        
+        // Get the actual deletion time for the response
+        $timeStmt = $pdo->prepare("SELECT scheduled_for_deletion_at FROM initial_admission WHERE id = ?");
+        $timeStmt->execute([$application_id]);
+        $deletionTime = $timeStmt->fetchColumn();
         
         echo json_encode([
             'success' => true,
@@ -32,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['application_id'])) {
                 'id' => $application_id,
                 'student_name' => $application['student_first_name'] . ' ' . $application['student_last_name'],
                 'status' => 'pending_rejection',
-                'scheduled_for_deletion_at' => date('Y-m-d H:i:s', strtotime('+24 hours'))
+                'scheduled_for_deletion_at' => $deletionTime
             ]
         ]);
         

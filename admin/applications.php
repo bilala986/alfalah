@@ -715,6 +715,7 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                             <label for="statusSelect" class="form-label">Status</label>
                             <select id="statusSelect" class="form-select">
                                 <option value="all">All Statuses</option>
+                                <option value="pending_and_rejection" selected>Pending & Pending Rejection</option>
                                 <option value="approved">Approved</option>
                                 <option value="pending">Pending</option>
                                 <option value="pending_rejection">Pending Rejection</option>
