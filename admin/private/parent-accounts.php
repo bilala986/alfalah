@@ -16,13 +16,18 @@ $stmt = $pdo->prepare("SELECT id, name, email, created_at, last_login, is_approv
 $stmt->execute();
 $parents = $stmt->fetchAll();
 
-// Fetch only APPROVED students for dropdown
+// Fetch ALL ACTIVE students from students table and join with initial_admission for parent emails
 $students_stmt = $pdo->prepare("
-    SELECT id, student_first_name, student_last_name, parent1_email, parent2_email 
-    FROM initial_admission 
-    WHERE (parent1_email IS NOT NULL OR parent2_email IS NOT NULL)
-    AND status = 'approved'
-    ORDER BY student_first_name, student_last_name
+    SELECT 
+        s.id,
+        s.student_first_name, 
+        s.student_last_name,
+        ia.parent1_email,
+        ia.parent2_email
+    FROM students s
+    LEFT JOIN initial_admission ia ON s.admission_id = ia.id
+    WHERE s.status = 'active'
+    ORDER BY s.student_first_name, s.student_last_name
 ");
 $students_stmt->execute();
 $all_students = $students_stmt->fetchAll();

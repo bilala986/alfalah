@@ -33,7 +33,7 @@ try {
                            FROM initial_admission ia
                            LEFT JOIN parent_users pu ON (pu.email = ia.parent1_email OR pu.email = ia.parent2_email)
                            LEFT JOIN students s ON s.admission_id = ia.id
-                           WHERE (s.teacher_id IS NULL OR s.id IS NULL)  -- EXCLUDE APPLICATIONS WITH ASSIGNED TEACHERS
+                           WHERE s.teacher_id IS NULL  -- EXCLUDE APPLICATIONS WITH ASSIGNED TEACHERS
                            ORDER BY ia.submitted_at DESC");
     $stmt->execute();
     $applications = $stmt->fetchAll(PDO::FETCH_ASSOC);
