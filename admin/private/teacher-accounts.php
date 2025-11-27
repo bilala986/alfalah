@@ -352,9 +352,9 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
 
                             <!-- Approval Status -->
                             <div class="mb-3">
-                                <div class="form-check form-switch">
-                                    <input class="form-check-input" type="checkbox" id="editApproved" name="is_approved">
-                                    <label class="form-check-label fw-semibold" for="editApproved">Approved Account</label>
+                                <div class="form-check form-switch d-flex align-items-center" style="gap: 10px;">
+                                    <input class="form-check-input" type="checkbox" id="editApproved" name="is_approved" style="margin: 0;">
+                                    <label class="form-check-label fw-semibold" for="editApproved" style="margin: 0;">Approved Account</label>
                                 </div>
                                 <small class="form-text text-muted">Approved teachers can access the teacher panel and be assigned students.</small>
                             </div>

@@ -333,7 +333,8 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log('Teacher data for display:', {
                 name: teacher.name,
                 year_group: teacher.year_group,
-                program: teacher.program
+                program: teacher.program,
+                is_approved: teacher.is_approved  // Added this for debugging
             });
 
             row.innerHTML = `
@@ -397,6 +398,12 @@ document.addEventListener('DOMContentLoaded', function() {
         // Update rows reference and attach event listeners
         rows = teacherTableBody.querySelectorAll('tr[data-name]');
         attachEventListeners();
+
+        // DEBUG: Verify edit buttons have correct approval status
+        console.log('Edit buttons after table update:');
+        document.querySelectorAll('.edit-btn').forEach(btn => {
+            console.log(`Teacher ID: ${btn.getAttribute('data-teacher-id')}, Approved: ${btn.getAttribute('data-teacher-approved')}`);
+        });
     }
 
     // Attach event listeners to dynamic buttons
