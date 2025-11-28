@@ -11,7 +11,7 @@ if ($_SESSION['pending_approval']) {
 // Include database connection
 require_once $_SERVER['DOCUMENT_ROOT'] . '/alfalah/php/db_connect.php';
 
-// Fetch all admission applications with parent account status
+// Fetch all admission applications with parent account status AND exclude assigned teachers
 $stmt = $pdo->prepare("SELECT ia.*, 
                        CASE 
                            WHEN ia.status = 'approved' THEN 'approved'
@@ -25,6 +25,8 @@ $stmt = $pdo->prepare("SELECT ia.*,
                        END as account_status
                        FROM initial_admission ia
                        LEFT JOIN parent_users pu ON (pu.email = ia.parent1_email OR pu.email = ia.parent2_email)
+                       LEFT JOIN students s ON s.admission_id = ia.id
+                       WHERE s.teacher_id IS NULL  -- ADD THIS LINE
                        ORDER BY ia.submitted_at DESC");
 $stmt->execute();
 $applications = $stmt->fetchAll();
@@ -302,6 +304,7 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                                     <tr data-student="<?= htmlspecialchars(strtolower($app['student_first_name'] . ' ' . $app['student_last_name'])) ?>" 
                                         data-parent="<?= htmlspecialchars(strtolower($app['parent1_first_name'] . ' ' . $app['parent1_last_name'])) ?>"
                                         data-program="<?= htmlspecialchars(strtolower($app['interested_program'])) ?>"
+                                        data-year-group="<?= htmlspecialchars(strtolower($app['year_group'])) ?>"
                                         data-age="<?= $app['student_age'] ?? '0' ?>"
                                         data-application-id="<?= $app['id'] ?>"
                                         data-status="<?= $app['display_status'] ?? 'pending' ?>"
@@ -733,6 +736,7 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                             </select>
                         </div>
 
+                        <!-- Add this after the program select in the filter modal -->
                         <div class="mb-3">
                             <label for="yearGroupSelect" class="form-label">Year Group</label>
                             <select id="yearGroupSelect" class="form-select">

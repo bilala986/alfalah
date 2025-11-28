@@ -48,6 +48,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const maxAgeInput = document.getElementById('maxAge');
 
     // Current filter state
+    let currentActionApplicationId = null;
     let currentYearFilter = 'all';
     let currentProgramFilter = 'all';
     let currentMinAge = null;
@@ -144,6 +145,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const searchTerm = searchInput.value.toLowerCase();
         const rows = applicationsTableBody.querySelectorAll('tr[data-student]');
         let visibleRows = 0;
+            
+        console.log('Current Year Filter:', currentYearFilter); // Debug log
+        console.log('Current Program Filter:', currentProgramFilter); // Debug log
 
         // Get search options
         const searchInStudent = searchStudent ? searchStudent.checked : true;
@@ -154,9 +158,20 @@ document.addEventListener('DOMContentLoaded', function() {
             const studentName = row.getAttribute('data-student');
             const parentName = row.getAttribute('data-parent');
             const program = row.getAttribute('data-program');
+            const yearGroup = row.getAttribute('data-year-group');
             const age = parseInt(row.getAttribute('data-age')) || 0;
             const status = row.getAttribute('data-status');
             const accountStatus = row.getAttribute('data-account-status');
+            
+            console.log('Row data - Year Group:', yearGroup, 'Program:', program); // Debug log
+            // Add this inside your filterTable function, inside the rows.forEach loop:
+            console.log('Year Group Filter Check:', {
+                currentYearFilter: currentYearFilter,
+                yearGroup: yearGroup,
+                lowercaseFilter: currentYearFilter.toLowerCase(),
+                matches: yearGroup === currentYearFilter.toLowerCase(),
+                shouldShow: currentYearFilter === 'all' || yearGroup === currentYearFilter.toLowerCase()
+            });
 
             // Get additional data from the row cells for email search
             const parentCell = row.cells[3];
@@ -179,18 +194,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
 
-            // Apply filters - UPDATED STATUS FILTER
+            // Apply filters - UPDATED WITH YEAR GROUP
             const statusFilter = currentStatusFilter === 'all' || 
                                 (currentStatusFilter === 'pending_and_rejection' && 
                                  (status === 'pending' || status === 'pending_rejection')) ||
                                 status === currentStatusFilter;
 
             const accountStatusFilter = currentAccountStatusFilter === 'all' || accountStatus === currentAccountStatusFilter;
-            const programFilter = currentProgramFilter === 'all' || program === currentProgramFilter;
+            const programFilter = currentProgramFilter === 'all' || program === currentProgramFilter.toLowerCase();
+            const yearGroupFilter = currentYearFilter === 'all' || (yearGroup && yearGroup.trim() === currentYearFilter.toLowerCase().trim());
             const ageFilter = (currentMinAge === null || age >= currentMinAge) && 
                              (currentMaxAge === null || age <= currentMaxAge);
 
-            const shouldShow = matchesSearch && statusFilter && accountStatusFilter && programFilter && ageFilter;
+            const shouldShow = matchesSearch && statusFilter && accountStatusFilter && programFilter && yearGroupFilter && ageFilter;
             row.style.display = shouldShow ? '' : 'none';
 
             if (shouldShow) {
@@ -205,6 +221,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Update filter button appearance
         const isAnyFilterActive = currentProgramFilter !== 'all' || 
+                                 currentYearFilter !== 'all' ||  // Add this
                                  currentMinAge !== null || 
                                  currentMaxAge !== null ||
                                  currentStatusFilter !== 'all' ||
@@ -245,6 +262,7 @@ document.addEventListener('DOMContentLoaded', function() {
             row.setAttribute('data-student', app.student_first_name.toLowerCase() + ' ' + app.student_last_name.toLowerCase());
             row.setAttribute('data-parent', app.parent1_first_name.toLowerCase() + ' ' + app.parent1_last_name.toLowerCase());
             row.setAttribute('data-program', app.interested_program.toLowerCase());
+            row.setAttribute('data-year-group', (app.year_group || '').toLowerCase()); // ADD THIS LINE
             row.setAttribute('data-age', app.student_age || '0');
             row.setAttribute('data-application-id', app.id);
             row.setAttribute('data-status', status);
@@ -908,7 +926,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Filter modal functionality
     filterBtn.addEventListener('click', function() {
-        yearGroupSelect.value = currentYearFilter;
+        yearGroupSelect.value = currentYearFilter; // Add this line
         programSelect.value = currentProgramFilter;
         statusSelect.value = currentStatusFilter;
         accountStatusSelect.value = currentAccountStatusFilter;
@@ -918,7 +936,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     applyFilterBtn.addEventListener('click', function() {
-        currentYearFilter = yearGroupSelect.value;
+        currentYearFilter = yearGroupSelect.value; // Add this line
         currentProgramFilter = programSelect.value;
         currentStatusFilter = statusSelect.value;
         currentAccountStatusFilter = accountStatusSelect.value;
@@ -929,14 +947,14 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     clearFilterBtn.addEventListener('click', function() {
-        currentYearFilter = 'all';
+        currentYearFilter = 'all'; // Add this line
         currentProgramFilter = 'all';
         currentStatusFilter = 'all';
         currentAccountStatusFilter = 'all';
         currentMinAge = null;
         currentMaxAge = null;
 
-        yearGroupSelect.value = 'all';
+        yearGroupSelect.value = 'all'; // Add this line
         programSelect.value = 'all';
         statusSelect.value = 'all';
         accountStatusSelect.value = 'all';
