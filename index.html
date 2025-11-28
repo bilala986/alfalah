@@ -101,7 +101,7 @@
                         </a>
                     </div>
                     <div class="col-md-3 col-6">
-                        <a href="#" class="quick-link-card">
+                        <a href="admissions.php" class="quick-link-card">
                             <i class="bi bi-mortarboard-fill"></i>
                             <span>Admissions</span>
                         </a>
@@ -171,7 +171,7 @@
         </section>
         
        <!-- Qur'an Ayah Section - Stylized -->
-        <section class="py-6 position-relative overflow-hidden" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);">
+        <section class="py-6 position-relative overflow-hidden bg-light">
             <div class="container position-relative z-2">
                 <div class="row justify-content-center">
                     <div class="col-lg-10 col-xl-8">
@@ -292,43 +292,120 @@
             </div>
         </section>
 
-        <!-- Intensive Course Video Section -->
-        <section id="intensive-course" class="py-5 bg-light">
+        <!-- Programs Section -->
+        <section id="programs" class="py-5 bg-light">
             <div class="container">
-                <div class="row align-items-center">
+                <!-- Tab Buttons -->
+                <div class="row justify-content-center mb-5">
+                    <div class="col-lg-8">
+                        <div class="d-flex flex-wrap justify-content-center gap-3">
+                            <button class="program-tab-btn active" data-tab="intensive-course">
+                                Intensive Course
+                            </button>
+                            <button class="program-tab-btn" data-tab="classes">
+                                Classes for Everyone
+                            </button>
+                            <button class="program-tab-btn" data-tab="events">
+                                Our Events
+                            </button>
+                        </div>
+                    </div>
+                </div>
 
-                    <!-- Video Column -->
-                    <div class="col-md-6 mb-4 mb-md-0">
-                        <div class="ratio ratio-16x9 shadow-sm rounded-4 overflow-hidden">
-                            <iframe 
-                                    src="https://www.youtube.com/embed/luxI78vgkR4?rel=0"
-                                    title="Intensive Qur'an Course"
-                                    allowfullscreen
-                                    style="border: none;">
-                            </iframe>
+                <!-- Tab Content -->
+                <div class="tab-content">
+                    <!-- Intensive Course Tab (default visible) -->
+                    <div id="intensive-course" class="tab-pane active">
+                        <div class="row align-items-center">
+                            <!-- Video Column -->
+                            <div class="col-md-6 mb-4 mb-md-0">
+                                <div class="ratio ratio-16x9 shadow-sm rounded-4 overflow-hidden">
+                                    <iframe 
+                                        src="https://www.youtube.com/embed/luxI78vgkR4?rel=0"
+                                        title="Intensive Qur'an Course"
+                                        allowfullscreen
+                                        style="border: none;">
+                                    </iframe>
+                                </div>
+                            </div>
+
+                            <!-- Text Column -->
+                            <div class="col-md-6">
+                                <h2 class="text-success fw-bold mb-3">Annual Qur'an Intensive Course</h2>
+                                <p class="text-muted fs-5 mb-3">
+                                    For the past <strong>15 years</strong>, our Annual Qur'an Intensive has been a transformative program that helps students deepen their connection with the Qur'an and strengthen their Islamic identity.
+                                </p>
+                                <p class="text-muted fs-5 mb-3">
+                                    Over the course of <strong>10 days</strong>, students dedicate <strong>6–8 hours daily</strong> to reciting and reflecting upon the Qur'an, while developing strong spiritual habits through <strong>tahajjud, adhan, and all five salah in jama'ah</strong>.
+                                </p>
+                                <p class="text-muted fs-5 mb-4">
+                                    Alongside worship and study, participants enjoy <strong>football tournaments, table tennis, and nutritious meals</strong> — nurturing both body and soul in an environment of brotherhood and iman.
+                                </p>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Text Column -->
-                    <div class="col-md-6">
-                        <h2 class="text-success fw-bold mb-3">Annual Qur’an Intensive Course</h2>
-                        <p class="text-muted fs-5 mb-3">
-                            For the past <strong>15 years</strong>, our Annual Qur’an Intensive has been a transformative program that helps students deepen their connection with the Qur’an and strengthen their Islamic identity.
-                        </p>
-                        <p class="text-muted fs-5 mb-3">
-                            Over the course of <strong>10 days</strong>, students dedicate <strong>6–8 hours daily</strong> to reciting and reflecting upon the Qur’an, while developing strong spiritual habits through  <strong>tahajjud, adhan, and all five salah in jama‘ah</strong>.
-                        </p>
-                        <p class="text-muted fs-5 mb-4">
-                            Alongside worship and study, participants enjoy <strong>football tournaments, table tennis, and nutritious meals</strong> — nurturing both body and soul in an environment of   brotherhood and iman.
-                        </p>
+                    <!-- Classes for Everyone Tab -->
+                    <div id="classes" class="tab-pane">
+                        <div class="row g-4">
+                            <div class="col-md-4">
+                                <div class="class-card">
+                                    <img src="img/seerah.jpg" alt="Seerah Class" class="class-image">
+                                    <div class="class-content">
+                                        <h4 class="text-success fw-bold">Seerah</h4>
+                                        <p class="text-muted">Learn about the life and teachings of Prophet Muhammad ﷺ</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="class-card">
+                                    <img src="img/namesofallah.jpg" alt="Names of Allah Class" class="class-image">
+                                    <div class="class-content">
+                                        <h4 class="text-success fw-bold">Names of Allah</h4>
+                                        <p class="text-muted">Deepen your understanding of Allah's beautiful names and attributes</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="class-card">
+                                    <img src="img/tafseer.jpg" alt="Tafseer Class" class="class-image">
+                                    <div class="class-content">
+                                        <h4 class="text-success fw-bold">Tafseer</h4>
+                                        <p class="text-muted">Study the meanings and explanations of the Holy Qur'an</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
+                    <!-- Our Events Tab -->
+                    <div id="events" class="tab-pane">
+                        <div class="row align-items-center">
+                            <div class="col-md-6 mb-4 mb-md-0">
+                                <div class="event-image-container">
+                                    <img src="img/charity.jpg" alt="Charity Event" class="event-image rounded-4 shadow-sm">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <h2 class="text-success fw-bold mb-3">Community Events</h2>
+                                <p class="text-muted fs-5 mb-3">
+                                    Join us for our regular community events that bring people together in the spirit of brotherhood and service.
+                                </p>
+                                <p class="text-muted fs-5 mb-3">
+                                    From charity drives and fundraising events to community iftars and educational seminars, we strive to create opportunities for spiritual growth and community bonding.
+                                </p>
+                                <p class="text-muted fs-5 mb-4">
+                                    Our events are open to everyone and provide a welcoming environment for learning, sharing, and building lasting connections.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
         
         <!-- Hadith & Registration Section - Stylized -->
-        <section class="py-6 position-relative overflow-hidden" style="background: linear-gradient(135deg, #e9ecef 0%, #f8f9fa 100%);">
+        <section class="py-6 position-relative overflow-hidden bg-light">
             <div class="container position-relative z-2">
                 <div class="row justify-content-center">
                     <div class="col-lg-8 col-md-10">
@@ -368,7 +445,7 @@
 
                         <!-- Enhanced Register Button -->
                         <div class="text-center">
-                            <a href="#" class="btn-register btn-lg">
+                            <a href="admissions.php" class="btn-register btn-lg">
                                 <span class="btn-content">
                                     <i class="bi bi-pencil-square me-2"></i>
                                     Register Your Child

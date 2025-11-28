@@ -285,11 +285,43 @@ body {
   width: 100%;
 }
 
+/* Remove underline for dropdown items */
+.navbar-custom .dropdown-toggle.nav-link::after {
+  display: none; /* Hide the underline for dropdown */
+}
+
+.navbar-custom .dropdown-toggle.nav-link:hover::after {
+  display: none; /* Hide underline on hover for dropdown */
+}
+
 /* Dropdown menu styling */
 .navbar-custom .dropdown-menu {
   border: none;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   border-radius: 0.5rem;
+  display: block;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(10px);
+  transition: all 0.3s ease;
+  pointer-events: none; /* Prevent glitchiness during transition */
+}
+
+/* Show dropdown on hover */
+.navbar-custom .dropdown:hover .dropdown-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  pointer-events: auto; /* Re-enable interactions when visible */
+}
+
+/* Add a small delay to prevent accidental closing when moving to dropdown */
+.navbar-custom .dropdown {
+  position: relative;
+}
+
+.navbar-custom .dropdown-menu {
+  margin-top: 0; /* Remove any gap */
 }
 
 .navbar-custom .dropdown-item {
@@ -300,6 +332,62 @@ body {
 .navbar-custom .dropdown-item:hover {
   background-color: #e9ecef;
   color: #004d23;
+}
+
+/* Custom dropdown arrow - positioned right next to text */
+.navbar-custom .dropdown-toggle {
+  position: relative;
+  padding-right: 1.5rem !important; /* Make space for the arrow */
+}
+
+.navbar-custom .dropdown-toggle::after {
+  content: "▼";
+  border: none !important;
+  position: absolute;
+  right: 0.5rem; /* Position right next to the text */
+  top: 50%;
+  transform: translateY(-50%);
+  margin: 0;
+  font-size: 1em;
+  transition: transform 0.3s ease;
+  vertical-align: baseline;
+}
+
+/* Rotate arrow when dropdown is hovered */
+.navbar-custom .dropdown:hover .dropdown-toggle::after {
+  transform: translateY(-50%) rotate(180deg);
+}
+
+/* Ensure dropdown works on mobile too */
+@media (max-width: 991.98px) {
+  .navbar-custom .dropdown-menu {
+    display: none;
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    pointer-events: auto;
+  }
+  
+  .navbar-custom .dropdown.show .dropdown-menu {
+    display: block;
+  }
+  
+  .navbar-custom .dropdown-toggle::after {
+    position: static;
+    transform: none;
+    float: right;
+    margin-top: 0.5rem;
+    margin-left: 0.5rem;
+  }
+  
+  .navbar-custom .dropdown.show .dropdown-toggle::after {
+    transform: rotate(180deg);
+  }
+  
+  /* Remove the extra padding on mobile */
+  .navbar-custom .dropdown-toggle {
+    padding-right: 0.75rem !important;
+  }
 }
 
 /* HERO SECTION - Clean and simple */
@@ -319,7 +407,7 @@ body {
   right: 0;
   width: 47.5%;
   height: 100%;
-  background-image: url('../img/hero6.png');
+  background-image: url('../img/hero.png');
   background-repeat: no-repeat;
   background-position: right center;
   background-size: 110% auto;
@@ -498,7 +586,7 @@ body {
     left: 0;
     right: 0;
     width: 100%;
-    background-image: linear-gradient(rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0.35)), url('../img/hero6.png');
+    background-image: linear-gradient(rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0.35)), url('../img/hero.png');
     background-position: center center;
     background-size: cover;
     -webkit-mask-image: none;
@@ -535,7 +623,7 @@ body {
     left: 0;
     right: 0;
     width: 100%;
-    background-image: linear-gradient(rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0.35)), url('../img/hero6.png');
+    background-image: linear-gradient(rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0.35)), url('../img/hero.png');
     background-position: center center;
     background-size: cover;
     -webkit-mask-image: none;
@@ -755,6 +843,24 @@ body {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* Import Better Arabic Fonts from Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400;1,700&family=Lateef:wght@200;300;400;500;600;700;800&family=Scheherazade+New:wght@400;500;600;700&display=swap');
+
 /* Qur'an Ayah Section Styling */
 .py-6 {
   padding-top: 5rem !important;
@@ -785,13 +891,27 @@ body {
   animation: shimmer 3s ease-in-out infinite;
 }
 
+/* Improved Arabic Font Styling */
 .ayah-arabic {
-  font-size: 2rem;
+  font-size: 2.3rem;
   font-weight: 700;
-  line-height: 1.6;
-  color: #2d3748;
+  line-height: 1.8;
+  color: #1a202c;
   text-align: center;
-  font-family: 'Traditional Arabic', 'Scheherazade New', serif;
+  font-family: 'Amiri', 'Scheherazade New', 'Traditional Arabic', serif;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  letter-spacing: -0.5px;
+}
+
+.hadith-arabic {
+  font-size: 1.9rem;
+  font-weight: 600;
+  line-height: 2;
+  color: #1a202c;
+  text-align: center;
+  font-family: 'Lateef', 'Amiri', 'Scheherazade New', serif;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  letter-spacing: -0.3px;
 }
 
 .ayah-decoration {
@@ -859,15 +979,6 @@ body {
   height: 100%;
   background: radial-gradient(circle, rgba(25, 135, 84, 0.05) 0%, transparent 70%);
   animation: float 8s ease-in-out infinite;
-}
-
-.hadith-arabic {
-  font-size: 1.6rem;
-  font-weight: 600;
-  line-height: 1.8;
-  color: #2d3748;
-  text-align: center;
-  font-family: 'Traditional Arabic', 'Scheherazade New', serif;
 }
 
 .hadith-decoration {
@@ -1014,11 +1125,13 @@ body {
   }
   
   .ayah-arabic {
-    font-size: 1.6rem;
+    font-size: 1.8rem;
+    line-height: 1.6;
   }
   
   .hadith-arabic {
-    font-size: 1.3rem;
+    font-size: 1.5rem;
+    line-height: 1.8;
   }
   
   .ayah-translation {
@@ -1041,11 +1154,13 @@ body {
 
 @media (max-width: 480px) {
   .ayah-arabic {
-    font-size: 1.4rem;
+    font-size: 1.5rem;
+    line-height: 1.5;
   }
   
   .hadith-arabic {
-    font-size: 1.1rem;
+    font-size: 1.3rem;
+    line-height: 1.6;
   }
   
   .ayah-translation,
@@ -1062,3 +1177,121 @@ body {
 
 
 
+
+/* Programs Section Tabs */
+.program-tab-btn {
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #198754;
+    background: #ffffff;
+    border: 2px solid #198754;
+    border-radius: 50px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.program-tab-btn:hover {
+    background: #f8f9fa;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.program-tab-btn.active {
+    background: #198754;
+    color: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(25, 135, 84, 0.3);
+}
+
+/* Tab Content */
+.tab-content {
+    position: relative;
+}
+
+.tab-pane {
+    display: none;
+    animation: fadeIn 0.5s ease-in;
+}
+
+.tab-pane.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Class Cards */
+.class-card {
+    background: #ffffff;
+    border-radius: 1rem;
+    overflow: hidden;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    height: 100%;
+}
+
+.class-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
+}
+
+.class-image {
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
+}
+
+.class-content {
+    padding: 1.5rem;
+}
+
+.class-content h4 {
+    margin-bottom: 0.75rem;
+}
+
+/* Event Image */
+.event-image-container {
+    position: relative;
+    overflow: hidden;
+    border-radius: 1rem;
+}
+
+.event-image {
+    width: 100%;
+    height: 400px;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.event-image:hover {
+    transform: scale(1.02);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .program-tab-btn {
+        padding: 0.75rem 1.25rem; /* Slightly smaller padding for mobile */
+        font-size: 0.95rem; /* Slightly smaller font for mobile */
+        /* Remove width: 100% and margin-bottom to keep them in one row */
+    }
+    
+    .class-image {
+        height: 200px;
+    }
+    
+    .event-image {
+        height: 300px;
+    }
+}
+
+/* For very small screens, you might want to adjust further */
+@media (max-width: 480px) {
+    .program-tab-btn {
+        padding: 0.6rem 1rem; /* Even smaller padding for very small screens */
+        font-size: 0.9rem; /* Even smaller font */
+    }
+}
