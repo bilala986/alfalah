@@ -41,26 +41,33 @@
                         <li class="nav-item">
                             <a class="nav-link active fw-bold" href="index.html">Home</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">Curriculum</a>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Our Madrassah
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="#">About Us</a></li>
+                                <li><a class="dropdown-item" href="#">Calendar</a></li>
+                                <li><a class="dropdown-item" href="#">Curriculum</a></li>
+                            </ul>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#">Hifdh</a>
+                            <a class="nav-link" href="#">Newsletters</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#">Fees</a>
+                            <a class="nav-link" href="#">Donations</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="admissions.php">Admissions</a>
+                            <a class="nav-link" href="#">Contact Us</a>
                         </li>
                     </ul>
                 </div>
             </div>
         </nav>
 
-        <!-- Hero Section -->
+        <!-- Hero Section - Remove custom padding -->
         <section class="hero-section d-flex align-items-center">
-            <div class="container py-5">
+            <div class="container">
                 <div class="row align-items-center">
                     <div class="col-lg-6">
                         <h1 class="display-4 fw-bold text-success">
@@ -68,7 +75,7 @@
                         </h1>
                         <p class="lead text-dark">
                             Dedicated to nurturing faith, knowledge, and character among our students through
-                            Qur’an, Hifdh, and Islamic education.
+                            Qur'an, Hifdh, and Islamic education.
                         </p>
                         <a href="#about" class="btn btn-success-modern btn-lg">Learn More</a>
                     </div>
@@ -76,8 +83,41 @@
             </div>
         </section>
 
+        <!-- Quick Links Section with ultra stylish divider -->
+        <section class="quick-links-section py-4 position-relative">
+            <div class="container position-relative">
+                <!-- Ultra Stylish Divider Line -->
+                <div class="quick-links-divider">
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                </div>
+
+                <div class="row g-4">
+                    <div class="col-md-3 col-6">
+                        <a href="#" class="quick-link-card">
+                            <i class="bi bi-calendar-check-fill"></i>
+                            <span>Events</span>
+                        </a>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <a href="#" class="quick-link-card">
+                            <i class="bi bi-mortarboard-fill"></i>
+                            <span>Admissions</span>
+                        </a>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <a href="#" class="quick-link-card">
+                            <i class="bi bi-telephone-fill"></i>
+                            <span>Contact</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <!-- About Section -->
-        <section id="about" class="py-5 bg-light">
+        <section id="about" class="py-5">
             <div class="container">
                 <h2 class="text-center text-success mb-4">About Al Falah Educational Centre</h2>
                 <p class="lead text-center mb-5">
@@ -130,21 +170,47 @@
             </div>
         </section>
         
-        <!-- Call to Action Section -->
-        <section class="py-5 bg-light text-center">
-            <div class="container">
-                <!-- Qur’an Ayah -->
-                <blockquote class="blockquote mb-5">
-                  <p dir="rtl" class="mb-2 fw-semibold" style="font-size: 1.3rem; line-height: 1.8;">
-                    يَرْفَعِ اللَّهُ الَّذِينَ آمَنُوا مِنكُمْ وَالَّذِينَ أُوتُوا الْعِلْمَ دَرَجَاتٍ
-                  </p>
-                  <p class="mb-1 fst-italic text-muted" style="font-size: 1rem;">
-                    "Allah will raise those who have believed among you and those who were given knowledge, by degrees"
-                  </p>
-                  <footer class="blockquote-footer mt-1" style="font-size: 0.875rem;">
-                    Qur’an, <cite>Surah Al-Mujadila 58:11</cite>
-                  </footer>
-                </blockquote>
+       <!-- Qur'an Ayah Section - Stylized -->
+        <section class="py-6 position-relative overflow-hidden" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);">
+            <div class="container position-relative z-2">
+                <div class="row justify-content-center">
+                    <div class="col-lg-10 col-xl-8">
+                        <!-- Decorative Elements -->
+                        <div class="position-absolute top-0 start-0 w-100 h-100 opacity-10">
+                            <div class="position-absolute" style="top: 20%; left: 10%;">
+                                <i class="bi bi-moon-stars-fill fs-1 text-success"></i>
+                            </div>
+                            <div class="position-absolute" style="top: 60%; right: 15%;">
+                                <i class="bi bi-star-fill fs-2 text-success"></i>
+                            </div>
+                        </div>
+
+                        <!-- Main Content -->
+                        <div class="ayah-card p-5 position-relative">
+                            <!-- Arabic Text -->
+                            <div class="mb-4">
+                                <p dir="rtl" class="ayah-arabic mb-3">
+                                    يَرْفَعِ اللَّهُ الَّذِينَ آمَنُوا مِنكُمْ وَالَّذِينَ أُوتُوا الْعِلْمَ دَرَجَاتٍ
+                                </p>
+                                <div class="ayah-decoration">
+                                    <span class="decoration-line"></span>
+                                    <i class="bi bi-flower1 mx-3 text-success"></i>
+                                    <span class="decoration-line"></span>
+                                </div>
+                            </div>
+
+                            <!-- Translation -->
+                            <div class="translation-box p-4 rounded-3">
+                                <p class="ayah-translation mb-2">
+                                    "Allah will raise those who have believed among you and those who were given knowledge, by degrees"
+                                </p>
+                                <footer class="ayah-source">
+                                    Qur'an, <cite>Surah Al-Mujadila 58:11</cite>
+                                </footer>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </section>
             
@@ -261,30 +327,56 @@
             </div>
         </section>
         
-        <!-- Call to Action Section -->
-        <section class="py-5 text-center bg-light">
-            <div class="container">
-                <div class="col-lg-8 col-md-10 mx-auto">
-                    <!-- Hadith -->
-                    <blockquote class="blockquote mb-5">
-                        <p dir="rtl" class="mb-2 fw-semibold fs-5 lh-lg">
-                            مَنْ قَرَأَ حَرْفًا مِنْ كِتَابِ اللَّهِ فَلَهُ بِهِ حَسَنَةٌ وَالْحَسَنَةُ بِعَشْرِ أَمْثَالِهَا 
-                    لاَ أَقُولُ الم حَرْفٌ وَلَكِنْ أَلِفٌ حَرْفٌ وَلاَمٌ حَرْفٌ وَمِيمٌ حَرْفٌ
-                        </p>
-                        <p class="mb-1 fst-italic text-muted small">
-                            "[Whoever recites a letter] from Allah's Book, then he receives the reward from it, 
-                            and the reward of ten the like of it. I do not say that Alif Lam Mim is a letter, 
-                            but Alif is a letter, Lam is a letter and Mim is a letter."
-                        </p>
-                        <footer class="blockquote-footer mt-1 small">
-                            Prophet Muhammad ﷺ, <cite>Jami’ at-Tirmidhi, Hadith 2910</cite>
-                        </footer>
-                    </blockquote>
+        <!-- Hadith & Registration Section - Stylized -->
+        <section class="py-6 position-relative overflow-hidden" style="background: linear-gradient(135deg, #e9ecef 0%, #f8f9fa 100%);">
+            <div class="container position-relative z-2">
+                <div class="row justify-content-center">
+                    <div class="col-lg-8 col-md-10">
+                        <!-- Decorative Corner Elements -->
+                        <div class="corner-decoration top-left">
+                            <i class="bi bi-bookmark-heart-fill"></i>
+                        </div>
+                        <div class="corner-decoration bottom-right">
+                            <i class="bi bi-bookmark-heart-fill"></i>
+                        </div>
 
-                    <!-- Register Button -->
-                    <a href="#" class="btn btn-success-modern btn-lg fw-semibold mt-3">
-                        Register Your Child
-                    </a>
+                        <!-- Hadith Card -->
+                        <div class="hadith-card p-5 mb-5">
+                            <!-- Arabic Text -->
+                            <div class="mb-4">
+                                <p dir="rtl" class="hadith-arabic mb-3">
+                                    مَنْ قَرَأَ حَرْفًا مِنْ كِتَابِ اللَّهِ فَلَهُ بِهِ حَسَنَةٌ وَالْحَسَنَةُ بِعَشْرِ أَمْثَالِهَا 
+                                    لاَ أَقُولُ الم حَرْفٌ وَلَكِنْ أَلِفٌ حَرْفٌ وَلاَمٌ حَرْفٌ وَمِيمٌ حَرْفٌ
+                                </p>
+                                <div class="hadith-decoration">
+                                    <i class="bi bi-stars"></i>
+                                </div>
+                            </div>
+
+                            <!-- Translation -->
+                            <div class="translation-box p-4 rounded-3 mb-4">
+                                <p class="hadith-translation mb-2">
+                                    "[Whoever recites a letter] from Allah's Book, then he receives the reward from it, 
+                                    and the reward of ten the like of it. I do not say that Alif Lam Mim is a letter, 
+                                    but Alif is a letter, Lam is a letter and Mim is a letter."
+                                </p>
+                                <footer class="hadith-source">
+                                    Prophet Muhammad ﷺ, <cite>Jami' at-Tirmidhi, Hadith 2910</cite>
+                                </footer>
+                            </div>
+                        </div>
+
+                        <!-- Enhanced Register Button -->
+                        <div class="text-center">
+                            <a href="#" class="btn-register btn-lg">
+                                <span class="btn-content">
+                                    <i class="bi bi-pencil-square me-2"></i>
+                                    Register Your Child
+                                </span>
+                                <div class="btn-shine"></div>
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>

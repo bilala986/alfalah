@@ -145,9 +145,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const searchTerm = searchInput.value.toLowerCase();
         const rows = applicationsTableBody.querySelectorAll('tr[data-student]');
         let visibleRows = 0;
-            
-        console.log('Current Year Filter:', currentYearFilter); // Debug log
-        console.log('Current Program Filter:', currentProgramFilter); // Debug log
 
         // Get search options
         const searchInStudent = searchStudent ? searchStudent.checked : true;
@@ -162,16 +159,6 @@ document.addEventListener('DOMContentLoaded', function() {
             const age = parseInt(row.getAttribute('data-age')) || 0;
             const status = row.getAttribute('data-status');
             const accountStatus = row.getAttribute('data-account-status');
-            
-            console.log('Row data - Year Group:', yearGroup, 'Program:', program); // Debug log
-            // Add this inside your filterTable function, inside the rows.forEach loop:
-            console.log('Year Group Filter Check:', {
-                currentYearFilter: currentYearFilter,
-                yearGroup: yearGroup,
-                lowercaseFilter: currentYearFilter.toLowerCase(),
-                matches: yearGroup === currentYearFilter.toLowerCase(),
-                shouldShow: currentYearFilter === 'all' || yearGroup === currentYearFilter.toLowerCase()
-            });
 
             // Get additional data from the row cells for email search
             const parentCell = row.cells[3];
@@ -238,7 +225,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Dynamic table update function with status support - UPDATED WITH DOCUMENT FRAGMENT
     function updateTable(applications) {
-        console.log('Updating table with applications:', applications);
         applicationsTableBody.innerHTML = '';
 
         // Update total count element
@@ -508,7 +494,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Enhanced refresh table data with better loading state
     function refreshTableData(shouldShowToast = false) {
-        console.log('Refreshing applications data...');
         
         // Show loading state on refresh button
         const refreshBtn = document.getElementById('refreshBtn');
@@ -518,7 +503,6 @@ document.addEventListener('DOMContentLoaded', function() {
         fetch(`php/get_applications.php?bid=${browserInstanceId}`)
             .then(response => response.json())
             .then(data => {
-                console.log('Received applications data from server:', data);
                 if (data.success) {
                     updateTable(data.applications);
                     if (shouldShowToast) {
@@ -1094,12 +1078,4 @@ document.addEventListener('DOMContentLoaded', function() {
     attachEventListeners();
     startCountdownTimers(); // Add this line
     filterTable();
-    
-    // Debug: Check if variables are properly set
-    console.log('Applications page initialized - Browser Instance ID:', browserInstanceId);
-    console.log('Search options available:', {
-        student: !!searchStudent,
-        parent: !!searchParent,
-        email: !!searchEmail
-    });
 });

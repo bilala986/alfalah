@@ -4,56 +4,82 @@ document.addEventListener('DOMContentLoaded', () => {
     const barContainer = document.querySelector('#mission-bar-bg');
     const section = document.getElementById('mission');
 
-    // Animate mission rows on scroll
-    const observer = new IntersectionObserver(entries => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) entry.target.classList.add('animate');
+    // Only initialize progress bar features on desktop
+    if (window.innerWidth > 768) {
+        // Animate mission rows on scroll
+        const observer = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) entry.target.classList.add('animate');
+            });
+        }, { threshold: 0.2 });
+        rows.forEach(row => observer.observe(row));
+
+        // Create tick markers inside the progress bar
+        const ticks = [];
+        rows.forEach((row, index) => {
+            const icon = row.querySelector('.rounded-circle');
+            const tick = document.createElement('div');
+            tick.classList.add('mission-tick');
+            
+            // Calculate tick position relative to the progress bar container
+            const iconRect = icon.getBoundingClientRect();
+            const barContainerRect = barContainer.getBoundingClientRect();
+            const sectionRect = section.getBoundingClientRect();
+            
+            // Position tick relative to the icon's vertical center, aligned with progress bar
+            const topPos = iconRect.top + iconRect.height / 2 - barContainerRect.top - 7; // 7px is half of tick height
+            
+            tick.style.top = `${topPos}px`;
+            barContainer.appendChild(tick);
+            ticks.push({ el: tick, top: topPos, icon: icon });
         });
-    }, { threshold: 0.2 });
-    rows.forEach(row => observer.observe(row));
 
-    // Create tick markers inside the progress bar
-    const ticks = [];
-    rows.forEach(row => {
-        const icon = row.querySelector('.rounded-circle');
-        const tick = document.createElement('div');
-        tick.classList.add('mission-tick');
-        // Calculate tick position relative to the section
-        const topPos = icon.offsetTop + row.offsetTop + icon.offsetHeight / 2 - 7;
-        tick.style.top = `${topPos}px`;
-        barContainer.appendChild(tick);
-        ticks.push({ el: tick, top: topPos });
-    });
+        window.addEventListener('scroll', () => {
+            const sectionRect = section.getBoundingClientRect();
+            const sectionHeight = section.offsetHeight;
+            const viewportHeight = window.innerHeight;
 
-    window.addEventListener('scroll', () => {
-        const sectionRect = section.getBoundingClientRect();
-        const sectionHeight = section.offsetHeight;
-        const viewportHeight = window.innerHeight;
+            // How much the section has entered the viewport
+            const scrollProgress = Math.min(
+                Math.max((viewportHeight - sectionRect.top) / (sectionHeight + viewportHeight / 2), 0),
+                1
+            );
 
-        // How much the section has entered the viewport
-        const scrollProgress = Math.min(
-            Math.max((viewportHeight - sectionRect.top) / (sectionHeight + viewportHeight / 2), 0),
-            1
-        );
+            // Limit bar fill to its own height
+            const maxBarHeight = barContainer.offsetHeight;
+            const barHeight = scrollProgress * maxBarHeight;
+            bar.style.height = `${barHeight}px`;
 
-        // Limit bar fill to its own height
-        const maxBarHeight = barContainer.offsetHeight;
-        const barHeight = scrollProgress * maxBarHeight;
-        bar.style.height = `${barHeight}px`;
-
-        // Activate ticks and circles
-        ticks.forEach(({ el, top }, i) => {
-            const icon = rows[i].querySelector('.rounded-circle');
-            if (barHeight >= top) {
-                el.classList.add('active');
-                el.innerHTML = '✔';
-                icon.classList.add('filled');
-            } else {
-                el.classList.remove('active');
-                el.innerHTML = '';
-                icon.classList.remove('filled');
-            }
+            // Activate ticks and circles
+            ticks.forEach(({ el, top, icon }) => {
+                if (barHeight >= top) {
+                    el.classList.add('active');
+                    el.innerHTML = '✔';
+                    icon.classList.add('filled');
+                } else {
+                    el.classList.remove('active');
+                    el.innerHTML = '';
+                    icon.classList.remove('filled');
+                }
+            });
         });
-    });
 
+        // Recalculate positions on resize
+        window.addEventListener('resize', () => {
+            ticks.forEach(({ el, icon }) => {
+                const iconRect = icon.getBoundingClientRect();
+                const barContainerRect = barContainer.getBoundingClientRect();
+                const topPos = iconRect.top + iconRect.height / 2 - barContainerRect.top - 7;
+                el.style.top = `${topPos}px`;
+            });
+        });
+    } else {
+        // Mobile: Just animate the rows without progress bar
+        const observer = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) entry.target.classList.add('animate');
+            });
+        }, { threshold: 0.2 });
+        rows.forEach(row => observer.observe(row));
+    }
 });
