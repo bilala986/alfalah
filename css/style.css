@@ -1295,3 +1295,88 @@ body {
         font-size: 0.9rem; /* Even smaller font */
     }
 }
+
+
+
+
+/* Welcome Section */
+.welcome-section {
+    background: #f8f9fa;
+}
+
+.bismillah-img {
+    max-width: 300px;
+    height: auto;
+    filter: brightness(0.9);
+}
+
+.welcome-content {
+    font-size: 1.1rem;
+    line-height: 1.7;
+}
+
+.award-img {
+    max-width: 100%;
+    height: auto;
+    transition: transform 0.3s ease;
+}
+
+.award-img:hover {
+    transform: scale(1.02);
+}
+
+/* Apply Arabic font to all Arabic text */
+[dir="rtl"],
+.ayah-arabic,
+.hadith-arabic {
+    font-family: 'Reem Kufi', 'Amiri', 'Scheherazade New', 'Traditional Arabic', serif !important;
+}
+
+
+
+
+
+/* Center mission icons on tablet and mobile (768px and below) */
+@media (max-width: 768px) {
+    /* Center align mission items */
+    .mission-row {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+    
+    .mission-row > div:first-child {
+        margin-left: 0 !important;
+        margin-bottom: 1.5rem;
+        margin-right: 0 !important;
+    }
+    
+    .mission-row > div:nth-child(2) {
+        margin-left: 0 !important;
+    }
+    
+    /* Reset icon positioning */
+    #mission .rounded-circle {
+        margin-left: 0;
+        width: 70px;
+        height: 70px;
+    }
+    
+    #mission .rounded-circle i {
+        font-size: 1.5rem !important;
+    }
+    
+    /* Improve text sizing */
+    .mission-row h4 {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .mission-row p {
+        font-size: 1.1rem !important;
+        line-height: 1.6;
+    }
+}
+
+
