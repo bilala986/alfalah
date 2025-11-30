@@ -246,6 +246,55 @@
     background: rgba(25, 135, 84, 0.05);
 }
 
+/* Copy Instruction Styling */
+.copy-instruction .alert {
+    border-radius: 0.75rem;
+    border: 2px solid rgba(25, 135, 84, 0.3);
+    background: rgba(25, 135, 84, 0.05);
+    font-size: 0.95rem;
+}
+
+.copy-instruction .bi-clipboard-check {
+    font-size: 1.1rem;
+}
+
+/* Enhanced bank info items for better clickability */
+.bank-info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-radius: 0.5rem;
+    margin: 0.25rem 0;
+    padding: 1.25rem 1rem;
+}
+
+.bank-info-item:hover {
+    background-color: rgba(25, 135, 84, 0.05);
+    transform: translateX(5px);
+}
+
+.bank-info-item:active {
+    background-color: rgba(25, 135, 84, 0.1);
+    transform: translateX(2px);
+}
+
+/* Add a subtle copy indicator */
+.bank-info-item::after {
+    content: "📋";
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    margin-left: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.bank-info-item:hover::after {
+    opacity: 0.7;
+}
+
 /* Other Ways to Donate */
 .other-ways-section {
     background: #ffffff;

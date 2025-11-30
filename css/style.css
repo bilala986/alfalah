@@ -359,31 +359,6 @@ body {
   transform: scale(1.02);
 }
 
-/* ===== ABOUT SECTION ===== */
-#about {
-  background: #f8f9fa;
-  padding-top: 6rem;
-  position: relative;
-  z-index: 2;
-}
-
-#about .card {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-#about .card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
-}
-
-/* Remove background from all other sections to maintain consistency */
-.py-5.bg-light,
-#mission.bg-light,
-#intensive-course.bg-light,
-#contact-info.bg-light {
-  background: #f8f9fa !important;
-}
-
 /* ===== MISSION SECTION ===== */
 #mission .rounded-circle {
   width: 80px;

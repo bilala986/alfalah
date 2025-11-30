@@ -1,0 +1,434 @@
+/* ===== ABOUT PAGE STYLES ===== */
+
+/* About Hero Section */
+.about-hero-section {
+    position: relative;
+    min-height: 50vh;
+    background: linear-gradient(135deg, #198754 0%, #28a745 50%, #38b27c 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    padding: 6rem 0 4rem;
+}
+
+.about-hero-section .hero-content {
+    position: relative;
+    z-index: 3;
+    text-align: center;
+    color: white;
+}
+
+.about-hero-section .hero-title {
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.about-hero-section .hero-subtitle {
+    font-size: 1.3rem;
+    margin-bottom: 0;
+    opacity: 0.95;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Hero Background Shapes */
+.about-hero-section .hero-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+.about-hero-section .hero-shape-1 {
+    position: absolute;
+    top: 20%;
+    right: 10%;
+    width: 150px;
+    height: 150px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    animation: float 6s ease-in-out infinite;
+}
+
+.about-hero-section .hero-shape-2 {
+    position: absolute;
+    bottom: 30%;
+    left: 8%;
+    width: 100px;
+    height: 100px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+    animation: float 8s ease-in-out infinite reverse;
+}
+
+.about-hero-section .hero-shape-3 {
+    position: absolute;
+    top: 60%;
+    left: 60%;
+    width: 120px;
+    height: 120px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 40% 60% 60% 40% / 40% 40% 60% 60%;
+    animation: rotate 15s linear infinite;
+}
+
+/* Stats Section */
+.stats-section {
+    background: #ffffff;
+}
+
+.stats-section .card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.stats-section .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* History Section */
+.history-img {
+    max-width: 100%;
+    height: auto;
+    transition: transform 0.3s ease;
+}
+
+.history-img:hover {
+    transform: scale(1.02);
+}
+
+/* Vision & Mission Section */
+.vision-mission-section {
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 50%, #f8f9fa 100%);
+}
+
+/* Shared Styles */
+.vision-content, .mission-content {
+    padding: 4rem 3rem;
+    border-radius: 2rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.vision-bg-shape, .mission-bg-shape {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.03;
+    z-index: 1;
+}
+
+.vision-bg-shape {
+    background: radial-gradient(circle at 20% 80%, #198754 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, #28a745 0%, transparent 50%);
+}
+
+.mission-bg-shape {
+    background: radial-gradient(circle at 80% 80%, #198754 0%, transparent 50%),
+                radial-gradient(circle at 20% 20%, #28a745 0%, transparent 50%);
+}
+
+.section-badge {
+    display: inline-flex;
+    align-items: center;
+    background: rgba(25, 135, 84, 0.1);
+    color: #198754;
+    padding: 0.5rem 1.25rem;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    border: 1px solid rgba(25, 135, 84, 0.2);
+}
+
+.highlight-text {
+    background: linear-gradient(120deg, #198754, #28a745);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 600;
+}
+
+/* Vision Specific */
+.vision-content {
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    border: 1px solid rgba(25, 135, 84, 0.1);
+    box-shadow: 
+        20px 20px 60px rgba(0, 0, 0, 0.05),
+        -20px -20px 60px rgba(255, 255, 255, 0.8);
+}
+
+.vision-content::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(180deg, #198754, #28a745);
+    border-radius: 2px 0 0 2px;
+}
+
+/* Mission Specific */
+.mission-content {
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    border: 1px solid rgba(25, 135, 84, 0.1);
+    box-shadow: 
+        20px 20px 60px rgba(0, 0, 0, 0.05),
+        -20px -20px 60px rgba(255, 255, 255, 0.8);
+}
+
+.mission-content::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(180deg, #28a745, #198754);
+    border-radius: 0 2px 2px 0;
+}
+
+/* Decoration Items */
+.vision-decoration, .mission-decoration {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+}
+
+.decoration-item {
+    position: absolute;
+    font-size: 1.5rem;
+    color: rgba(25, 135, 84, 0.15);
+    animation: float 6s ease-in-out infinite;
+}
+
+.vision-decoration .item-1 {
+    top: 20%;
+    left: 10%;
+    animation-delay: 0s;
+}
+
+.vision-decoration .item-2 {
+    top: 60%;
+    left: 15%;
+    animation-delay: 2s;
+}
+
+.vision-decoration .item-3 {
+    top: 40%;
+    right: 10%;
+    animation-delay: 4s;
+}
+
+.mission-decoration .item-1 {
+    top: 25%;
+    left: 15%;
+    animation-delay: 1s;
+}
+
+.mission-decoration .item-2 {
+    top: 65%;
+    left: 10%;
+    animation-delay: 3s;
+}
+
+.mission-decoration .item-3 {
+    top: 45%;
+    right: 15%;
+    animation-delay: 5s;
+}
+
+/* Connecting Line */
+.connecting-line {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100px;
+    height: 4px;
+    z-index: 2;
+}
+
+.connecting-line .line {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, #198754, #28a745, #198754);
+    border-radius: 2px;
+    position: relative;
+}
+
+.center-circle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 60px;
+    height: 60px;
+    background: #ffffff;
+    border: 3px solid #198754;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 5px 15px rgba(25, 135, 84, 0.3);
+}
+
+.center-circle i {
+    color: #198754;
+    font-size: 1.5rem;
+}
+
+/* Enhanced Animations */
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0px) rotate(0deg);
+    }
+    33% {
+        transform: translateY(-10px) rotate(120deg);
+    }
+    66% {
+        transform: translateY(5px) rotate(240deg);
+    }
+}
+
+/* Hover Effects */
+.vision-content:hover .vision-decoration .decoration-item,
+.mission-content:hover .mission-decoration .decoration-item {
+    animation-duration: 3s;
+}
+
+.vision-content:hover, .mission-content:hover {
+    transform: translateY(-5px);
+    transition: transform 0.3s ease;
+}
+
+/* Approach Section */
+.approach-card {
+    background: #ffffff;
+    padding: 2.5rem;
+    border-radius: 1rem;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(25, 135, 84, 0.1);
+    transition: all 0.3s ease;
+    height: 100%;
+}
+
+.approach-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
+}
+
+.approach-icon {
+    width: 70px;
+    height: 70px;
+    background: linear-gradient(135deg, #198754, #28a745);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem auto;
+    transition: all 0.3s ease;
+}
+
+.approach-card:hover .approach-icon {
+    transform: scale(1.1) rotate(10deg);
+}
+
+.approach-icon i {
+    color: #ffffff;
+    font-size: 1.8rem;
+}
+
+.approach-card h4 {
+    margin-bottom: 1rem;
+}
+
+.approach-card p {
+    color: #6c757d;
+    line-height: 1.6;
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-20px);
+    }
+}
+
+@keyframes rotate {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 768px) {
+    .vision-content, .mission-content {
+        padding: 2.5rem 2rem;
+        margin-bottom: 2rem;
+    }
+    
+    .vision-content::before, .mission-content::before {
+        width: 100%;
+        height: 4px;
+        top: 0;
+        left: 0;
+    }
+    
+    .vision-content::before {
+        background: linear-gradient(90deg, #198754, #28a745);
+    }
+    
+    .mission-content::before {
+        background: linear-gradient(90deg, #28a745, #198754);
+    }
+    
+    .connecting-line {
+        display: none;
+    }
+    
+    .decoration-item {
+        font-size: 1.2rem;
+    }
+    
+    .vision-text p, .mission-text p {
+        font-size: 1.1rem !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .vision-content, .mission-content {
+        padding: 2rem 1.5rem;
+    }
+    
+    .section-badge {
+        font-size: 0.8rem;
+        padding: 0.4rem 1rem;
+    }
+    
+    h2 {
+        font-size: 1.5rem;
+    }
+    
+    .decoration-item {
+        display: none;
+    }
+}
