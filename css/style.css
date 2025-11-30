@@ -34,19 +34,25 @@ body {
   position: absolute;
   left: 50%;
   bottom: 0;
-  width: 0%;
+  width: 0%; /* Start with 0 width for regular links */
   height: 2px;
   background-color: #006d32;
   transform: translateX(-50%);
   transition: width 0.3s ease;
 }
 
-.navbar-custom .nav-link:hover {
-  color: #004d23 !important;
+/* Active links (like Home) should have underline by default */
+.navbar-custom .nav-link.active::after {
+  width: 80%; /* Show underline for active pages */
 }
 
+/* Show underline on hover for ALL links */
 .navbar-custom .nav-link:hover::after {
   width: 80%;
+}
+
+.navbar-custom .nav-link:hover {
+  color: #004d23 !important;
 }
 
 .navbar-custom .nav-link.active {
@@ -54,8 +60,22 @@ body {
   color: #004d23 !important;
 }
 
-.navbar-custom .nav-link.active::after {
-  width: 80%;
+/* Custom dropdown arrow styling using Bootstrap icon */
+.dropdown-toggle .dropdown-arrow {
+  font-size: 0.8em; /* Slightly smaller than text */
+  color: #006d32;
+  transition: color 0.3s ease;
+  margin-left: 4px;
+  vertical-align: middle;
+}
+
+.navbar-custom .nav-link:hover .dropdown-arrow {
+  color: #004d23;
+}
+
+/* Remove any existing arrow animations if present */
+.navbar-custom .dropdown-toggle::after {
+  display: none !important; /* Hide Bootstrap's default arrow */
 }
 
 /* Enhanced Dropdown Styling */
@@ -126,6 +146,8 @@ body {
 .navbar-custom .dropdown-item:active {
   background-color: #e9ecef;
 }
+
+/* Rest of your responsive CSS remains the same... */
 
 /* ===== HERO SECTION ===== */
 .hero-section {
@@ -1136,4 +1158,86 @@ body {
     padding: 0.6rem 1rem;
     font-size: 0.9rem;
   }
+}
+
+
+
+/* ===== FOOTER ===== */
+.footer-section {
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%) !important;
+    position: relative;
+    overflow: hidden;
+}
+
+.footer-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #198754, #28a745, #38b27c);
+}
+
+.footer-link {
+    color: rgba(255, 255, 255, 0.75) !important;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+}
+
+.footer-link:hover {
+    color: #28a745 !important;
+    transform: translateX(5px);
+}
+
+.social-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    color: rgba(255, 255, 255, 0.7) !important;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    font-size: 1.1rem;
+}
+
+.social-link:hover {
+    background: #198754;
+    color: #fff !important;
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(25, 135, 84, 0.3);
+}
+
+.contact-info i {
+    font-size: 1.1rem;
+    width: 20px;
+}
+
+/* Footer responsive */
+@media (max-width: 768px) {
+    .footer-section {
+        text-align: center;
+    }
+    
+    .footer-brand {
+        text-align: center;
+    }
+    
+    .social-links {
+        justify-content: center;
+    }
+    
+    .contact-info .d-flex {
+        justify-content: center;
+        text-align: center;
+    }
+    
+    .footer-links {
+        text-align: center;
+        margin-top: 1rem;
+    }
 }
