@@ -9,7 +9,6 @@
     align-items: center;
     justify-content: center;
     overflow: hidden;
-    margin-top: 80px;
     padding: 4rem 0;
 }
 
@@ -99,55 +98,6 @@
     animation: rotate 15s linear infinite;
 }
 
-/* Contact Details Card */
-.contact-details-card {
-    background: #ffffff;
-    padding: 2.5rem;
-    border-radius: 1.5rem;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-    border: 1px solid rgba(25, 135, 84, 0.1);
-    height: 100%;
-    animation: slideInLeft 0.8s ease-out;
-}
-
-.contact-item {
-    display: flex;
-    align-items: flex-start;
-    margin-bottom: 2rem;
-}
-
-.contact-icon {
-    width: 50px;
-    height: 50px;
-    background: linear-gradient(135deg, #198754, #28a745);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-right: 1.5rem;
-    flex-shrink: 0;
-    transition: transform 0.3s ease;
-}
-
-.contact-item:hover .contact-icon {
-    transform: scale(1.1) rotate(5deg);
-}
-
-.contact-icon i {
-    color: #ffffff;
-    font-size: 1.2rem;
-}
-
-.contact-content h5 {
-    margin-bottom: 0.5rem;
-}
-
-.contact-content p {
-    color: #6c757d;
-    font-size: 1.1rem;
-    line-height: 1.6;
-}
-
 /* ===== CONTACT CARDS GRID ===== */
 
 .contact-cards-container {
@@ -179,8 +129,8 @@
 }
 
 .contact-card-icon {
-    width: 50px; /* Smaller icons */
-    height: 50px; /* Smaller icons */
+    width: 50px;
+    height: 50px;
     background: linear-gradient(135deg, #198754, #28a745);
     border-radius: 50%;
     display: flex;
@@ -197,7 +147,7 @@
 
 .contact-card-icon i {
     color: #ffffff;
-    font-size: 1.2rem; /* Smaller icon size */
+    font-size: 1.2rem;
 }
 
 .contact-card-content h5 {
@@ -273,6 +223,11 @@
     .contact-card-content h5 {
         font-size: 1rem;
     }
+    
+    /* Center header on mobile */
+    .contact-cards-container h2 {
+        text-align: center !important;
+    }
 }
 
 /* Small Tablet (577px to 767px): 2 per row when space allows */
@@ -294,17 +249,25 @@
     .contact-card-icon i {
         font-size: 1.1rem;
     }
+    
+    /* Center header on small tablets */
+    .contact-cards-container h2 {
+        text-align: center !important;
+    }
 }
 
 /* Tablet (768px to 991px): Auto-fit to fill available space */
 @media (min-width: 768px) and (max-width: 991px) {
     .contact-cards-grid {
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
         gap: 1.5rem;
+        justify-items: center;
     }
     
     .contact-card {
         padding: 1.5rem;
+        max-width: 280px;
+        width: 100%;
     }
     
     .contact-timing-item {
@@ -317,6 +280,11 @@
     .contact-time {
         text-align: left;
         font-size: 0.8rem;
+    }
+    
+    /* Center header on tablets */
+    .contact-cards-container h2 {
+        text-align: center !important;
     }
 }
 
@@ -336,6 +304,7 @@
         text-align: left;
         flex-direction: row;
         align-items: flex-start;
+        max-width: none;
     }
     
     .contact-card-icon {
@@ -373,6 +342,11 @@
         text-align: left;
         font-size: 0.8rem;
     }
+    
+    /* Left align header on desktop */
+    .contact-cards-container h2 {
+        text-align: left !important;
+    }
 }
 
 /* Large Desktop (1200px and above): Better spacing */
@@ -393,35 +367,6 @@
     .contact-card-icon i {
         font-size: 1.2rem;
     }
-}
-
-/* Timings Styling */
-.timings {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.timing-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.5rem 0;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-}
-
-.timing-item:last-child {
-    border-bottom: none;
-}
-
-.timing-item .days {
-    font-weight: 500;
-    color: #495057;
-}
-
-.timing-item .time {
-    font-weight: 600;
-    color: #198754;
 }
 
 /* Map Card */
@@ -462,9 +407,75 @@
     box-shadow: 0 8px 25px rgba(25, 135, 84, 0.4);
 }
 
-/* Additional Contact Section */
-.additional-contact-section {
+/* ===== CONTACT FORM SECTION ===== */
+.contact-form-section {
+    background: #ffffff;
+    padding: 5rem 0;
+}
+
+.contact-image-container {
+    padding-right: 2rem;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.contact-image {
+    width: 85%;
+    height: auto;
+    max-height: 500px;
+    object-fit: contain;
+    border-radius: 0.5rem;
+}
+
+.contact-form-card {
+    background: #ffffff;
+    padding: 3rem;
+    border-radius: 1.5rem;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(25, 135, 84, 0.1);
+    height: 100%;
+}
+
+.contact-form .form-group {
+    margin-bottom: 1.5rem;
+}
+
+.contact-form .form-label {
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 0.5rem;
+}
+
+.contact-form .form-control,
+.contact-form .form-select {
+    border: 2px solid #e2e8f0;
+    border-radius: 0.75rem;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.contact-form .form-control:focus,
+.contact-form .form-select:focus {
+    border-color: #198754;
+    box-shadow: 0 0 0 3px rgba(25, 135, 84, 0.1);
+}
+
+.contact-form .form-control::placeholder {
+    color: #a0aec0;
+}
+
+.contact-form textarea.form-control {
+    resize: vertical;
+    min-height: 150px;
+}
+
+/* ===== CONNECT SECTION ===== */
+.connect-section {
     background: #f8f9fa !important;
+    padding: 5rem 0;
 }
 
 .connect-card {
@@ -511,6 +522,7 @@
 .connect-card p {
     color: #6c757d;
     line-height: 1.6;
+    margin-bottom: 1.5rem;
 }
 
 /* ===== ANIMATIONS ===== */
@@ -547,18 +559,6 @@
     }
 }
 
-@keyframes bounce {
-    0%, 20%, 50%, 80%, 100% {
-        transform: translateY(0) translateX(-50%);
-    }
-    40% {
-        transform: translateY(-10px) translateX(-50%);
-    }
-    60% {
-        transform: translateY(-5px) translateX(-50%);
-    }
-}
-
 @keyframes float {
     0%, 100% {
         transform: translateY(0px);
@@ -584,7 +584,6 @@
     .contact-hero-section {
         min-height: 40vh;
         padding: 3rem 0;
-        margin-top: 70px;
     }
     
     .hero-title {
@@ -623,6 +622,15 @@
     .hero-shape-3 {
         width: 70px;
         height: 70px;
+    }
+    
+    .contact-form-card {
+        padding: 2rem;
+    }
+    
+    .contact-form-section,
+    .connect-section {
+        padding: 3rem 0;
     }
 }
 
@@ -665,6 +673,46 @@
     .hero-shape-3 {
         display: none;
     }
+    
+    .contact-form-card {
+        padding: 1.5rem;
+    }
+}
+
+/* Mobile and Tablet (991px and below - when image disappears) */
+@media (max-width: 991px) {
+    .contact-form-card {
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    
+    .contact-form-section .row {
+        justify-content: center;
+    }
+    
+    /* On mobile/tablet, keep phone and subject stacked */
+    .contact-form .phone-subject-row {
+        display: block;
+    }
+    
+    .contact-form .phone-subject-row .col-md-6 {
+        width: 100%;
+        margin-bottom: 1.5rem;
+    }
+}
+
+/* Laptop and Desktop (992px and above) */
+@media (min-width: 992px) {
+    /* Phone and Subject on same row */
+    .contact-form .phone-subject-row {
+        display: flex;
+        gap: 1.5rem;
+    }
+    
+    .contact-form .phone-subject-row .col-md-6 {
+        flex: 1;
+        margin-bottom: 0;
+    }
 }
 
 /* Large Desktop (1200px and above) */
@@ -682,7 +730,6 @@
         font-size: 1.2rem;
     }
     
-    .contact-details-card,
     .map-card {
         padding: 3rem;
     }
@@ -690,364 +737,17 @@
     .map-container {
         height: 450px;
     }
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/* ===== CONTACT FORM STYLES ===== */
-
-.contact-form-card {
-    background: #ffffff;
-    padding: 2.5rem;
-    border-radius: 1.5rem;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-    border: 1px solid rgba(25, 135, 84, 0.1);
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-}
-
-.contact-form {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-}
-
-.contact-form .row.g-3 {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-}
-
-.contact-form .form-group {
-    margin-bottom: 1.5rem;
-}
-
-.contact-form .form-label {
-    font-weight: 600;
-    color: #2d3748;
-    margin-bottom: 0.5rem;
-}
-
-.contact-form .form-control,
-.contact-form .form-select {
-    border: 2px solid #e2e8f0;
-    border-radius: 0.75rem;
-    padding: 0.75rem 1rem;
-    font-size: 1rem;
-    transition: all 0.3s ease;
-}
-
-.contact-form .form-control:focus,
-.contact-form .form-select:focus {
-    border-color: #198754;
-    box-shadow: 0 0 0 3px rgba(25, 135, 84, 0.1);
-}
-
-.contact-form .form-control::placeholder {
-    color: #a0aec0;
-}
-
-/* Auto-expanding textarea */
-.contact-form .message-container {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    min-height: 250px; /* Much larger minimum height */
-}
-
-.contact-form .message-container .form-label {
-    margin-bottom: 0.75rem;
-}
-
-.contact-form textarea.form-control {
-    resize: none; /* Disable manual resizing */
-    min-height: 200px; /* Much larger initial height */
-    flex: 1; /* Take available space */
-    transition: height 0.2s ease;
-    line-height: 1.5;
-    overflow-y: auto; /* Show scrollbar when needed */
-}
-
-/* Connect Content Styles */
-.connect-content {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-}
-
-.connect-cards-grid {
-    display: grid;
-    gap: 1.25rem;
-    flex: 1;
-}
-
-.connect-card {
-    background: #ffffff;
-    padding: 1.5rem;
-    border-radius: 1rem;
-    text-align: center;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
-    border: 1px solid rgba(25, 135, 84, 0.1);
-    transition: all 0.3s ease;
-}
-
-.connect-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
-}
-
-.connect-icon {
-    width: 50px;
-    height: 50px;
-    background: linear-gradient(135deg, #198754, #28a745);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 1rem auto;
-    transition: all 0.3s ease;
-}
-
-.connect-card:hover .connect-icon {
-    transform: scale(1.1) rotate(5deg);
-}
-
-.connect-icon i {
-    color: #ffffff;
-    font-size: 1.3rem;
-}
-
-.connect-card h5 {
-    margin-bottom: 0.75rem;
-    font-size: 1.1rem;
-}
-
-.connect-card p {
-    color: #6c757d;
-    line-height: 1.5;
-    margin-bottom: 1rem;
-    font-size: 0.9rem;
-}
-
-.connect-card .btn {
-    padding: 0.4rem 1.25rem;
-    font-weight: 600;
-    font-size: 0.85rem;
-}
-
-/* ===== RESPONSIVE DESIGN ===== */
-
-/* Mobile & Tablet: Center "Other Ways to Connect" text */
-@media (max-width: 991px) {
-    .connect-content h3,
-    .connect-content p {
-        text-align: center !important;
-    }
     
-    .contact-cards-container h2 {
-        text-align: center !important;
-    }
-}
-
-/* Small Mobile (default): 1 per row */
-@media (max-width: 480px) {
-    .connect-cards-grid {
-        grid-template-columns: 1fr;
-        max-width: 320px;
-        margin-left: auto;
-        margin-right: auto;
-    }
-    
-    .contact-form-card {
-        padding: 1.75rem;
-        margin-bottom: 2rem;
-    }
-    
-    .connect-card {
-        padding: 1.25rem;
-    }
-    
-    .connect-icon {
-        width: 45px;
-        height: 45px;
-    }
-    
-    .connect-icon i {
-        font-size: 1.2rem;
-    }
-    
-    .contact-form .message-container {
-        min-height: 180px;
-    }
-    
-    .contact-form textarea.form-control {
-        min-height: 150px;
-    }
-}
-
-/* Mobile (481px to 640px): 2 per row when space allows */
-@media (min-width: 481px) and (max-width: 640px) {
-    .connect-cards-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 1rem;
-    }
-    
-    .contact-form-card {
-        padding: 2rem;
-        margin-bottom: 2rem;
-    }
-    
-    .connect-card {
-        padding: 1.25rem;
-    }
-    
-    .connect-card h5 {
-        font-size: 1rem;
-    }
-    
-    .connect-card p {
-        font-size: 0.85rem;
-    }
-    
-    .contact-form .message-container {
-        min-height: 200px;
-    }
-    
-    .contact-form textarea.form-control {
-        min-height: 170px;
-    }
-}
-
-/* Tablet Small (641px to 768px): Auto-fit grid */
-@media (min-width: 641px) and (max-width: 768px) {
-    .connect-cards-grid {
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-        gap: 1.25rem;
-    }
-    
-    .contact-form-card {
-        padding: 2rem;
-        margin-bottom: 2rem;
-    }
-    
-    .connect-card {
-        padding: 1.5rem;
-    }
-    
-    .contact-form .message-container {
-        min-height: 220px;
-    }
-    
-    .contact-form textarea.form-control {
-        min-height: 190px;
-    }
-}
-
-/* Tablet (769px to 991px): Auto-fit grid with more columns */
-@media (min-width: 769px) and (max-width: 991px) {
-    .connect-cards-grid {
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 1.5rem;
-    }
-    
-    .connect-card {
-        padding: 1.5rem;
-    }
-    
-    .connect-card h5 {
-        font-size: 1.1rem;
-    }
-    
-    .connect-card p {
-        font-size: 0.9rem;
-    }
-    
-    .contact-form .message-container {
-        min-height: 240px;
-    }
-    
-    .contact-form textarea.form-control {
-        min-height: 210px;
-    }
-}
-
-/* Desktop: Keep the nice centered card layout */
-@media (min-width: 992px) {
-    .connect-cards-grid {
-        grid-template-columns: 1fr;
-        gap: 1.25rem;
-    }
-    
-    .contact-form-card {
-        padding: 2.5rem;
-    }
-    
-    /* Keep cards centered and stacked on desktop too */
-    .connect-card {
-        padding: 1.5rem;
-        text-align: center;
-        display: block; /* Reset flex display */
-    }
-    
-    .connect-icon {
-        margin: 0 auto 1rem auto; /* Keep centered */
-    }
-    
-    .connect-card h5 {
-        margin-bottom: 0.75rem;
-    }
-    
-    .connect-card p {
-        margin-bottom: 1rem;
-    }
-    
-    .contact-form .message-container {
-        min-height: 280px; /* Much larger on desktop */
-    }
-    
-    .contact-form textarea.form-control {
-        min-height: 250px; /* Much larger on desktop to balance height */
-    }
-}
-
-/* Large Desktop: Better spacing */
-@media (min-width: 1200px) {
-    .connect-cards-grid {
-        gap: 1.5rem;
-    }
-    
-    .connect-card {
-        padding: 1.75rem;
+    .contact-image-container {
+        padding-right: 3rem;
     }
     
     .contact-form-card {
         padding: 3rem;
     }
     
-    .contact-form .message-container {
-        min-height: 320px; /* Even larger on big screens */
-    }
-    
-    .contact-form textarea.form-control {
-        min-height: 290px; /* Even larger on big screens */
+    .contact-image {
+        width: 80%;
+        max-height: 450px;
     }
 }

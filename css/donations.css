@@ -1,0 +1,520 @@
+/* ===== DONATIONS PAGE STYLES ===== */
+
+/* Donations Hero Section */
+.donations-hero-section {
+    position: relative;
+    min-height: 70vh;
+    background: linear-gradient(135deg, #198754 0%, #28a745 50%, #38b27c 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    padding: 6rem 0 4rem;
+}
+
+.hero-content {
+    position: relative;
+    z-index: 3;
+    text-align: center;
+    color: white;
+}
+
+.ayah-container {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    padding: 2rem;
+    border-radius: 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    margin-bottom: 2rem;
+}
+
+.ayah-arabic {
+    font-size: 2rem;
+    font-weight: normal;
+    line-height: 1.8;
+    color: #ffffff;
+    text-align: center;
+    font-family: 'Reem Kufi', 'Amiri', 'Scheherazade New', serif;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    margin-bottom: 1.5rem;
+}
+
+.ayah-decoration {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 1.5rem 0;
+}
+
+.decoration-line {
+    flex: 1;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+}
+
+.ayah-translation {
+    font-size: 1.1rem;
+    font-weight: 500;
+    line-height: 1.6;
+    font-style: italic;
+    margin-bottom: 1rem;
+}
+
+.ayah-source {
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.hero-title {
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.hero-subtitle {
+    font-size: 1.3rem;
+    margin-bottom: 2.5rem;
+    opacity: 0.95;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.6;
+}
+
+.hero-actions {
+    margin-top: 2rem;
+}
+
+/* Hero Background Shapes */
+.hero-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+.hero-shape-1 {
+    position: absolute;
+    top: 20%;
+    right: 10%;
+    width: 150px;
+    height: 150px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    animation: float 6s ease-in-out infinite;
+}
+
+.hero-shape-2 {
+    position: absolute;
+    bottom: 30%;
+    left: 8%;
+    width: 100px;
+    height: 100px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+    animation: float 8s ease-in-out infinite reverse;
+}
+
+.hero-shape-3 {
+    position: absolute;
+    top: 60%;
+    left: 60%;
+    width: 120px;
+    height: 120px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 40% 60% 60% 40% / 40% 40% 60% 60%;
+    animation: rotate 15s linear infinite;
+}
+
+/* Impact Section */
+.impact-section {
+    background: #ffffff;
+}
+
+.impact-card {
+    background: #ffffff;
+    padding: 2rem;
+    border-radius: 1rem;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(25, 135, 84, 0.1);
+    transition: all 0.3s ease;
+    height: 100%;
+}
+
+.impact-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+.impact-icon {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #198754, #28a745);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem auto;
+    transition: all 0.3s ease;
+}
+
+.impact-card:hover .impact-icon {
+    transform: scale(1.1) rotate(10deg);
+}
+
+.impact-icon i {
+    color: #ffffff;
+    font-size: 2rem;
+}
+
+.impact-card h5 {
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+}
+
+.impact-card p {
+    color: #6c757d;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
+}
+
+.impact-amount {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #198754;
+    background: rgba(25, 135, 84, 0.1);
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    display: inline-block;
+}
+
+/* Bank Details Section */
+.bank-details-card {
+    background: #ffffff;
+    padding: 3rem;
+    border-radius: 1.5rem;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(25, 135, 84, 0.1);
+}
+
+.bank-info-container {
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.bank-info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.bank-info-item:last-child {
+    border-bottom: none;
+}
+
+.bank-info-label {
+    display: flex;
+    align-items: center;
+    font-weight: 600;
+    color: #2d3748;
+}
+
+.bank-info-label i {
+    margin-right: 0.75rem;
+    color: #198754;
+    font-size: 1.1rem;
+    width: 20px;
+}
+
+.bank-info-value {
+    font-weight: 700;
+    color: #198754;
+    font-size: 1.1rem;
+    font-family: 'Courier New', monospace;
+}
+
+.bank-note .alert {
+    border-radius: 0.75rem;
+    border: 1px solid rgba(25, 135, 84, 0.2);
+    background: rgba(25, 135, 84, 0.05);
+}
+
+/* Other Ways to Donate */
+.other-ways-section {
+    background: #ffffff;
+}
+
+.donation-method-card {
+    background: #ffffff;
+    padding: 2.5rem;
+    border-radius: 1.5rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(25, 135, 84, 0.1);
+    transition: all 0.3s ease;
+    height: 100%;
+    text-align: center;
+}
+
+.donation-method-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
+}
+
+.method-icon {
+    width: 70px;
+    height: 70px;
+    background: linear-gradient(135deg, #198754, #28a745);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem auto;
+    transition: all 0.3s ease;
+}
+
+.donation-method-card:hover .method-icon {
+    transform: scale(1.05);
+}
+
+.method-icon i {
+    color: #ffffff;
+    font-size: 1.8rem;
+}
+
+.donation-method-card h4 {
+    margin-bottom: 1rem;
+    font-size: 1.3rem;
+}
+
+.donation-method-card p {
+    color: #6c757d;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+}
+
+.method-benefits {
+    text-align: left;
+    margin-bottom: 2rem;
+    padding-left: 0;
+}
+
+.method-benefits li {
+    color: #495057;
+    margin-bottom: 0.5rem;
+    padding-left: 1.5rem;
+    position: relative;
+}
+
+.method-benefits li:before {
+    content: "✓";
+    color: #198754;
+    font-weight: bold;
+    position: absolute;
+    left: 0;
+}
+
+/* Hadith Section */
+.hadith-section {
+    background: #f8f9fa !important;
+}
+
+.hadith-card {
+    background: #ffffff;
+    padding: 3rem;
+    border-radius: 1.5rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(25, 135, 84, 0.1);
+}
+
+.hadith-arabic {
+    font-size: 1.8rem;
+    font-weight: normal;
+    line-height: 2;
+    color: #1a202c;
+    text-align: center;
+    font-family: 'Reem Kufi', 'Amiri', 'Scheherazade New', serif;
+}
+
+.hadith-decoration {
+    text-align: center;
+}
+
+.hadith-decoration .bi-stars {
+    font-size: 2rem;
+    animation: twinkle 2s ease-in-out infinite;
+}
+
+.hadith-translation {
+    color: #4a5568;
+    line-height: 1.7;
+    font-style: italic;
+}
+
+.hadith-source {
+    font-size: 0.9rem;
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-20px);
+    }
+}
+
+@keyframes rotate {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes twinkle {
+    0%, 100% { 
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% { 
+        opacity: 0.7;
+        transform: scale(1.1);
+    }
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+
+/* Tablet (768px and below) */
+@media (max-width: 768px) {
+    .donations-hero-section {
+        min-height: 60vh;
+        padding: 5rem 0 3rem;
+    }
+    
+    .hero-title {
+        font-size: 2.2rem;
+    }
+    
+    .hero-subtitle {
+        font-size: 1.1rem;
+    }
+    
+    .ayah-arabic {
+        font-size: 1.5rem;
+        line-height: 1.6;
+    }
+    
+    .ayah-container {
+        padding: 1.5rem;
+    }
+    
+    .hero-actions .btn {
+        margin-bottom: 1rem;
+        width: 100%;
+    }
+    
+    .hero-actions .me-3 {
+        margin-right: 0 !important;
+    }
+    
+    .bank-details-card {
+        padding: 2rem;
+    }
+    
+    .bank-info-item {
+        flex-direction: column;
+        align-items: flex-start;
+        text-align: left;
+    }
+    
+    .bank-info-value {
+        margin-top: 0.5rem;
+        font-size: 1rem;
+    }
+    
+    .impact-card,
+    .donation-method-card {
+        padding: 1.5rem;
+    }
+    
+    .hadith-card {
+        padding: 2rem;
+    }
+    
+    .hadith-arabic {
+        font-size: 1.4rem;
+        line-height: 1.8;
+    }
+    
+    .hero-shape-1 {
+        width: 100px;
+        height: 100px;
+        right: 5%;
+    }
+    
+    .hero-shape-2 {
+        width: 80px;
+        height: 80px;
+        left: 5%;
+    }
+    
+    .hero-shape-3 {
+        width: 90px;
+        height: 90px;
+    }
+}
+
+/* Mobile (480px and below) */
+@media (max-width: 480px) {
+    .donations-hero-section {
+        min-height: 50vh;
+        padding: 4rem 0 2rem;
+    }
+    
+    .hero-title {
+        font-size: 1.8rem;
+    }
+    
+    .hero-subtitle {
+        font-size: 1rem;
+    }
+    
+    .ayah-arabic {
+        font-size: 1.2rem;
+        line-height: 1.5;
+    }
+    
+    .ayah-container {
+        padding: 1rem;
+    }
+    
+    .impact-icon,
+    .method-icon {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .impact-icon i,
+    .method-icon i {
+        font-size: 1.5rem;
+    }
+    
+    .bank-details-card {
+        padding: 1.5rem;
+    }
+    
+    .hero-shape-1,
+    .hero-shape-2,
+    .hero-shape-3 {
+        display: none;
+    }
+}

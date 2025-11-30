@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Donations - Al Falah Educational Centre</title>
+
+        <!-- Favicon -->
+        <link rel="icon" type="image/png" href="img/favicon-32x32.png">
+
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@400..700&display=swap" rel="stylesheet">
+
+        <!-- Bootstrap CSS -->
+        <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+        <link
+              rel="stylesheet"
+              href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"
+              />
+        <link rel="stylesheet" href="css/style.css" />
+        <link rel="stylesheet" href="css/donations.css" />
+    </head>
+    <body class="bg-white">
+        <!-- Navbar -->
+        <nav class="navbar navbar-expand-lg navbar-custom fixed-top">
+            <div class="container">
+                <!-- Brand Logo -->
+                <a class="navbar-brand d-flex align-items-center" href="index.html">
+                    <img src="img/logo.png" alt="Al Falah Logo" height="50" class="me-2">
+                </a>
+
+                <!-- Toggler -->
+                <button
+                        class="navbar-toggler"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#navbarNav"
+                        aria-controls="navbarNav"
+                        aria-expanded="false"
+                        aria-label="Toggle navigation"
+                        >
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Nav Links -->
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="index.html">Home</a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Our Madrassah <i class="bi bi-chevron-down dropdown-arrow"></i>
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="#">About Us</a></li>
+                                <li><a class="dropdown-item" href="#">Calendar</a></li>
+                                <li><a class="dropdown-item" href="#">Curriculum</a></li>
+                            </ul>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Newsletters</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active fw-bold" href="donations.html">Donations</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="contact.html">Contact Us</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Donations Hero Section -->
+        <section class="donations-hero-section">
+            <div class="hero-content">
+                <div class="container">
+                    <div class="row justify-content-center text-center">
+                        <div class="col-lg-10">
+                            <!-- Qur'an Ayah -->
+                            <div class="ayah-container mb-4">
+                                <p dir="rtl" class="ayah-arabic mb-3">
+                                    مَّثَلُ الَّذِينَ يُنفِقُونَ أَمْوَالَهُمْ فِي سَبِيلِ اللَّهِ كَمَثَلِ حَبَّةٍ أَنبَتَتْ سَبْعَ سَنَابِلَ فِي كُلِّ سُنبُلَةٍ مِّائَةُ حَبَّةٍ ۗ وَاللَّهُ يُضَاعِفُ لِمَن يَشَاءُ ۗ وَاللَّهُ وَاسِعٌ عَلِيمٌ
+                                </p>
+                                <div class="ayah-decoration">
+                                    <span class="decoration-line"></span>
+                                    <i class="bi bi-flower1 mx-3 text-white"></i>
+                                    <span class="decoration-line"></span>
+                                </div>
+                                <p class="ayah-translation text-white mb-0">
+                                    "The example of those who spend their wealth in the way of Allah is like a seed 
+                                    [of grain] which grows seven spikes; in each spike is a hundred grains. And Allah 
+                                    multiplies [His reward] for whom He wills. And Allah is all-Encompassing and Knowing."
+                                </p>
+                                <footer class="ayah-source text-white opacity-75 mt-2">
+                                    Qur'an, <cite>Surah Al-Baqarah 2:261</cite>
+                                </footer>
+                            </div>
+                            
+                            <h1 class="hero-title">Support Our Mission</h1>
+                            <p class="hero-subtitle">
+                                Your generous donations help us provide quality Islamic education and nurture the next generation of Muslims
+                            </p>
+                            <div class="hero-actions">
+                                <a href="#bank-details" class="btn btn-light btn-lg me-3">
+                                    <i class="bi bi-bank me-2"></i>
+                                    Bank Transfer
+                                </a>
+                                <a href="#other-ways" class="btn btn-outline-light btn-lg">
+                                    <i class="bi bi-heart me-2"></i>
+                                    Other Ways to Give
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-background">
+                <div class="hero-shape-1"></div>
+                <div class="hero-shape-2"></div>
+                <div class="hero-shape-3"></div>
+            </div>
+        </section>
+
+        <!-- Impact Section -->
+        <section class="impact-section py-5">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-lg-10">
+                        <h2 class="text-center text-success fw-bold mb-5">Your Donation Makes a Difference</h2>
+                        
+                        <div class="row g-4">
+                            <!-- Student Sponsorship -->
+                            <div class="col-md-6 col-lg-3">
+                                <div class="impact-card">
+                                    <div class="impact-icon">
+                                        <i class="bi bi-mortarboard-fill"></i>
+                                    </div>
+                                    <h5 class="fw-bold text-success">Student Sponsorship</h5>
+                                    <p class="text-muted">Help cover tuition costs for students in need</p>
+                                    <div class="impact-amount">£30/month</div>
+                                </div>
+                            </div>
+
+                            <!-- Educational Materials -->
+                            <div class="col-md-6 col-lg-3">
+                                <div class="impact-card">
+                                    <div class="impact-icon">
+                                        <i class="bi bi-book-fill"></i>
+                                    </div>
+                                    <h5 class="fw-bold text-success">Educational Materials</h5>
+                                    <p class="text-muted">Provide Qur'ans, books, and learning resources</p>
+                                    <div class="impact-amount">£50</div>
+                                </div>
+                            </div>
+
+                            <!-- Facility Maintenance -->
+                            <div class="col-md-6 col-lg-3">
+                                <div class="impact-card">
+                                    <div class="impact-icon">
+                                        <i class="bi bi-building-fill"></i>
+                                    </div>
+                                    <h5 class="fw-bold text-success">Facility Maintenance</h5>
+                                    <p class="text-muted">Support upkeep of our classrooms and facilities</p>
+                                    <div class="impact-amount">£100</div>
+                                </div>
+                            </div>
+
+                            <!-- Teacher Support -->
+                            <div class="col-md-6 col-lg-3">
+                                <div class="impact-card">
+                                    <div class="impact-icon">
+                                        <i class="bi bi-person-fill"></i>
+                                    </div>
+                                    <h5 class="fw-bold text-success">Teacher Support</h5>
+                                    <p class="text-muted">Help retain qualified Islamic studies teachers</p>
+                                    <div class="impact-amount">£200/month</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Bank Details Section -->
+        <section id="bank-details" class="bank-details-section py-5 bg-light">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-lg-8">
+                        <div class="bank-details-card">
+                            <h2 class="text-center text-success fw-bold mb-4">Bank Transfer Details</h2>
+                            <p class="text-center text-muted mb-5">
+                                You can make a direct bank transfer to support our educational programs
+                            </p>
+
+                            <div class="bank-info-container">
+                                <div class="bank-info-item">
+                                    <div class="bank-info-label">
+                                        <i class="bi bi-building"></i>
+                                        <span>Account Name</span>
+                                    </div>
+                                    <div class="bank-info-value">Al Falah Educational Centre</div>
+                                </div>
+
+                                <div class="bank-info-item">
+                                    <div class="bank-info-label">
+                                        <i class="bi bi-bank"></i>
+                                        <span>Bank Name</span>
+                                    </div>
+                                    <div class="bank-info-value">Islamic Bank of Britain</div>
+                                </div>
+
+                                <div class="bank-info-item">
+                                    <div class="bank-info-label">
+                                        <i class="bi bi-credit-card"></i>
+                                        <span>Account Number</span>
+                                    </div>
+                                    <div class="bank-info-value">7854 3298 1234 5678</div>
+                                </div>
+
+                                <div class="bank-info-item">
+                                    <div class="bank-info-label">
+                                        <i class="bi bi-sort-numeric-up"></i>
+                                        <span>Sort Code</span>
+                                    </div>
+                                    <div class="bank-info-value">30-94-87</div>
+                                </div>
+
+                                <div class="bank-info-item">
+                                    <div class="bank-info-label">
+                                        <i class="bi bi-chat-quote"></i>
+                                        <span>Reference</span>
+                                    </div>
+                                    <div class="bank-info-value">DONATION [Your Name]</div>
+                                </div>
+                            </div>
+
+                            <div class="bank-note mt-4">
+                                <div class="alert alert-info">
+                                    <i class="bi bi-info-circle me-2"></i>
+                                    <strong>Important:</strong> Please use your name as reference so we can acknowledge your donation
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Other Ways to Donate -->
+        <section id="other-ways" class="other-ways-section py-5">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-lg-10">
+                        <h2 class="text-center text-success fw-bold mb-5">Other Ways to Support Us</h2>
+
+                        <div class="row g-4">
+                            <!-- Monthly Giving -->
+                            <div class="col-md-6">
+                                <div class="donation-method-card">
+                                    <div class="method-icon">
+                                        <i class="bi bi-arrow-repeat"></i>
+                                    </div>
+                                    <h4 class="fw-bold text-success">Monthly Giving</h4>
+                                    <p class="text-muted">
+                                        Become a sustaining donor with monthly contributions that provide reliable support 
+                                        for our ongoing programs and operations.
+                                    </p>
+                                    <ul class="method-benefits">
+                                        <li>Consistent support for our students</li>
+                                        <li>Easier budgeting for your charity</li>
+                                        <li>Continuous reward (Sadaqah Jariyah)</li>
+                                    </ul>
+                                    <button class="btn btn-success btn-lg w-100">
+                                        <i class="bi bi-calendar-check me-2"></i>
+                                        Set Up Monthly Donation
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- In-Person Donation -->
+                            <div class="col-md-6">
+                                <div class="donation-method-card">
+                                    <div class="method-icon">
+                                        <i class="bi bi-geo-alt-fill"></i>
+                                    </div>
+                                    <h4 class="fw-bold text-success">In-Person Donation</h4>
+                                    <p class="text-muted">
+                                        Visit us at the centre to make your donation in person. Our staff will be happy 
+                                        to assist you and provide a receipt.
+                                    </p>
+                                    <ul class="method-benefits">
+                                        <li>Personal interaction with our team</li>
+                                        <li>Immediate receipt for your records</li>
+                                        <li>See the centre and meet our students</li>
+                                    </ul>
+                                    <a href="contact.html" class="btn btn-outline-success btn-lg w-100">
+                                        <i class="bi bi-map me-2"></i>
+                                        Visit Our Centre
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- Zakat & Sadaqah -->
+                            <div class="col-md-6">
+                                <div class="donation-method-card">
+                                    <div class="method-icon">
+                                        <i class="bi bi-gem"></i>
+                                    </div>
+                                    <h4 class="fw-bold text-success">Zakat & Sadaqah</h4>
+                                    <p class="text-muted">
+                                        Your Zakat and Sadaqah help us provide free education to underprivileged students 
+                                        and support various charitable activities.
+                                    </p>
+                                    <ul class="method-benefits">
+                                        <li>Purify your wealth through Zakat</li>
+                                        <li>Earn continuous rewards (Sadaqah Jariyah)</li>
+                                        <li>Support needy students directly</li>
+                                    </ul>
+                                    <button class="btn btn-success btn-lg w-100">
+                                        <i class="bi bi-calculator me-2"></i>
+                                        Calculate & Donate Zakat
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Legacy Giving -->
+                            <div class="col-md-6">
+                                <div class="donation-method-card">
+                                    <div class="method-icon">
+                                        <i class="bi bi-tree-fill"></i>
+                                    </div>
+                                    <h4 class="fw-bold text-success">Legacy Giving</h4>
+                                    <p class="text-muted">
+                                        Include Al Falah Educational Centre in your will and leave a lasting legacy of 
+                                        Islamic education for future generations.
+                                    </p>
+                                    <ul class="method-benefits">
+                                        <li>Perpetual reward (Sadaqah Jariyah)</li>
+                                        <li>Support Islamic education indefinitely</li>
+                                        <li>Blessings that continue after your lifetime</li>
+                                    </ul>
+                                    <button class="btn btn-outline-success btn-lg w-100">
+                                        <i class="bi bi-file-text me-2"></i>
+                                        Learn About Legacy Giving
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Hadith Section -->
+        <section class="hadith-section py-5 bg-light">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-lg-8">
+                        <div class="hadith-card text-center">
+                            <p dir="rtl" class="hadith-arabic mb-4">
+                                إِذَا مَاتَ الإِنْسَانُ انْقَطَعَ عَنْهُ عَمَلُهُ إِلاَّ مِنْ ثَلاَثَةٍ إِلاَّ مِنْ صَدَقَةٍ جَارِيَةٍ أَوْ عِلْمٍ يُنْتَفَعُ بِهِ أَوْ وَلَدٍ صَالِحٍ يَدْعُو لَهُ
+                            </p>
+                            <div class="hadith-decoration mb-4">
+                                <i class="bi bi-stars text-success"></i>
+                            </div>
+                            <p class="hadith-translation fs-5">
+                                "When a man dies, his deeds come to an end except for three things: 
+                                <strong>Sadaqah Jariyah (continuous charity)</strong>, knowledge from which benefit continues to be reaped, 
+                                or a righteous child who prays for him."
+                            </p>
+                            <footer class="hadith-source text-muted mt-3">
+                                Prophet Muhammad ﷺ, <cite>Sahih Muslim</cite>
+                            </footer>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer-section bg-dark text-light pt-5">
+            <div class="container">
+                <div class="row g-4">
+                    <!-- Brand Column -->
+                    <div class="col-lg-4 col-md-6">
+                        <div class="footer-brand mb-4">
+                            <img src="img/logo.png" alt="Al Falah Logo" height="50" class="mb-3">
+                            <h5 class="text-success fw-bold">Al Falah Educational Centre</h5>
+                            <p class="text-light opacity-75 mt-3">
+                                Dedicated to nurturing faith, knowledge, and character through Qur'an, Hifdh, and Islamic education.
+                            </p>
+                            <div class="social-links mt-4">
+                                <a href="#" class="social-link me-3">
+                                    <i class="bi bi-facebook"></i>
+                                </a>
+                                <a href="#" class="social-link me-3">
+                                    <i class="bi bi-twitter"></i>
+                                </a>
+                                <a href="#" class="social-link me-3">
+                                    <i class="bi bi-instagram"></i>
+                                </a>
+                                <a href="#" class="social-link">
+                                    <i class="bi bi-youtube"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Links -->
+                    <div class="col-lg-2 col-md-6">
+                        <h6 class="text-success fw-bold mb-3">Quick Links</h6>
+                        <ul class="list-unstyled">
+                            <li class="mb-2"><a href="index.html" class="footer-link">Home</a></li>
+                            <li class="mb-2"><a href="#" class="footer-link">About Us</a></li>
+                            <li class="mb-2"><a href="admissions.php" class="footer-link">Admissions</a></li>
+                            <li class="mb-2"><a href="#" class="footer-link">Calendar</a></li>
+                            <li class="mb-2"><a href="contact.html" class="footer-link">Contact</a></li>
+                            <li class="mb-2"><a href="admin/" class="footer-link">Admin</a></li>
+                        </ul>
+                    </div>
+
+                    <!-- Programs -->
+                    <div class="col-lg-3 col-md-6">
+                        <h6 class="text-success fw-bold mb-3">Our Programs</h6>
+                        <ul class="list-unstyled">
+                            <li class="mb-2"><a href="#" class="footer-link">Qur'an Classes</a></li>
+                            <li class="mb-2"><a href="#" class="footer-link">Hifdh Program</a></li>
+                            <li class="mb-2"><a href="#" class="footer-link">Islamic Studies</a></li>
+                            <li class="mb-2"><a href="#" class="footer-link">Weekend Madrasah</a></li>
+                            <li class="mb-2"><a href="#" class="footer-link">Adult Education</a></li>
+                        </ul>
+                    </div>
+
+                    <!-- Contact Info -->
+                    <div class="col-lg-3 col-md-6">
+                        <h6 class="text-success fw-bold mb-3">Contact Info</h6>
+                        <div class="contact-info">
+                            <div class="d-flex align-items-start mb-3">
+                                <i class="bi bi-geo-alt-fill text-success me-3 mt-1"></i>
+                                <div>
+                                    <p class="mb-0 text-light opacity-75">2 Whitefriars Avenue,</p>
+                                    <p class="mb-0 text-light opacity-75">Harrow, Middlesex, HA3 5RN</p>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="bi bi-telephone-fill text-success me-3"></i>
+                                <span class="text-light opacity-75">(+44) 208 427 3113</span>
+                            </div>
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="bi bi-envelope-fill text-success me-3"></i>
+                                <span class="text-light opacity-75">info@slmcc.co.uk</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-clock-fill text-success me-3"></i>
+                                <div>
+                                    <p class="mb-0 text-light opacity-75">Mon-Thu: 5:30pm – 7:30pm</p>
+                                    <p class="mb-0 text-light opacity-75">Sat-Sun: 9:00am – 1:00pm</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Divider -->
+                <div class="border-top border-secondary my-4"></div>
+
+                <!-- Bottom Bar -->
+                <div class="row align-items-center py-3">
+                    <div class="col-md-6">
+                        <p class="mb-0 text-light opacity-75">
+                            © 2025 Al Falah Educational Centre. All rights reserved.
+                        </p>
+                    </div>
+                    <div class="col-md-6 text-md-end">
+                        <div class="footer-links">
+                            <a href="#" class="footer-link me-3">Privacy Policy</a>
+                            <a href="#" class="footer-link">Terms of Service</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </footer>
+
+        <!-- Bootstrap JS -->
+        <script src="bootstrap/js/bootstrap.bundle.min.js"></script>
+        <script src="js/donations.js"></script>
+    </body>
+</html>

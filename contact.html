@@ -63,7 +63,7 @@
                             <a class="nav-link" href="#">Newsletters</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#">Donations</a>
+                            <a class="nav-link" href="donations.html">Donations</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link active fw-bold" href="contact.html">Contact Us</a>
@@ -227,134 +227,150 @@
             </div>
         </section>
 
-        <!-- Additional Contact Section -->
-        <section class="additional-contact-section py-5 bg-light">
+        <!-- Contact Form Section -->
+        <section class="contact-form-section">
+            <div class="container">
+                <div class="row align-items-center">
+                    <!-- Image Column - Hidden on mobile/tablet, visible on laptop+ -->
+                    <div class="col-lg-6 d-none d-lg-block">
+                        <div class="contact-image-container">
+                            <img src="img/contact.png" alt="Contact Al Falah Educational Centre" class="contact-image">
+                        </div>
+                    </div>
+
+                    <!-- Form Column -->
+                    <div class="col-lg-6">
+                        <div class="contact-form-card">
+                            <h2 class="text-success fw-bold mb-4 text-center text-lg-start">Send Us a Message</h2>
+                            <p class="text-muted mb-4 text-center text-lg-start">We'll get back to you as soon as possible</p>
+
+                            <form class="contact-form">
+                                <div class="row g-3">
+                                    <!-- Full Name -->
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="fullName" class="form-label">Full Name *</label>
+                                            <input type="text" class="form-control" id="fullName" name="fullName" placeholder="Enter your full name" required>
+                                        </div>
+                                    </div>
+
+                                    <!-- Email -->
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="email" class="form-label">Email Address *</label>
+                                            <input type="email" class="form-control" id="email" name="email" placeholder="Enter your email" required>
+                                        </div>
+                                    </div>
+
+                                    <!-- Phone & Subject Row - Side by side on laptop+ -->
+                                    <div class="row g-3 phone-subject-row">
+                                        <!-- Phone -->
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="phone" class="form-label">Phone Number</label>
+                                                <input type="tel" class="form-control" id="phone" name="phone" placeholder="Enter your phone number">
+                                            </div>
+                                        </div>
+
+                                        <!-- Subject -->
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="subject" class="form-label">Subject *</label>
+                                                <select class="form-select" id="subject" name="subject" required>
+                                                    <option value="" selected disabled>Select a subject</option>
+                                                    <option value="admission">Admission Inquiry</option>
+                                                    <option value="general">General Information</option>
+                                                    <option value="feedback">Feedback & Suggestions</option>
+                                                    <option value="volunteer">Volunteer Opportunities</option>
+                                                    <option value="donation">Donation Inquiry</option>
+                                                    <option value="other">Other</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Message -->
+                                    <div class="col-12">
+                                        <div class="form-group">
+                                            <label for="message" class="form-label">Message *</label>
+                                            <textarea class="form-control" id="message" name="message" rows="6" placeholder="Enter your message here..." required></textarea>
+                                        </div>
+                                    </div>
+
+                                    <!-- Submit Button -->
+                                    <div class="col-12">
+                                        <button type="submit" class="btn btn-success-modern btn-lg w-100">
+                                            <i class="bi bi-send-fill me-2"></i>
+                                            Send Message
+                                        </button>
+                                    </div>
+
+                                    <!-- Required Fields Note -->
+                                    <div class="col-12">
+                                        <p class="text-muted small mb-0">
+                                            <sup>*</sup> Required fields
+                                        </p>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Other Ways to Connect Section -->
+        <section class="connect-section bg-light">
             <div class="container">
                 <div class="row justify-content-center">
                     <div class="col-lg-10">
-                        <h2 class="text-success fw-bold mb-5 text-center">Get In Touch With Us</h2>
+                        <h2 class="text-success fw-bold mb-5 text-center">Other Ways to Connect</h2>
+                        <p class="text-muted mb-5 text-center">
+                            Stay connected with Al Falah Educational Centre through our various platforms and communication channels.
+                        </p>
 
-                        <div class="row g-5">
-                            <!-- Left Side: Contact Form -->
-                            <div class="col-lg-6">
-                                <div class="contact-form-card">
-                                    <h3 class="text-success fw-bold mb-4">Send Us a Message</h3>
-                                    <p class="text-muted mb-4">We'll get back to you as soon as possible</p>
-
-                                    <form class="contact-form">
-                                        <div class="row g-3">
-                                            <!-- Full Name -->
-                                            <div class="col-md-6">
-                                                <div class="form-group">
-                                                    <label for="fullName" class="form-label">Full Name *</label>
-                                                    <input type="text" class="form-control" id="fullName" placeholder="Enter your full name" required>
-                                                </div>
-                                            </div>
-
-                                            <!-- Email -->
-                                            <div class="col-md-6">
-                                                <div class="form-group">
-                                                    <label for="email" class="form-label">Email Address *</label>
-                                                    <input type="email" class="form-control" id="email" placeholder="Enter your email" required>
-                                                </div>
-                                            </div>
-
-                                            <!-- Phone -->
-                                            <div class="col-12">
-                                                <div class="form-group">
-                                                    <label for="phone" class="form-label">Phone Number</label>
-                                                    <input type="tel" class="form-control" id="phone" placeholder="Enter your phone number">
-                                                </div>
-                                            </div>
-
-                                            <!-- Subject -->
-                                            <div class="col-12">
-                                                <div class="form-group">
-                                                    <label for="subject" class="form-label">Subject *</label>
-                                                    <select class="form-select" id="subject" required>
-                                                        <option value="" selected disabled>Select a subject</option>
-                                                        <option value="admission">Admission Inquiry</option>
-                                                        <option value="general">General Information</option>
-                                                        <option value="feedback">Feedback & Suggestions</option>
-                                                        <option value="volunteer">Volunteer Opportunities</option>
-                                                        <option value="donation">Donation Inquiry</option>
-                                                        <option value="other">Other</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-
-                                            <!-- Message -->
-                                            <div class="col-12">
-                                                <div class="form-group message-container">
-                                                    <label for="message" class="form-label">Message *</label>
-                                                    <textarea class="form-control auto-expand" id="message" rows="3" placeholder="Enter your message here..." required></textarea>
-                                                </div>
-                                            </div>
-
-                                            <!-- Submit Button -->
-                                            <div class="col-12">
-                                                <button type="submit" class="btn btn-success-modern btn-lg w-100">
-                                                    <i class="bi bi-send-fill me-2"></i>
-                                                    Send Message
-                                                </button>
-                                            </div>
-
-                                            <!-- Required Fields Note -->
-                                            <div class="col-12">
-                                                <p class="text-muted small mb-0">
-                                                    <sup>*</sup> Required fields
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </form>
+                        <div class="row g-4">
+                            <div class="col-md-6 col-lg-3">
+                                <div class="connect-card">
+                                    <div class="connect-icon">
+                                        <i class="bi bi-facebook"></i>
+                                    </div>
+                                    <h5 class="fw-bold text-success mb-2">Facebook</h5>
+                                    <p class="text-muted">Follow us for updates, events, and community news</p>
+                                    <a href="#" class="btn btn-outline-success btn-sm">Follow Page</a>
                                 </div>
                             </div>
 
-                            <!-- Right Side: Other Ways to Connect -->
-                            <div class="col-lg-6">
-                                <div class="connect-content">
-                                    <h3 class="text-success fw-bold mb-4">Other Ways to Connect</h3>
-                                    <p class="text-muted mb-4">
-                                        Stay connected with Al Falah Educational Centre through our various platforms and communication channels.
-                                    </p>
-
-                                    <div class="connect-cards-grid">
-                                        <div class="connect-card">
-                                            <div class="connect-icon">
-                                                <i class="bi bi-facebook"></i>
-                                            </div>
-                                            <h5 class="fw-bold text-success mb-2">Facebook</h5>
-                                            <p class="text-muted">Follow us for updates, events, and community news</p>
-                                            <a href="#" class="btn btn-outline-success btn-sm">Follow Page</a>
-                                        </div>
-
-                                        <div class="connect-card">
-                                            <div class="connect-icon">
-                                                <i class="bi bi-instagram"></i>
-                                            </div>
-                                            <h5 class="fw-bold text-success mb-2">Instagram</h5>
-                                            <p class="text-muted">See photos and videos from our activities and events</p>
-                                            <a href="#" class="btn btn-outline-success btn-sm">Follow Us</a>
-                                        </div>
-
-                                        <div class="connect-card">
-                                            <div class="connect-icon">
-                                                <i class="bi bi-youtube"></i>
-                                            </div>
-                                            <h5 class="fw-bold text-success mb-2">YouTube</h5>
-                                            <p class="text-muted">Watch our educational content and event recordings</p>
-                                            <a href="#" class="btn btn-outline-success btn-sm">Subscribe</a>
-                                        </div>
-
-                                        <div class="connect-card">
-                                            <div class="connect-icon">
-                                                <i class="bi bi-whatsapp"></i>
-                                            </div>
-                                            <h5 class="fw-bold text-success mb-2">WhatsApp</h5>
-                                            <p class="text-muted">Join our community groups for updates</p>
-                                            <a href="#" class="btn btn-outline-success btn-sm">Join Group</a>
-                                        </div>
+                            <div class="col-md-6 col-lg-3">
+                                <div class="connect-card">
+                                    <div class="connect-icon">
+                                        <i class="bi bi-instagram"></i>
                                     </div>
+                                    <h5 class="fw-bold text-success mb-2">Instagram</h5>
+                                    <p class="text-muted">See photos and videos from our activities and events</p>
+                                    <a href="#" class="btn btn-outline-success btn-sm">Follow Us</a>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 col-lg-3">
+                                <div class="connect-card">
+                                    <div class="connect-icon">
+                                        <i class="bi bi-youtube"></i>
+                                    </div>
+                                    <h5 class="fw-bold text-success mb-2">YouTube</h5>
+                                    <p class="text-muted">Watch our educational content and event recordings</p>
+                                    <a href="#" class="btn btn-outline-success btn-sm">Subscribe</a>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 col-lg-3">
+                                <div class="connect-card">
+                                    <div class="connect-icon">
+                                        <i class="bi bi-whatsapp"></i>
+                                    </div>
+                                    <h5 class="fw-bold text-success mb-2">WhatsApp</h5>
+                                    <p class="text-muted">Join our community groups for updates</p>
+                                    <a href="#" class="btn btn-outline-success btn-sm">Join Group</a>
                                 </div>
                             </div>
                         </div>

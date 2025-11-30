@@ -1,48 +1,10 @@
-// Auto-expanding textarea
-function initAutoExpandTextarea() {
-    const textareas = document.querySelectorAll('.auto-expand');
-    
-    textareas.forEach(textarea => {
-        // Set initial height based on min-height
-        const computedStyle = window.getComputedStyle(textarea);
-        const minHeight = parseInt(computedStyle.minHeight) || 200;
-        textarea.style.height = minHeight + 'px';
-        
-        // Auto-expand on input
-        textarea.addEventListener('input', function() {
-            this.style.height = 'auto';
-            const newHeight = Math.max(this.scrollHeight, minHeight);
-            this.style.height = newHeight + 'px';
-        });
-        
-        // Also expand on focus for better UX
-        textarea.addEventListener('focus', function() {
-            this.style.height = 'auto';
-            const newHeight = Math.max(this.scrollHeight, minHeight);
-            this.style.height = newHeight + 'px';
-        });
-        
-        // Handle window resize
-        window.addEventListener('resize', function() {
-            textarea.style.height = 'auto';
-            const newHeight = Math.max(textarea.scrollHeight, minHeight);
-            textarea.style.height = newHeight + 'px';
-        });
-    });
-}
-
 // Contact Page JavaScript
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize auto-expanding textarea
-    initAutoExpandTextarea();
-    
     // Directions button click handler
     const directionsBtn = document.getElementById('directions-btn');
     if (directionsBtn) {
         directionsBtn.addEventListener('click', function(e) {
-            // You can add any pre-click functionality here
             console.log('Directions button clicked');
-            // The actual Google Maps link will be added to the href attribute
         });
     }
     
@@ -60,23 +22,42 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // Add loading state to buttons
-    document.querySelectorAll('.btn').forEach(button => {
-        button.addEventListener('click', function() {
-            // Add loading spinner for any async operations
-            if (this.classList.contains('async-action')) {
-                const originalText = this.innerHTML;
-                this.innerHTML = '<i class="bi bi-arrow-repeat spinner"></i> Loading...';
-                this.disabled = true;
-                
-                // Reset after 2 seconds (for demo)
-                setTimeout(() => {
-                    this.innerHTML = originalText;
-                    this.disabled = false;
-                }, 2000);
+    // Form submission handler
+    const contactForm = document.querySelector('.contact-form');
+    if (contactForm) {
+        contactForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Get form data
+            const formData = new FormData(this);
+            const formObject = Object.fromEntries(formData.entries());
+            
+            // Simple validation
+            if (!formObject.fullName || !formObject.email || !formObject.subject || !formObject.message) {
+                alert('Please fill in all required fields.');
+                return;
             }
+            
+            // Show loading state
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="bi bi-arrow-repeat spinner"></i> Sending...';
+            submitBtn.disabled = true;
+            
+            // Simulate form submission (replace with actual API call)
+            setTimeout(() => {
+                // Reset button
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+                
+                // Show success message
+                alert('Thank you for your message! We will get back to you soon.');
+                
+                // Reset form
+                this.reset();
+            }, 2000);
         });
-    });
+    }
     
     // Add intersection observer for fade-in animations
     const observerOptions = {
@@ -93,7 +74,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }, observerOptions);
     
     // Observe elements for fade-in animation
-    document.querySelectorAll('.contact-details-card, .map-card, .connect-card').forEach(el => {
+    document.querySelectorAll('.contact-card, .map-card, .contact-form-card, .connect-card').forEach(el => {
         el.classList.add('fade-in');
         observer.observe(el);
     });
