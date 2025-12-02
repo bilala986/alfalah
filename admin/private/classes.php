@@ -22,13 +22,14 @@ try {
     $tableExists = $checkTableStmt->rowCount() > 0;
     
     if ($tableExists) {
-        // Fetch classes data with teacher and student information
+        // Fetch classes data with teacher and student information - INCLUDING GENDER
         $stmt = $pdo->prepare("
             SELECT 
                 c.id as class_id,
                 c.class_name,
                 c.year_group,
                 c.program,
+                c.gender,
                 tu.name as teacher_name,
                 tu.id as teacher_id,
                 COUNT(s.id) as student_count,
@@ -140,10 +141,22 @@ try {
                 .mobile-hide {
                     display: none;
                 }
+                .actions-column {
+                    min-width: 100px;
+                }
             }
             
             .setup-alert {
                 margin-bottom: 20px;
+            }
+            
+            .actions-column {
+                white-space: nowrap;
+            }
+            
+            .btn-group-sm .btn {
+                padding: 0.25rem 0.5rem;
+                font-size: 0.875rem;
             }
         </style>
     </head>
@@ -271,30 +284,35 @@ ALTER TABLE students ADD FOREIGN KEY (class_id) REFERENCES classes(id) ON DELETE
                                     <th>Teacher</th>
                                     <th>Students</th>
                                     <th class="mobile-hide">Student List</th>
+                                    <th class="actions-column">Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="classesTableBody">
                                 <?php if ($error): ?>
                                     <tr>
-                                        <td colspan="6" class="text-center text-muted py-4">
+                                        <td colspan="7" class="text-center text-muted py-4">
                                             <i class="bi bi-database-exclamation display-6"></i>
                                             <p class="mt-2">Database setup required. Please create the classes table.</p>
                                         </td>
                                     </tr>
                                 <?php elseif (empty($classes)): ?>
                                     <tr>
-                                        <td colspan="6" class="text-center text-muted py-4">
+                                        <td colspan="7" class="text-center text-muted py-4">
                                             <i class="bi bi-mortarboard display-6"></i>
                                             <p class="mt-2">No classes found. Create your first class to get started.</p>
                                         </td>
                                     </tr>
                                 <?php else: ?>
                                     <?php foreach ($classes as $class): ?>
+                                    <!-- In the table row loop, around line 195, update the data attributes: -->
                                     <tr class="class-row"
+                                        data-class-id="<?= $class['class_id'] ?>"
                                         data-class-name="<?= htmlspecialchars(strtolower($class['class_name'])) ?>"
-                                        data-program="<?= htmlspecialchars(strtolower($class['program'])) ?>"
+                                        data-program="<?= htmlspecialchars(strtolower($class['program'] ?? '')) ?>"
                                         data-year-group="<?= htmlspecialchars(strtolower($class['year_group'])) ?>"
+                                        data-gender="<?= htmlspecialchars($class['gender'] ?? 'Mixed') ?>"
                                         data-teacher="<?= htmlspecialchars(strtolower($class['teacher_name'] ?? 'Unassigned')) ?>"
+                                        data-teacher-id="<?= $class['teacher_id'] ?? '' ?>"
                                         data-students="<?= htmlspecialchars(strtolower($class['student_names'] ?? '')) ?>">
                                         <td class="fw-semibold">
                                             <span class="badge badge-class me-2"><?= htmlspecialchars($class['class_name']) ?></span>
@@ -332,6 +350,20 @@ ALTER TABLE students ADD FOREIGN KEY (class_id) REFERENCES classes(id) ON DELETE
                                             <?php else: ?>
                                                 <span class="text-muted">No students</span>
                                             <?php endif; ?>
+                                        </td>
+                                        <td class="actions-column">
+                                            <div class="btn-group btn-group-sm">
+                                                <button type="button" 
+                                                        class="btn btn-outline-primary edit-class-btn"
+                                                        data-class-id="<?= $class['class_id'] ?>"
+                                                        data-class-name="<?= htmlspecialchars($class['class_name']) ?>"
+                                                        data-year-group="<?= htmlspecialchars($class['year_group']) ?>"
+                                                        data-program="<?= htmlspecialchars($class['program'] ?? '') ?>"
+                                                        data-gender="<?= htmlspecialchars($class['gender'] ?? 'Mixed') ?>"
+                                                        data-teacher-id="<?= $class['teacher_id'] ?? '' ?>">
+                                                    <i class="bi bi-pencil"></i> Edit
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                     <?php endforeach; ?>
@@ -497,6 +529,100 @@ ALTER TABLE students ADD FOREIGN KEY (class_id) REFERENCES classes(id) ON DELETE
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                         <button type="button" id="confirmAddClass" class="btn btn-primary">Create Class</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Edit Class Modal -->
+        <div class="modal fade" id="editClassModal" tabindex="-1" aria-labelledby="editClassModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editClassModalLabel">Edit Class</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="editClassForm">
+                            <!-- Hidden field for class ID -->
+                            <input type="hidden" id="editClassId" name="class_id">
+
+                            <!-- Current class name (read-only) -->
+                            <div class="mb-3">
+                                <label for="currentClassName" class="form-label">Current Class Name</label>
+                                <input type="text" class="form-control" id="currentClassName" disabled readonly>
+                            </div>
+
+                            <!-- Auto-generated new class name -->
+                            <div class="mb-3">
+                                <label for="newAutoClassName" class="form-label">New Class Name (Auto-generated)</label>
+                                <input type="text" class="form-control" id="newAutoClassName" disabled readonly>
+                                <small class="text-muted">Based on selections below</small>
+                            </div>
+
+                            <!-- Required fields -->
+                            <div class="mb-3">
+                                <label for="editClassProgram" class="form-label">Program <span class="text-danger">*</span></label>
+                                <select class="form-select" id="editClassProgram" name="program" required>
+                                    <option value="">Select Program</option>
+                                    <option value="Weekday Morning Hifdh">Weekday Morning Hifdh</option>
+                                    <option value="Weekday Evening Hifdh">Weekday Evening Hifdh</option>
+                                    <option value="Weekday Evening Islamic Studies">Weekday Evening Islamic Studies</option>
+                                    <option value="Weekend Hifdh">Weekend Hifdh</option>
+                                    <option value="Weekend Islamic Studies">Weekend Islamic Studies</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="editClassYearGroup" class="form-label">Year Group <span class="text-danger">*</span></label>
+                                <select class="form-select" id="editClassYearGroup" name="year_group" required>
+                                    <option value="">Select Year Group</option>
+                                    <option value="Nursery">Nursery</option>
+                                    <option value="Reception">Reception</option>
+                                    <option value="Year 1">Year 1</option>
+                                    <option value="Year 2">Year 2</option>
+                                    <option value="Year 3">Year 3</option>
+                                    <option value="Year 4">Year 4</option>
+                                    <option value="Year 5">Year 5</option>
+                                    <option value="Year 6">Year 6</option>
+                                    <option value="Year 7">Year 7</option>
+                                    <option value="Year 8">Year 8</option>
+                                    <option value="Year 9">Year 9</option>
+                                    <option value="Year 10">Year 10</option>
+                                    <option value="Year 11">Year 11</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="editClassGender" class="form-label">Gender <span class="text-danger">*</span></label>
+                                <select class="form-select" id="editClassGender" name="gender" required>
+                                    <option value="">Select Gender</option>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                    <option value="Mixed">Mixed</option>
+                                </select>
+                            </div>
+
+                            <!-- Optional teacher field -->
+                            <div class="mb-3">
+                                <label for="editClassTeacher" class="form-label">Teacher (Optional)</label>
+                                <select class="form-select" id="editClassTeacher" name="teacher_id">
+                                    <option value="">Unassigned</option>
+                                    <?php if (!empty($teachers)): ?>
+                                        <?php foreach ($teachers as $teacher): ?>
+                                            <option value="<?= $teacher['id'] ?>"><?= htmlspecialchars($teacher['name']) ?></option>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
+                                </select>
+                            </div>
+
+                            <!-- Hidden field for the actual class name -->
+                            <input type="hidden" id="editClassName" name="class_name">
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" id="confirmEditClass" class="btn btn-primary">Update Class</button>
                     </div>
                 </div>
             </div>

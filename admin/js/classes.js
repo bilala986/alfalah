@@ -1,6 +1,6 @@
 // admin/js/classes.js
 document.addEventListener('DOMContentLoaded', function() {
-    // Helper function to escape HTML - MOVED TO TOP
+    // Helper function to escape HTML
     function escapeHtml(unsafe) {
         if (!unsafe) return '';
         return unsafe
@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const applyFilterBtn = document.getElementById('applyFilterBtn');
     const clearFilterBtn = document.getElementById('clearFilterBtn');
     
-    // Add these elements to the top of your classes.js
+    // Add class modal elements
     const addClassBtn = document.getElementById('addClassBtn');
     const addClassModal = new bootstrap.Modal(document.getElementById('addClassModal'));
     const addClassForm = document.getElementById('addClassForm');
@@ -52,8 +52,21 @@ document.addEventListener('DOMContentLoaded', function() {
     const classProgram = document.getElementById('classProgram');
     const classYearGroup = document.getElementById('classYearGroup');
     const classGender = document.getElementById('classGender');
+    const classTeacher = document.getElementById('classTeacher');
     const confirmAddClass = document.getElementById('confirmAddClass');
 
+    // Edit class modal elements
+    const editClassModal = new bootstrap.Modal(document.getElementById('editClassModal'));
+    const editClassForm = document.getElementById('editClassForm');
+    const currentClassName = document.getElementById('currentClassName');
+    const newAutoClassName = document.getElementById('newAutoClassName');
+    const editClassName = document.getElementById('editClassName');
+    const editClassProgram = document.getElementById('editClassProgram');
+    const editClassYearGroup = document.getElementById('editClassYearGroup');
+    const editClassGender = document.getElementById('editClassGender');
+    const editClassTeacher = document.getElementById('editClassTeacher');
+    const editClassId = document.getElementById('editClassId');
+    const confirmEditClass = document.getElementById('confirmEditClass');
 
     // Current filter state
     let currentYearGroupFilter = 'all';
@@ -100,25 +113,25 @@ document.addEventListener('DOMContentLoaded', function() {
             const yearGroupFilter = currentYearGroupFilter === 'all' || 
                                   yearGroup === currentYearGroupFilter.toLowerCase();
             
-            let teacherFilter = true;
+            let teacherFilterMatch = true;
             if (currentTeacherFilter === 'unassigned') {
-                teacherFilter = teacher === 'unassigned';
+                teacherFilterMatch = teacher === 'unassigned';
             } else if (currentTeacherFilter !== 'all') {
                 // For specific teacher, check teacher name
                 const teacherCell = row.cells[3];
                 if (teacherCell) {
                     const teacherText = teacherCell.textContent.toLowerCase().trim();
-                    teacherFilter = teacherText.includes(currentTeacherFilter.toLowerCase());
+                    teacherFilterMatch = teacherText.includes(currentTeacherFilter.toLowerCase());
                 }
             }
 
-            const programFilter = currentProgramFilter === 'all' || 
+            const programFilterMatch = currentProgramFilter === 'all' || 
                                 program === currentProgramFilter.toLowerCase();
 
             const studentFilter = (currentMinStudents === null || studentCount >= currentMinStudents) && 
                                  (currentMaxStudents === null || studentCount <= currentMaxStudents);
 
-            const shouldShow = matchesSearch && yearGroupFilter && teacherFilter && programFilter && studentFilter;
+            const shouldShow = matchesSearch && yearGroupFilter && teacherFilterMatch && programFilterMatch && studentFilter;
             row.style.display = shouldShow ? '' : 'none';
 
             if (shouldShow) {
@@ -182,6 +195,38 @@ document.addEventListener('DOMContentLoaded', function() {
             });
     }
 
+    // Function to generate class name for add modal
+    function generateAddClassName() {
+        const yearGroup = classYearGroup.value;
+        const gender = classGender.value;
+        const program = classProgram.value;
+
+        if (yearGroup && gender && program) {
+            const className = `${yearGroup}, ${gender}, ${program}`;
+            autoClassName.value = className;
+            classNameInput.value = className;
+        } else {
+            autoClassName.value = '';
+            classNameInput.value = '';
+        }
+    }
+
+    // Function to generate class name for edit modal
+    function generateEditClassName() {
+        const yearGroup = editClassYearGroup.value;
+        const gender = editClassGender.value;
+        const program = editClassProgram.value;
+
+        if (yearGroup && gender && program) {
+            const className = `${yearGroup}, ${gender}, ${program}`;
+            newAutoClassName.value = className;
+            editClassName.value = className;
+        } else {
+            newAutoClassName.value = '';
+            editClassName.value = '';
+        }
+    }
+
     // Update table with new data
     function updateTable(classes) {
         console.log('Updating table with classes:', classes);
@@ -193,23 +238,24 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         if (classes.length === 0) {
-            classesTableBody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">No classes found.</td></tr>';
+            classesTableBody.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-4">No classes found.</td></tr>';
             visibleCount.textContent = '0';
             rows = [];
             return;
         }
 
-        // Create document fragment for efficient DOM manipulation
-        var frag = document.createDocumentFragment();
+        const frag = document.createDocumentFragment();
 
         classes.forEach(cls => {
             const row = document.createElement('tr');
             row.className = 'class-row';
-            row.setAttribute('data-class-id', cls.class_id); // ADD THIS LINE
+            row.setAttribute('data-class-id', cls.class_id);
             row.setAttribute('data-class-name', (cls.class_name || '').toLowerCase());
             row.setAttribute('data-program', (cls.program || '').toLowerCase());
             row.setAttribute('data-year-group', (cls.year_group || '').toLowerCase());
+            row.setAttribute('data-gender', (cls.gender || 'Mixed').toLowerCase());
             row.setAttribute('data-teacher', (cls.teacher_name || 'Unassigned').toLowerCase());
+            row.setAttribute('data-teacher-id', cls.teacher_id || '');
             row.setAttribute('data-students', (cls.student_names || '').toLowerCase());
 
             // Format student list
@@ -245,29 +291,91 @@ document.addEventListener('DOMContentLoaded', function() {
                 </td>
                 <td class="mobile-hide">
                     ${studentListHTML}
-                    <div class="mt-2">
-                        <button type="button" class="btn btn-sm btn-outline-primary edit-class-btn">
+                </td>
+                <td class="actions-column">
+                    <div class="btn-group btn-group-sm">
+                        <button type="button" 
+                                class="btn btn-outline-primary edit-class-btn"
+                                data-class-id="${cls.class_id}"
+                                data-class-name="${escapeHtml(cls.class_name)}"
+                                data-year-group="${escapeHtml(cls.year_group)}"
+                                data-program="${escapeHtml(cls.program || '')}"
+                                data-gender="${escapeHtml(cls.gender || 'Mixed')}"
+                                data-teacher-id="${cls.teacher_id || ''}">
                             <i class="bi bi-pencil"></i> Edit
                         </button>
                     </div>
                 </td>
             `;
 
-            frag.append(row);
+            frag.appendChild(row);
         });
 
-        // Append all rows at once using the document fragment
-        classesTableBody.append(frag);
-
+        classesTableBody.appendChild(frag);
+        
         // Update rows reference
         rows = classesTableBody.querySelectorAll('.class-row');
 
         // Apply current search and filters
         searchAndFilterClasses(searchInput.value.toLowerCase());
 
-        // ADD THIS LINE: Initialize class assignment functionality
-        addClassAssignmentFunctionality();
+        // No need to attach event listeners here - using event delegation instead
     }
+
+    // FIX 1: Use event delegation for edit buttons (works after F5 refresh)
+    classesTableBody.addEventListener('click', function(event) {
+        // Check if the clicked element is an edit button or inside an edit button
+        const editButton = event.target.closest('.edit-class-btn');
+        
+        if (editButton) {
+            event.preventDefault();
+            event.stopPropagation();
+            
+            console.log('Edit button clicked via event delegation');
+            
+            // Get the data from the button's attributes
+            const classId = editButton.getAttribute('data-class-id');
+            const className = editButton.getAttribute('data-class-name');
+            const yearGroup = editButton.getAttribute('data-year-group');
+            const program = editButton.getAttribute('data-program');
+            const gender = editButton.getAttribute('data-gender');
+            const teacherId = editButton.getAttribute('data-teacher-id');
+            
+            console.log('Editing class data:', { 
+                classId, 
+                className, 
+                yearGroup, 
+                program, 
+                gender,  // DEBUG: Check what value is coming through
+                teacherId 
+            });
+            
+            // Populate the edit form
+            editClassId.value = classId;
+            currentClassName.value = className;
+            editClassYearGroup.value = yearGroup;
+            editClassProgram.value = program;
+            
+            // FIX 2: Set the gender correctly (case-sensitive match)
+            if (gender) {
+                // Convert to proper case for the select option
+                const genderValue = gender.charAt(0).toUpperCase() + gender.slice(1).toLowerCase();
+                editClassGender.value = genderValue;
+                console.log('Setting gender to:', genderValue);
+            } else {
+                editClassGender.value = 'Mixed';
+                console.log('Gender not found, defaulting to Mixed');
+            }
+            
+            editClassTeacher.value = teacherId || '';
+            
+            // Generate the new class name
+            generateEditClassName();
+            
+            // Show the modal
+            editClassModal.show();
+        }
+    });
 
     // Search functionality
     searchInput.addEventListener('input', function() {
@@ -316,26 +424,15 @@ document.addEventListener('DOMContentLoaded', function() {
         filterModal.hide();
     });
     
-    // Function to generate class name
-    function generateClassName() {
-        const yearGroup = classYearGroup.value;
-        const gender = classGender.value;
-        const program = classProgram.value;
+    // Event listeners for add class name generation
+    classProgram.addEventListener('change', generateAddClassName);
+    classYearGroup.addEventListener('change', generateAddClassName);
+    classGender.addEventListener('change', generateAddClassName);
 
-        if (yearGroup && gender && program) {
-            const className = `${yearGroup}, ${gender}, ${program}`;
-            autoClassName.value = className;
-            classNameInput.value = className;
-        } else {
-            autoClassName.value = '';
-            classNameInput.value = '';
-        }
-    }
-
-    // Event listeners for class name generation
-    classProgram.addEventListener('change', generateClassName);
-    classYearGroup.addEventListener('change', generateClassName);
-    classGender.addEventListener('change', generateClassName);
+    // Event listeners for edit class name generation
+    editClassProgram.addEventListener('change', generateEditClassName);
+    editClassYearGroup.addEventListener('change', generateEditClassName);
+    editClassGender.addEventListener('change', generateEditClassName);
 
     // Add Class button functionality
     addClassBtn.addEventListener('click', function() {
@@ -378,65 +475,37 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // Add this function to classes.js
-    function addClassAssignmentFunctionality() {
-        // Add edit button functionality to all edit buttons
-        document.querySelectorAll('.edit-class-btn').forEach(button => {
-            // Remove existing listeners to prevent duplicates
-            button.removeEventListener('click', handleEditClassClick);
-            button.addEventListener('click', handleEditClassClick);
+    // Confirm edit class
+    confirmEditClass.addEventListener('click', function() {
+        const button = this;
+        button.disabled = true;
+        button.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Updating...';
+
+        const formData = new FormData(editClassForm);
+
+        fetch('../php/update_class_details.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                editClassModal.hide();
+                showToast('Class updated successfully!', 'success');
+                refreshTableData(false);
+            } else {
+                showToast('Error: ' + data.message, 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Update class error:', error);
+            showToast('Error updating class', 'error');
+        })
+        .finally(() => {
+            button.disabled = false;
+            button.innerHTML = 'Update Class';
         });
-    }
-
-    function handleEditClassClick() {
-        const row = this.closest('tr.class-row');
-        if (!row) return;
-
-        const classId = row.getAttribute('data-class-id');
-        const className = row.querySelector('.badge-class').textContent;
-        const yearGroup = row.querySelector('.badge-year').textContent;
-        const program = row.cells[1].textContent;
-        const teacherCell = row.cells[3];
-        const currentTeacher = teacherCell.textContent.trim();
-
-        console.log('Edit class clicked:', { classId, className, yearGroup, program, currentTeacher });
-
-        // TODO: Implement a proper edit modal
-        // For now, show a basic prompt
-        const newTeacher = prompt(`Edit Class: ${className}\nYear Group: ${yearGroup}\nProgram: ${program}\n\nEnter new teacher name (leave blank to unassign):`, currentTeacher);
-
-        if (newTeacher !== null) {
-            updateClassTeacher(classId, newTeacher);
-        }
-    }
-
-    function updateClassTeacher(classId, teacherName) {
-        // This is a placeholder - you need to implement this properly
-        console.log(`Updating class ${classId} with teacher: ${teacherName}`);
-
-        // You'll need to:
-        // 1. Create an edit class modal (similar to add class modal)
-        // 2. Make an API call to update_class.php
-        // 3. Refresh the table after successful update
-        alert('Edit class functionality not fully implemented yet. Need to create edit modal.');
-    }
-
-    function openEditClassModal(row) {
-        const classId = row.getAttribute('data-class-id') || row.cells[0].querySelector('.badge-class').textContent;
-        const className = row.cells[0].querySelector('.badge-class').textContent;
-        const yearGroup = row.cells[2].querySelector('.badge-year').textContent;
-        const teacherCell = row.cells[3];
-        const currentTeacher = teacherCell.textContent.trim();
-        const currentTeacherId = teacherCell.querySelector('select')?.value || '';
-
-        // You'll need to create an edit modal similar to the add modal
-        // This is a simplified version - you should create a proper modal
-
-        console.log('Edit class:', { classId, className, yearGroup, currentTeacher });
-
-        // For now, show an alert - you should implement a proper modal
-        alert(`Edit Class: ${className}\nYear Group: ${yearGroup}\nCurrent Teacher: ${currentTeacher}`);
-    }
+    });
 
     // Initialize
     searchAndFilterClasses('');
