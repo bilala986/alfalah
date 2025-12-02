@@ -132,6 +132,49 @@ document.addEventListener('DOMContentLoaded', function() {
             });
     }
     
+    // Function to load classes for the edit modal
+    function loadClassesForModal() {
+        const classGrid = document.getElementById('classGrid');
+        if (!classGrid) return;
+
+        classGrid.innerHTML = '<div class="text-center py-3"><div class="spinner-border spinner-border-sm" role="status"></div><span class="ms-2">Loading classes...</span></div>';
+
+        fetch(`../php/get_classes_for_dropdown.php?bid=${browserInstanceId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    classGrid.innerHTML = '';
+
+                    data.classes.forEach(cls => {
+                        const option = document.createElement('div');
+                        option.className = 'multi-select-option';
+                        option.setAttribute('data-value', cls.id);
+                        option.innerHTML = `
+                            <div class="option-checkbox">
+                                <i class="bi bi-check-lg"></i>
+                            </div>
+                            <span class="option-label">${escapeHtml(cls.class_name)}</span>
+                        `;
+
+                        // Add click event
+                        option.addEventListener('click', function() {
+                            this.classList.toggle('selected');
+                            updateClassSelection();
+                        });
+
+                        classGrid.appendChild(option);
+                    });
+
+                    // Initialize multi-select functionality
+                    initMultiSelect();
+                }
+            })
+            .catch(error => {
+                console.error('Error loading classes:', error);
+                classGrid.innerHTML = '<div class="text-center text-danger py-3">Error loading classes</div>';
+            });
+    }
+    
     function formatUKDateTime(dateTimeString) {
         if (!dateTimeString) return 'Never';
         
@@ -173,14 +216,13 @@ document.addEventListener('DOMContentLoaded', function() {
         teacherTableBody.innerHTML = '';
 
         if (teachers.length === 0) {
-            teacherTableBody.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-4">No teacher accounts found.</td></tr>';
+            teacherTableBody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">No teacher accounts found.</td></tr>';
             visibleCount.textContent = '0';
             if (totalCount) totalCount.textContent = '0';
             rows = [];
             return;
         }
 
-        // Create document fragment for efficient DOM manipulation
         const frag = document.createDocumentFragment();
 
         teachers.forEach(teacher => {
@@ -191,11 +233,6 @@ document.addEventListener('DOMContentLoaded', function() {
             row.setAttribute('data-status', statusValue);
             row.setAttribute('data-teacher-id', teacher.id);
 
-            // Set year group data attribute for filtering
-            const yearGroupValue = teacher.year_group ? teacher.year_group : 'not_set';
-            row.setAttribute('data-year-group', yearGroupValue);
-            row.setAttribute('data-program', teacher.program || 'not_set');
-
             const statusBadge = teacher.is_approved == 1 ? 
                 '<span class="badge bg-success">Approved</span>' : 
                 '<span class="badge bg-danger">Pending</span>';
@@ -205,35 +242,17 @@ document.addEventListener('DOMContentLoaded', function() {
                     <i class="bi bi-check-lg"></i> Approve
                 </button>` : '';
 
-            // DEBUG: Log the teacher data to see what we're getting
-            console.log('Teacher data for display:', {
-                name: teacher.name,
-                year_group: teacher.year_group,
-                program: teacher.program,
-                is_approved: teacher.is_approved  // Added this for debugging
-            });
-
             row.innerHTML = `
                 <td class="fw-semibold">${escapeHtml(teacher.name)}</td>
                 <td>${escapeHtml(teacher.email)}</td>
                 <td class="mobile-hide">
-                    ${teacher.year_group && teacher.year_group !== '' ? `
-                        <div class="year-group-badges">
-                            ${teacher.year_group.split(',').map(year => 
-                                `<span class="badge bg-primary me-1">Year ${escapeHtml(year.trim())}</span>`
+                    ${teacher.classes && teacher.classes.length > 0 ? `
+                        <div class="class-badges">
+                            ${teacher.classes.map(className => 
+                                `<span class="badge bg-info me-1 mb-1">${escapeHtml(className)}</span>`
                             ).join('')}
                         </div>
-                    ` : '<span class="text-muted">Not set</span>'}
-                </td>
-                <td class="mobile-hide">
-                    ${teacher.program && teacher.program !== '' ? `
-                        <div class="program-badges">
-                            ${teacher.program.split(',').map(program => {
-                                const formattedProgram = formatProgramNames(program);
-                                return `<span class="badge bg-info me-1 mb-1">${escapeHtml(formattedProgram)}</span>`;
-                            }).join('')}
-                        </div>
-                    ` : '<span class="text-muted">Not set</span>'}
+                    ` : '<span class="text-muted">No classes assigned</span>'}
                 </td>
                 <td class="mobile-hide">
                     ${teacher.last_login ? formatUKDateTime(teacher.last_login) : '<span class="text-muted">Never</span>'}
@@ -245,9 +264,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 data-teacher-id="${teacher.id}" 
                                 data-teacher-name="${escapeHtml(teacher.name)}" 
                                 data-teacher-email="${escapeHtml(teacher.email)}" 
-                                data-teacher-approved="${teacher.is_approved}"
-                                data-year-group="${teacher.year_group || ''}"
-                                data-program="${teacher.program || ''}">
+                                data-teacher-approved="${teacher.is_approved}">
                             <i class="bi bi-pencil"></i> Edit
                         </button>
                         ${approveButton}
@@ -264,22 +281,11 @@ document.addEventListener('DOMContentLoaded', function() {
             frag.appendChild(row);
         });
 
-        // Append all rows at once using the document fragment
         teacherTableBody.appendChild(frag);
-
-        // Update counts
         visibleCount.textContent = teachers.length;
         if (totalCount) totalCount.textContent = teachers.length;
-
-        // Update rows reference and attach event listeners
         rows = teacherTableBody.querySelectorAll('tr[data-name]');
         attachEventListeners();
-
-        // DEBUG: Verify edit buttons have correct approval status
-        console.log('Edit buttons after table update:');
-        document.querySelectorAll('.edit-btn').forEach(btn => {
-            console.log(`Teacher ID: ${btn.getAttribute('data-teacher-id')}, Approved: ${btn.getAttribute('data-teacher-approved')}`);
-        });
     }
 
     // Attach event listeners to dynamic buttons

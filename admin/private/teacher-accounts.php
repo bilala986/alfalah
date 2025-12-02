@@ -11,30 +11,8 @@ if ($_SESSION['pending_approval']) {
 // Include database connection
 require_once $_SERVER['DOCUMENT_ROOT'] . '/alfalah/php/db_connect.php';
 
-// Function to format program names for display
-function formatProgramNames($programValues) {
-    $programMap = [
-        'weekday_morning_hifdh' => 'Weekday Morning Hifdh',
-        'weekday_evening_hifdh' => 'Weekday Evening Hifdh',
-        'weekend_evening_islamic_studies' => 'Weekend Evening Islamic Studies',
-        'weekend_hifdh' => 'Weekend Hifdh',
-        'weekend_islamic_studies' => 'Weekend Islamic Studies'
-    ];
-    
-    if (empty($programValues)) {
-        return 'Not set';
-    }
-    
-    $programs = explode(',', $programValues);
-    $formattedPrograms = array_map(function($program) use ($programMap) {
-        return $programMap[trim($program)] ?? trim($program);
-    }, $programs);
-    
-    return implode(', ', $formattedPrograms);
-}
-
 // Fetch all teacher users
-$stmt = $pdo->prepare("SELECT id, name, email, year_group, program, created_at, last_login, is_approved FROM teacher_users ORDER BY created_at DESC");
+$stmt = $pdo->prepare("SELECT id, name, email, created_at, last_login, is_approved FROM teacher_users ORDER BY created_at DESC");
 $stmt->execute();
 $teachers = $stmt->fetchAll();
 
@@ -270,69 +248,22 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                                 </div>
                             </div>
 
-                            <!-- Year Groups Selection -->
+                            <!-- Classes Selection -->
                             <div class="mb-4">
-                                <label class="form-label fw-semibold">Year Groups</label>
-                                <div class="multi-select-card" id="yearGroupSelectCard">
+                                <label class="form-label fw-semibold">Assigned Classes</label>
+                                <div class="multi-select-card" id="classSelectCard">
                                     <div class="multi-select-header">
-                                        <span>Select year groups this teacher can teach</span>
-                                        <small class="text-muted" id="yearGroupCount">0 selected</small>
+                                        <span>Select classes to assign to this teacher</span>
+                                        <small class="text-muted" id="classCount">0 selected</small>
                                     </div>
-                                    <div class="multi-select-grid" id="yearGroupGrid">
-                                        <?php for ($i = 1; $i <= 11; $i++): ?>
-                                            <div class="multi-select-option" data-value="<?= $i ?>">
-                                                <div class="option-checkbox">
-                                                    <i class="bi bi-check-lg"></i>
-                                                </div>
-                                                <span class="option-label">Year <?= $i ?></span>
-                                            </div>
-                                        <?php endfor; ?>
-                                    </div>
-                                    <input type="hidden" id="editYearGroup" name="year_group[]">
-                                </div>
-                            </div>
-
-                            <!-- Programs Selection -->
-                            <div class="mb-4">
-                                <label class="form-label fw-semibold">Programs</label>
-                                <div class="multi-select-card" id="programSelectCard">
-                                    <div class="multi-select-header">
-                                        <span>Select programs this teacher can teach</span>
-                                        <small class="text-muted" id="programCount">0 selected</small>
-                                    </div>
-                                    <div class="multi-select-grid" id="programGrid">
-                                        <div class="multi-select-option" data-value="weekday_morning_hifdh">
-                                            <div class="option-checkbox">
-                                                <i class="bi bi-check-lg"></i>
-                                            </div>
-                                            <span class="option-label">Weekday Morning Hifdh</span>
-                                        </div>
-                                        <div class="multi-select-option" data-value="weekday_evening_hifdh">
-                                            <div class="option-checkbox">
-                                                <i class="bi bi-check-lg"></i>
-                                            </div>
-                                            <span class="option-label">Weekday Evening Hifdh</span>
-                                        </div>
-                                        <div class="multi-select-option" data-value="weekend_evening_islamic_studies">
-                                            <div class="option-checkbox">
-                                                <i class="bi bi-check-lg"></i>
-                                            </div>
-                                            <span class="option-label">Weekend Evening Islamic Studies</span>
-                                        </div>
-                                        <div class="multi-select-option" data-value="weekend_hifdh">
-                                            <div class="option-checkbox">
-                                                <i class="bi bi-check-lg"></i>
-                                            </div>
-                                            <span class="option-label">Weekend Hifdh</span>
-                                        </div>
-                                        <div class="multi-select-option" data-value="weekend_islamic_studies">
-                                            <div class="option-checkbox">
-                                                <i class="bi bi-check-lg"></i>
-                                            </div>
-                                            <span class="option-label">Weekend Islamic Studies</span>
+                                    <div class="multi-select-grid" id="classGrid">
+                                        <!-- Will be populated by JavaScript -->
+                                        <div class="text-center py-3">
+                                            <div class="spinner-border spinner-border-sm" role="status"></div>
+                                            <span class="ms-2">Loading classes...</span>
                                         </div>
                                     </div>
-                                    <input type="hidden" id="editProgram" name="program[]">
+                                    <input type="hidden" id="editClasses" name="classes[]">
                                 </div>
                             </div>
 
@@ -369,28 +300,6 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                                 <option value="all">All Teachers</option>
                                 <option value="approved">Approved Only</option>
                                 <option value="pending">Pending Only</option>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label for="yearGroupFilterSelect" class="form-label">Filter by Year Group</label>
-                            <select id="yearGroupFilterSelect" class="form-select">
-                                <option value="all">All Year Groups</option>
-                                <?php for ($i = 1; $i <= 11; $i++): ?>
-                                    <option value="<?= $i ?>">Year <?= $i ?></option>
-                                <?php endfor; ?>
-                                <option value="not_set">Not Set</option>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label for="programFilterSelect" class="form-label">Filter by Program</label>
-                            <select id="programFilterSelect" class="form-select">
-                                <option value="all">All Programs</option>
-                                <option value="weekday_morning_hifdh">Weekday Morning Hifdh</option>
-                                <option value="weekday_evening_hifdh">Weekday Evening Hifdh</option>
-                                <option value="weekend_evening_islamic_studies">Weekend Evening Islamic Studies</option>
-                                <option value="weekend_hifdh">Weekend Hifdh</option>
-                                <option value="weekend_islamic_studies">Weekend Islamic Studies</option>
-                                <option value="not_set">Not Set</option>
                             </select>
                         </div>
                     </div>

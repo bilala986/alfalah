@@ -11,10 +11,12 @@ try {
         ia.student_dob,
         ia.student_school,
         tu.name as teacher_name,
-        tu.id as teacher_id
+        tu.id as teacher_id,
+        c.class_name  -- ADD THIS LINE
     FROM students s
     LEFT JOIN initial_admission ia ON s.admission_id = ia.id
     LEFT JOIN teacher_users tu ON s.teacher_id = tu.id
+    LEFT JOIN classes c ON s.class_id = c.id  -- ADD THIS JOIN
     WHERE s.status = 'active'
     ORDER BY s.student_first_name, s.student_last_name");
     $stmt->execute();

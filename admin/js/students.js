@@ -63,23 +63,26 @@ document.addEventListener('DOMContentLoaded', function() {
             const yearGroup = row.getAttribute('data-year-group');
             const teacher = row.getAttribute('data-teacher');
             const age = parseInt(row.getAttribute('data-age')) || 0;
+            // Add class data attribute
+            const classCell = row.cells[5]; // Class column is index 5
+            const className = classCell ? classCell.textContent.toLowerCase() : '';
 
-            // Search matching
+            // Search matching - ADD CLASS TO SEARCH
             const matchesSearch = searchTerm === '' || 
                 studentName.includes(searchTerm) ||
                 program.includes(searchTerm) ||
                 yearGroup.includes(searchTerm) ||
-                teacher.includes(searchTerm);
+                teacher.includes(searchTerm) ||
+                className.includes(searchTerm);
 
-            // Filter matching
+            // ... rest of your filter logic stays the same
             const programFilter = currentProgramFilter === 'all' || program === currentProgramFilter.toLowerCase();
             const yearGroupFilter = currentYearGroupFilter === 'all' || yearGroup === currentYearGroupFilter.toLowerCase();
-            
+
             let teacherFilter = true;
             if (currentTeacherFilter === 'unassigned') {
                 teacherFilter = teacher === 'unassigned';
             } else if (currentTeacherFilter !== 'all') {
-                // For specific teacher, we need to check the teacher ID from the data attribute
                 const teacherId = row.querySelector('.edit-btn')?.getAttribute('data-teacher-id');
                 teacherFilter = teacherId === currentTeacherFilter;
             }
@@ -181,7 +184,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         if (students.length === 0) {
-            studentsTableBody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">No students found.</td></tr>';
+            // Fix colspan to 7
+            studentsTableBody.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-4">No students found.</td></tr>';
             visibleCount.textContent = '0';
             rows = [];
             return;
@@ -199,6 +203,12 @@ document.addEventListener('DOMContentLoaded', function() {
             row.setAttribute('data-age', student.student_age || '0');
             row.setAttribute('data-student-id', student.id);
 
+            // Get class name for this student
+            const className = student.class_name || 'Unassigned';
+            const classBadge = student.class_name ? 
+                `<span class="badge bg-info">${escapeHtml(student.class_name)}</span>` : 
+                '<span class="text-muted">Unassigned</span>';
+
             row.innerHTML = `
                 <td class="fw-semibold">
                     ${escapeHtml(student.student_first_name + ' ' + student.student_last_name)}
@@ -212,6 +222,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 <td>
                     ${student.teacher_name ? escapeHtml(student.teacher_name) : '<span class="text-muted">Unassigned</span>'}
                 </td>
+                <td> <!-- ADDED CLASS COLUMN -->
+                    ${classBadge}
+                </td>
                 <td>
                     <div class="btn-group btn-group-sm">
                         <button type="button" 
@@ -223,7 +236,8 @@ document.addEventListener('DOMContentLoaded', function() {
                                 class="btn btn-outline-primary edit-btn" 
                                 data-student-id="${student.id}"
                                 data-student-name="${escapeHtml(student.student_first_name + ' ' + student.student_last_name)}"
-                                data-teacher-id="${student.teacher_id || ''}">
+                                data-teacher-id="${student.teacher_id || ''}"
+                                data-class-id="${student.class_id || ''}"> <!-- Added class_id -->
                             <i class="bi bi-pencil"></i> Edit
                         </button>
                         <button type="button" 
@@ -243,7 +257,7 @@ document.addEventListener('DOMContentLoaded', function() {
             detailsRow.className = 'student-details-row';
             detailsRow.style.display = 'none';
             detailsRow.innerHTML = `
-                <td colspan="6">
+                <td colspan="7"> <!-- Fix colspan to 7 -->
                     <div class="student-details" id="details-${student.id}">
                         <div class="text-center text-muted py-3">
                             <i class="bi bi-hourglass-split"></i> Click "View" to load details
@@ -253,7 +267,7 @@ document.addEventListener('DOMContentLoaded', function() {
             `;
             frag.append(detailsRow);
         });
-        
+
         // Append all rows at once using the document fragment
         document.getElementById('studentsTableBody').append(frag);
 

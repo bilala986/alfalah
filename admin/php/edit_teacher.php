@@ -1,5 +1,5 @@
 <?php
-// admin/php/edit_teacher.php - UPDATED FOR CLASSES INSTEAD OF YEAR GROUPS/PROGRAMS
+// admin/php/edit_teacher.php - UPDATED FOR CLASSES
 require_once 'admin_protect.php';
 require_once $_SERVER['DOCUMENT_ROOT'] . '/alfalah/php/db_connect.php';
 
@@ -29,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
     
-    // FIXED: Properly check checkbox value
+    // Properly check checkbox value
     $is_approved = (!empty($_POST['is_approved']) && $_POST['is_approved'] == '1') ? 1 : 0;
     
     // Validate inputs
@@ -77,9 +77,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         // Commit transaction
         $pdo->commit();
-        
-        // Log the update for debugging
-        error_log("Teacher updated - ID: $teacher_id, Classes: " . implode(',', $classes));
         
         echo json_encode([
             "success" => true, 

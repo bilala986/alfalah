@@ -1,19 +1,17 @@
 <?php
-// admin/php/get_teachers.php - SIMPLIFIED VERSION WITHOUT STUDENT DATA
+// admin/php/get_teachers.php - UPDATED WITHOUT YEAR GROUPS/PROGRAMS
 require_once 'admin_protect.php';
 require_once $_SERVER['DOCUMENT_ROOT'] . '/alfalah/php/db_connect.php';
 
 header('Content-Type: application/json');
 
 try {
-    // Simple query to get only teacher data without student joins
+    // Simple query to get only teacher data
     $stmt = $pdo->prepare("
         SELECT 
             id,
             name,
             email,
-            year_group,
-            program,
             is_approved,
             last_login,
             created_at,
@@ -24,10 +22,16 @@ try {
     $stmt->execute();
     $teachers = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
-    // Debug: Log what we're returning
-    error_log("get_teachers.php returning: " . count($teachers) . " teachers");
-    foreach ($teachers as $teacher) {
-        error_log("Teacher: " . $teacher['name'] . " - Year Groups: " . $teacher['year_group'] . " - Programs: " . $teacher['program']);
+    // For each teacher, fetch their assigned classes
+    foreach ($teachers as &$teacher) {
+        $classStmt = $pdo->prepare("
+            SELECT class_name 
+            FROM classes 
+            WHERE teacher_id = ? AND status = 'active' 
+            ORDER BY class_name
+        ");
+        $classStmt->execute([$teacher['id']]);
+        $teacher['classes'] = $classStmt->fetchAll(PDO::FETCH_COLUMN, 0);
     }
     
     echo json_encode([
