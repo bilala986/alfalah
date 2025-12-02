@@ -641,15 +641,22 @@ document.addEventListener('DOMContentLoaded', function() {
     function handleEditClick() {
         const studentId = this.getAttribute('data-student-id');
         const studentName = this.getAttribute('data-student-name');
-        
+
+        console.log('Edit clicked - Student ID:', studentId, 'Student Name:', studentName);
+
         currentActionStudentId = studentId;
 
-        // Fetch student details and populate form
+        // First, fetch student details
         fetch(`../php/get_student_details.php?id=${studentId}&bid=${browserInstanceId}`)
             .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    const student = data.student;
+            .then(studentData => {
+                console.log('Student data response:', studentData);
+
+                if (studentData.success) {
+                    const student = studentData.student;
+                    console.log('Student details:', student);
+
+                    // Populate the form with student data
                     document.getElementById('editStudentId').value = student.id;
                     document.getElementById('editFirstName').value = student.student_first_name;
                     document.getElementById('editLastName').value = student.student_last_name;
@@ -657,15 +664,53 @@ document.addEventListener('DOMContentLoaded', function() {
                     document.getElementById('editProgram').value = student.interested_program || '';
                     document.getElementById('editYearGroup').value = student.year_group || '';
                     document.getElementById('editTeacher').value = student.teacher_id || '';
-                    
-                    editModal.show();
+
+                    // Store student data for later use
+                    const currentStudentClassId = student.class_id;
+
+                    // Now fetch classes
+                    return fetch(`../php/get_classes_for_dropdown.php?bid=${browserInstanceId}`)
+                        .then(response => response.json())
+                        .then(classesData => {
+                            console.log('Classes data response:', classesData);
+
+                            if (classesData.success) {
+                                const classSelect = document.getElementById('editClass');
+                                if (classSelect) {
+                                    classSelect.innerHTML = '<option value="">Unassigned</option>';
+
+                                    classesData.classes.forEach(cls => {
+                                        const option = document.createElement('option');
+                                        option.value = cls.id;
+                                        option.textContent = cls.class_name;
+
+                                        // Compare with the student's class_id we stored earlier
+                                        if (cls.id == currentStudentClassId) {
+                                            option.selected = true;
+                                        }
+
+                                        classSelect.appendChild(option);
+                                    });
+
+                                    console.log('Class dropdown populated. Student class ID:', currentStudentClassId);
+                                }
+                            }
+
+                            return studentData; // Return student data for the next .then()
+                        });
                 } else {
-                    showToast('Error loading student details', 'error');
+                    showToast('Error loading student details: ' + studentData.message, 'error');
+                    throw new Error('Failed to load student details');
                 }
             })
+            .then(() => {
+                // Show the modal after everything is loaded
+                console.log('Showing edit modal');
+                editModal.show();
+            })
             .catch(error => {
-                console.error('Error loading student details:', error);
-                showToast('Error loading student details', 'error');
+                console.error('Error in handleEditClick:', error);
+                showToast('Error loading student details: ' + error.message, 'error');
             });
     }
 

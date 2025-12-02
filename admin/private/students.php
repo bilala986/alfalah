@@ -169,16 +169,23 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                                     <th class="mobile-hide">Program</th>
                                     <th class="mobile-hide">Year Group</th>
                                     <th>Teacher</th>
+                                    <th>Class</th> <!-- NEW COLUMN -->
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="studentsTableBody">
                                 <?php if (empty($students)): ?>
                                     <tr>
-                                        <td colspan="6" class="text-center text-muted py-4">No students found.</td>
+                                        <td colspan="7" class="text-center text-muted py-4">No students found.</td> <!-- Changed colspan from 6 to 7 -->
                                     </tr>
                                 <?php else: ?>
                                     <?php foreach ($students as $student): ?>
+                                    <?php
+                                    // Fetch class name for this student
+                                    $classStmt = $pdo->prepare("SELECT class_name FROM classes WHERE id = ?");
+                                    $classStmt->execute([$student['class_id'] ?? 0]);
+                                    $class = $classStmt->fetch();
+                                    ?>
                                     <tr data-student="<?= htmlspecialchars(strtolower($student['student_first_name'] . ' ' . $student['student_last_name'])) ?>" 
                                         data-program="<?= htmlspecialchars(strtolower($student['interested_program'])) ?>"
                                         data-year-group="<?= htmlspecialchars(strtolower($student['year_group'])) ?>"
@@ -203,6 +210,13 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                                                 <span class="text-muted">Unassigned</span>
                                             <?php endif; ?>
                                         </td>
+                                        <td> <!-- NEW CLASS COLUMN -->
+                                            <?php if (!empty($class['class_name'])): ?>
+                                                <span class="badge bg-info"><?= htmlspecialchars($class['class_name']) ?></span>
+                                            <?php else: ?>
+                                                <span class="text-muted">Unassigned</span>
+                                            <?php endif; ?>
+                                        </td>
                                         <td>
                                             <div class="btn-group btn-group-sm">
                                                 <button type="button" 
@@ -213,7 +227,8 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                                                 <button type="button" 
                                                         class="btn btn-outline-primary edit-btn" 
                                                         data-student-id="<?= $student['id'] ?>"
-                                                        data-student-name="<?= htmlspecialchars($student['student_first_name'] . ' ' . $student['student_last_name']) ?>">
+                                                        data-student-name="<?= htmlspecialchars($student['student_first_name'] . ' ' . $student['student_last_name']) ?>"
+                                                        data-class-id="<?= $student['class_id'] ?? '' ?>">
                                                     <i class="bi bi-pencil"></i> Edit
                                                 </button>
                                                 <button type="button" 
@@ -227,7 +242,7 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                                     </tr>
                                     <!-- Student Details Row - Same design as applications page -->
                                     <tr class="student-details-row" style="display: none;">
-                                        <td colspan="6">
+                                        <td colspan="7"> <!-- Changed colspan from 6 to 7 -->
                                             <div class="student-details" id="details-<?= $student['id'] ?>">
                                                 <div class="text-center text-muted py-3">
                                                     <i class="bi bi-hourglass-split"></i> Click "View" to load details
@@ -320,9 +335,19 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                                     <option value="Other">Other</option>
                                 </select>
                             </div>
+                            <!-- NEW: Class Selection -->
                             <div class="mb-3">
-                                <label for="editTeacher" class="form-label">Assign Teacher</label>
-                                <select class="form-select" id="editTeacher" name="teacher_id">
+                                <label for="editClass" class="form-label">Class</label>
+                                <select class="form-select" id="editClass" name="class_id">
+                                    <option value="">Unassigned</option>
+                                    <!-- Will be populated by JavaScript -->
+                                </select>
+                                <small class="form-text text-muted">Selecting a class will automatically assign the teacher</small>
+                            </div>
+                            <!-- Teacher field is now auto-filled when class is selected -->
+                            <div class="mb-3">
+                                <label for="editTeacher" class="form-label">Teacher (Auto-filled from Class)</label>
+                                <select class="form-select" id="editTeacher" name="teacher_id" disabled>
                                     <option value="">Unassigned</option>
                                     <?php
                                     // Fetch active teachers
@@ -333,6 +358,7 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                                         <option value="<?= $teacher['id'] ?>"><?= htmlspecialchars($teacher['name']) ?></option>
                                     <?php endforeach; ?>
                                 </select>
+                                <input type="hidden" id="editTeacherHidden" name="teacher_id">
                             </div>
                         </form>
                     </div>

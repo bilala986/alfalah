@@ -79,130 +79,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Get all rows (will be updated on refresh)
     let rows = [];
 
-    // Multi-select functionality - FIXED VERSION
-    function initializeMultiSelect() {
-        console.log('Initializing multi-select...');
-
-        // Year group options - use specific IDs
-        const yearGroupGrid = document.getElementById('yearGroupGrid');
-        if (yearGroupGrid) {
-            const yearGroupOptions = yearGroupGrid.querySelectorAll('.multi-select-option');
-            console.log('Year group options found:', yearGroupOptions.length);
-
-            yearGroupOptions.forEach(option => {
-                option.addEventListener('click', function() {
-                    console.log('Year group clicked:', this.getAttribute('data-value'));
-                    this.classList.toggle('selected');
-                    updateYearGroupSelection();
-                });
-            });
-        } else {
-            console.error('Year group grid not found!');
-        }
-
-        // Program options - use specific IDs
-        const programGrid = document.getElementById('programGrid');
-        if (programGrid) {
-            const programOptions = programGrid.querySelectorAll('.multi-select-option');
-            console.log('Program options found:', programOptions.length);
-
-            programOptions.forEach(option => {
-                option.addEventListener('click', function() {
-                    console.log('Program clicked:', this.getAttribute('data-value'));
-                    this.classList.toggle('selected');
-                    updateProgramSelection();
-                });
-            });
-        } else {
-            console.error('Program grid not found!');
-        }
-    }
-
-    function updateYearGroupSelection() {
-        const yearGroupGrid = document.getElementById('yearGroupGrid');
-        if (!yearGroupGrid) {
-            console.error('Year group grid not found for selection update!');
-            return;
-        }
-
-        const selectedOptions = yearGroupGrid.querySelectorAll('.multi-select-option.selected');
-        const yearGroups = Array.from(selectedOptions).map(opt => opt.getAttribute('data-value'));
-
-        console.log('Year groups selected:', yearGroups);
-
-        editYearGroup.value = yearGroups.join(',');
-        yearGroupCount.textContent = `${yearGroups.length} selected`;
-        checkFormChanges();
-    }
-
-    function updateProgramSelection() {
-        const programGrid = document.getElementById('programGrid');
-        if (!programGrid) {
-            console.error('Program grid not found for selection update!');
-            return;
-        }
-
-        const selectedOptions = programGrid.querySelectorAll('.multi-select-option.selected');
-        const programs = Array.from(selectedOptions).map(opt => opt.getAttribute('data-value'));
-
-        console.log('Programs selected:', programs);
-
-        editProgram.value = programs.join(',');
-        programCount.textContent = `${programs.length} selected`;
-        checkFormChanges();
-    }
-
-    function clearMultiSelectSelections() {
-        console.log('Clearing multi-select selections...');
-
-        // Clear year group selections
-        const yearGroupGrid = document.getElementById('yearGroupGrid');
-        if (yearGroupGrid) {
-            yearGroupGrid.querySelectorAll('.multi-select-option').forEach(option => {
-                option.classList.remove('selected');
-            });
-        }
-
-        // Clear program selections
-        const programGrid = document.getElementById('programGrid');
-        if (programGrid) {
-            programGrid.querySelectorAll('.multi-select-option').forEach(option => {
-                option.classList.remove('selected');
-            });
-        }
-
-        yearGroupCount.textContent = '0 selected';
-        programCount.textContent = '0 selected';
-        editYearGroup.value = '';
-        editProgram.value = '';
-    }
-
-    function setMultiSelectEnabled(enabled) {
-        console.log('Setting multi-select enabled:', enabled);
-
-        const yearGroupGrid = document.getElementById('yearGroupGrid');
-        const programGrid = document.getElementById('programGrid');
-
-        if (yearGroupGrid && programGrid) {
-            const allOptions = [
-                ...yearGroupGrid.querySelectorAll('.multi-select-option'),
-                ...programGrid.querySelectorAll('.multi-select-option')
-            ];
-
-            allOptions.forEach(option => {
-                if (enabled) {
-                    option.style.pointerEvents = 'auto';
-                    option.style.opacity = '1';
-                    option.style.cursor = 'pointer';
-                } else {
-                    option.style.pointerEvents = 'none';
-                    option.style.opacity = '0.6';
-                    option.style.cursor = 'not-allowed';
-                }
-            });
-        }
-    }
-
     // In the refreshTableData function - add cache buster
     function refreshTableData(shouldShowToast = false) {
         console.log('Refreshing teacher table data...');
@@ -556,65 +432,47 @@ document.addEventListener('DOMContentLoaded', function() {
         const teacherName = this.getAttribute('data-teacher-name');
         const teacherEmail = this.getAttribute('data-teacher-email');
         const teacherApproved = this.getAttribute('data-teacher-approved');
-        const yearGroup = this.getAttribute('data-year-group');
-        const program = this.getAttribute('data-program');
 
-        console.log('Teacher data:', { teacherId, teacherName, teacherEmail, teacherApproved, yearGroup, program });
+        console.log('Teacher data:', { teacherId, teacherName, teacherEmail, teacherApproved });
 
         // Populate basic form fields
         editTeacherId.value = teacherId;
         editName.value = teacherName;
         editEmail.value = teacherEmail;
 
-        // Clear previous selections
-        clearMultiSelectSelections();
-
-        // Handle multiple year groups
-        if (yearGroup && yearGroup !== '' && yearGroup !== 'null') {
-            const yearGroups = yearGroup.split(',').map(y => y.trim());
-            console.log('Setting year groups:', yearGroups);
-
-            const yearGroupGrid = document.getElementById('yearGroupGrid');
-            if (yearGroupGrid) {
-                yearGroupGrid.querySelectorAll('.multi-select-option').forEach(option => {
-                    const value = option.getAttribute('data-value');
-                    if (yearGroups.includes(value)) {
-                        option.classList.add('selected');
-                    }
-                });
-                updateYearGroupSelection();
-            }
-        }
-
-        // Handle multiple programs
-        if (program && program !== '') {
-            const programs = program.split(',').map(p => p.trim());
-            console.log('Setting programs:', programs);
-
-            const programGrid = document.getElementById('programGrid');
-            if (programGrid) {
-                programGrid.querySelectorAll('.multi-select-option').forEach(option => {
-                    const value = option.getAttribute('data-value');
-                    if (programs.includes(value)) {
-                        option.classList.add('selected');
-                    }
-                });
-                updateProgramSelection();
-            }
-        }
-
-        // Set approval status and enable/disable multi-select
+        // Set approval status
         const isApproved = teacherApproved === '1';
         editApproved.checked = isApproved;
-        setMultiSelectEnabled(isApproved);
+
+        // Fetch teacher's classes and populate the edit modal
+        fetch(`../php/get_teacher_classes.php?teacher_id=${teacherId}&bid=${browserInstanceId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Clear existing selections
+                    clearMultiSelectSelections();
+
+                    // Select classes this teacher is assigned to
+                    if (data.classes && data.classes.length > 0) {
+                        data.classes.forEach(classId => {
+                            const option = document.querySelector(`.multi-select-option[data-value="${classId}"]`);
+                            if (option) {
+                                option.classList.add('selected');
+                            }
+                        });
+                        updateSelectionCount();
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching teacher classes:', error);
+            });
 
         // Store original data for comparison
         originalFormData = {
             name: teacherName,
             email: teacherEmail,
-            is_approved: isApproved,
-            year_group: yearGroup || '',
-            program: program || ''
+            is_approved: isApproved
         };
 
         // Reset save button
@@ -646,16 +504,12 @@ document.addEventListener('DOMContentLoaded', function() {
         const currentData = {
             name: editName.value,
             email: editEmail.value,
-            is_approved: editApproved.checked,
-            year_group: currentYearGroups,
-            program: currentPrograms
+            is_approved: editApproved.checked
         };
 
         const hasChanges = currentData.name !== originalFormData.name ||
                           currentData.email !== originalFormData.email ||
-                          currentData.is_approved !== originalFormData.is_approved ||
-                          currentData.year_group !== originalFormData.year_group ||
-                          currentData.program !== originalFormData.program;
+                          currentData.is_approved !== originalFormData.is_approved;
 
         saveChangesBtn.disabled = !hasChanges;
     }
@@ -666,10 +520,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const formData = new FormData();
         const isApproved = editApproved.checked ? '1' : '0';
-
-        // Get selected year groups and programs
-        const selectedYearGroups = editYearGroup.value ? editYearGroup.value.split(',') : [];
-        const selectedPrograms = editProgram.value ? editProgram.value.split(',') : [];
 
         console.log('Selected Year Groups:', selectedYearGroups);
         console.log('Selected Programs:', selectedPrograms);
@@ -686,17 +536,6 @@ document.addEventListener('DOMContentLoaded', function() {
         for (let [key, value] of formData.entries()) {
             console.log(`${key}:`, value);
         }
-
-        // Append year groups and programs as arrays
-        selectedYearGroups.forEach(yearGroup => {
-            formData.append('year_group[]', yearGroup);
-            console.log('Appending year group:', yearGroup);
-        });
-
-        selectedPrograms.forEach(program => {
-            formData.append('program[]', program);
-            console.log('Appending program:', program);
-        });
 
         // Show loading state
         saveChangesBtn.disabled = true;
@@ -822,7 +661,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize everything
     function initializePage() {
         console.log('Initializing teacher accounts page...');
-        initializeMultiSelect();
         refreshTableData(false);
         attachEventListeners();
     }

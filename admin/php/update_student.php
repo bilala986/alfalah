@@ -11,36 +11,53 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['student_id'])) {
     $age = $_POST['age'] ?? null;
     $program = $_POST['program'] ?? '';
     $year_group = $_POST['year_group'] ?? '';
+    $class_id = $_POST['class_id'] ?? null;
     $teacher_id = $_POST['teacher_id'] ?? null;
     
     try {
         // Start transaction
         $pdo->beginTransaction();
         
-        // Update student with teacher assignment
+        // If class is assigned, get teacher from class if teacher_id is not provided
+        if (!empty($class_id) && empty($teacher_id)) {
+            $classStmt = $pdo->prepare("SELECT teacher_id FROM classes WHERE id = ?");
+            $classStmt->execute([$class_id]);
+            $class = $classStmt->fetch();
+            
+            if ($class && $class['teacher_id']) {
+                $teacher_id = $class['teacher_id'];
+            }
+        }
+        
+        // Update student with class and teacher assignment
         $stmt = $pdo->prepare("UPDATE students SET 
             student_first_name = ?,
             student_last_name = ?,
             student_age = ?,
             interested_program = ?,
             year_group = ?,
+            class_id = ?,
             teacher_id = ?,
             updated_at = CURRENT_TIMESTAMP
             WHERE id = ?");
-        $stmt->execute([$first_name, $last_name, $age, $program, $year_group, $teacher_id, $student_id]);
+        $stmt->execute([$first_name, $last_name, $age, $program, $year_group, $class_id, $teacher_id, $student_id]);
 
         // Commit operation
         $pdo->commit();
         
         $message = 'Student updated successfully';
+        if (!empty($class_id)) {
+            $message .= ' and assigned to class';
+        }
         if (!empty($teacher_id)) {
-            $message .= ' and teacher assigned';
+            $message .= ' with teacher assigned';
         }
         
         echo json_encode([
             'success' => true,
             'message' => $message,
-            'teacher_assigned' => (!empty($teacher_id))
+            'teacher_assigned' => (!empty($teacher_id)),
+            'class_assigned' => (!empty($class_id))
         ]);
         
     } catch (PDOException $e) {

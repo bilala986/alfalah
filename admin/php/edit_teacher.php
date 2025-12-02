@@ -1,5 +1,5 @@
 <?php
-// admin/php/edit_teacher.php - UPDATED FOR MULTIPLE YEAR GROUPS AND PROGRAMS
+// admin/php/edit_teacher.php - UPDATED FOR CLASSES INSTEAD OF YEAR GROUPS/PROGRAMS
 require_once 'admin_protect.php';
 require_once $_SERVER['DOCUMENT_ROOT'] . '/alfalah/php/db_connect.php';
 
@@ -17,36 +17,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = trim($_POST['name'] ?? '');
     $email = trim($_POST['email'] ?? '');
     
-    // Handle multiple year groups - FIXED: Check if array exists and is not empty
-    $year_groups = '';
-    if (isset($_POST['year_group']) && is_array($_POST['year_group']) && !empty($_POST['year_group'])) {
-        // Validate each year group
-        $valid_years = [];
-        foreach ($_POST['year_group'] as $year) {
-            $year_int = intval($year);
-            if ($year_int >= 1 && $year_int <= 11) {
-                $valid_years[] = $year_int;
+    // Handle classes assignment
+    $classes = [];
+    if (isset($_POST['classes']) && is_array($_POST['classes'])) {
+        // Validate each class exists
+        foreach ($_POST['classes'] as $class_id) {
+            $class_id_int = intval($class_id);
+            if ($class_id_int > 0) {
+                $classes[] = $class_id_int;
             }
         }
-        $year_groups = implode(',', $valid_years);
-    }
-    
-    // Handle multiple programs - FIXED: Check if array exists and is not empty
-    $programs = '';
-    if (isset($_POST['program']) && is_array($_POST['program']) && !empty($_POST['program'])) {
-        $valid_programs_list = [
-            'weekday_morning_hifdh',
-            'weekday_evening_hifdh', 
-            'weekend_evening_islamic_studies',
-            'weekend_hifdh',
-            'weekend_islamic_studies'
-        ];
-        
-        $filtered_programs = array_filter($_POST['program'], function($program) use ($valid_programs_list) {
-            return in_array($program, $valid_programs_list);
-        });
-        
-        $programs = implode(',', $filtered_programs);
     }
     
     // FIXED: Properly check checkbox value
@@ -73,24 +53,48 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit;
         }
         
-        // Update teacher with year_groups and programs
-        $stmt = $pdo->prepare("UPDATE teacher_users SET name = ?, email = ?, year_group = ?, program = ?, is_approved = ?, updated_at = NOW() WHERE id = ?");
-        $stmt->execute([$name, $email, $year_groups, $programs, $is_approved, $teacher_id]);
+        // Start transaction
+        $pdo->beginTransaction();
+        
+        // Update teacher basic info
+        $stmt = $pdo->prepare("UPDATE teacher_users SET name = ?, email = ?, is_approved = ?, updated_at = NOW() WHERE id = ?");
+        $stmt->execute([$name, $email, $is_approved, $teacher_id]);
+        
+        // Remove teacher from all current classes
+        $stmt = $pdo->prepare("UPDATE classes SET teacher_id = NULL WHERE teacher_id = ?");
+        $stmt->execute([$teacher_id]);
+        
+        // Assign teacher to selected classes
+        if (!empty($classes)) {
+            $placeholders = str_repeat('?,', count($classes) - 1) . '?';
+            $stmt = $pdo->prepare("UPDATE classes SET teacher_id = ? WHERE id IN ($placeholders)");
+            $stmt->execute(array_merge([$teacher_id], $classes));
+            
+            // Update students in these classes to have this teacher
+            $stmt = $pdo->prepare("UPDATE students SET teacher_id = ? WHERE class_id IN ($placeholders)");
+            $stmt->execute(array_merge([$teacher_id], $classes));
+        }
+        
+        // Commit transaction
+        $pdo->commit();
         
         // Log the update for debugging
-        error_log("Teacher updated - ID: $teacher_id, Year Groups: $year_groups, Programs: $programs");
+        error_log("Teacher updated - ID: $teacher_id, Classes: " . implode(',', $classes));
         
         echo json_encode([
             "success" => true, 
             "message" => "Teacher updated successfully",
             "data" => [
                 "is_approved" => $is_approved,
-                "year_group" => $year_groups,
-                "program" => $programs
+                "classes" => $classes
             ]
         ]);
         
     } catch (PDOException $e) {
+        // Rollback on error
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
         error_log("Edit teacher error: " . $e->getMessage());
         echo json_encode(["success" => false, "message" => "Database error: " . $e->getMessage()]);
     }

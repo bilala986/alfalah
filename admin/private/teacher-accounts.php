@@ -143,8 +143,7 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                                 <tr>
                                     <th>Name</th>
                                     <th>Email</th>
-                                    <th class="mobile-hide">Year Groups</th>
-                                    <th class="mobile-hide">Programs</th>
+                                    <th class="mobile-hide">Classes</th> <!-- CHANGED: From "Year Groups" to "Classes" -->
                                     <th class="mobile-hide">Last Login</th>
                                     <th>Status</th>
                                     <th>Actions</th>
@@ -153,7 +152,7 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                             <tbody id="teacherTableBody">
                                 <?php if (empty($teachers)): ?>
                                     <tr>
-                                        <td colspan="7" class="text-center text-muted py-4">No teacher accounts found.</td>
+                                        <td colspan="6" class="text-center text-muted py-4">No teacher accounts found.</td>
                                     </tr>
                                 <?php else: ?>
                                     <?php 
@@ -161,6 +160,12 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                                     $ukTimezone = new DateTimeZone('Europe/London');
                                     ?>
                                     <?php foreach ($teachers as $teacher): ?>
+                                    <?php
+                                    // Fetch classes for this teacher
+                                    $classStmt = $pdo->prepare("SELECT class_name FROM classes WHERE teacher_id = ? AND status = 'active' ORDER BY class_name");
+                                    $classStmt->execute([$teacher['id']]);
+                                    $teacher_classes = $classStmt->fetchAll();
+                                    ?>
                                     <tr data-name="<?= htmlspecialchars(strtolower($teacher['name'])) ?>" 
                                         data-email="<?= htmlspecialchars(strtolower($teacher['email'])) ?>" 
                                         data-status="<?= $teacher['is_approved'] ? 'approved' : 'pending' ?>"
@@ -168,31 +173,14 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                                         <td class="fw-semibold"><?= htmlspecialchars($teacher['name']) ?></td>
                                         <td><?= htmlspecialchars($teacher['email']) ?></td>
                                         <td class="mobile-hide">
-                                            <?php if (!empty($teacher['year_group'])): ?>
-                                                <div class="year-group-badges">
-                                                    <?php 
-                                                    $yearGroups = explode(',', $teacher['year_group']);
-                                                    foreach ($yearGroups as $year): ?>
-                                                        <span class="badge bg-primary me-1">Year <?= htmlspecialchars(trim($year)) ?></span>
+                                            <?php if (!empty($teacher_classes)): ?>
+                                                <div class="class-badges">
+                                                    <?php foreach ($teacher_classes as $class): ?>
+                                                        <span class="badge bg-info me-1 mb-1"><?= htmlspecialchars($class['class_name']) ?></span>
                                                     <?php endforeach; ?>
                                                 </div>
                                             <?php else: ?>
-                                                <span class="text-muted">Not set</span>
-                                            <?php endif; ?>
-                                        </td>
-                                        <td class="mobile-hide">
-                                            <?php if (!empty($teacher['program'])): ?>
-                                                <div class="program-badges">
-                                                    <?php 
-                                                    $programs = explode(',', $teacher['program']);
-                                                    foreach ($programs as $program): 
-                                                        $formattedProgram = formatProgramNames($program);
-                                                    ?>
-                                                        <span class="badge bg-info me-1 mb-1"><?= htmlspecialchars($formattedProgram) ?></span>
-                                                    <?php endforeach; ?>
-                                                </div>
-                                            <?php else: ?>
-                                                <span class="text-muted">Not set</span>
+                                                <span class="text-muted">No classes assigned</span>
                                             <?php endif; ?>
                                         </td>
                                         <td class="mobile-hide">
@@ -221,9 +209,7 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                                                         data-teacher-id="<?= $teacher['id'] ?>"
                                                         data-teacher-name="<?= htmlspecialchars($teacher['name']) ?>"
                                                         data-teacher-email="<?= htmlspecialchars($teacher['email']) ?>"
-                                                        data-teacher-approved="<?= $teacher['is_approved'] ?>"
-                                                        data-year-group="<?= $teacher['year_group'] ?? '' ?>"
-                                                        data-program="<?= $teacher['program'] ?? '' ?>">
+                                                        data-teacher-approved="<?= $teacher['is_approved'] ?>">
                                                     <i class="bi bi-pencil"></i> Edit
                                                 </button>
 
