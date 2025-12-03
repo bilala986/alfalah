@@ -60,9 +60,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt = $pdo->prepare("UPDATE teacher_users SET name = ?, email = ?, is_approved = ?, updated_at = NOW() WHERE id = ?");
         $stmt->execute([$name, $email, $is_approved, $teacher_id]);
         
+        // First, get list of classes this teacher is currently assigned to
+        $stmt = $pdo->prepare("SELECT id FROM classes WHERE teacher_id = ?");
+        $stmt->execute([$teacher_id]);
+        $current_classes = $stmt->fetchAll(PDO::FETCH_COLUMN, 0);
+        
         // Remove teacher from all current classes
         $stmt = $pdo->prepare("UPDATE classes SET teacher_id = NULL WHERE teacher_id = ?");
         $stmt->execute([$teacher_id]);
+        
+        // ALSO: Remove teacher assignment from students in those classes
+        if (!empty($current_classes)) {
+            $placeholders = str_repeat('?,', count($current_classes) - 1) . '?';
+            $stmt = $pdo->prepare("UPDATE students SET teacher_id = NULL WHERE class_id IN ($placeholders)");
+            $stmt->execute($current_classes);
+        }
         
         // Assign teacher to selected classes
         if (!empty($classes)) {
@@ -83,7 +95,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             "message" => "Teacher updated successfully",
             "data" => [
                 "is_approved" => $is_approved,
-                "classes" => $classes
+                "classes" => $classes,
+                "removed_from_classes" => $current_classes
             ]
         ]);
         

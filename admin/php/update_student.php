@@ -19,14 +19,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['student_id'])) {
         $pdo->beginTransaction();
         
         // If class is assigned, get teacher from class if teacher_id is not provided
-        if (!empty($class_id) && empty($teacher_id)) {
+        if (!empty($class_id)) {
             $classStmt = $pdo->prepare("SELECT teacher_id FROM classes WHERE id = ?");
             $classStmt->execute([$class_id]);
             $class = $classStmt->fetch();
-            
-            if ($class && $class['teacher_id']) {
-                $teacher_id = $class['teacher_id'];
-            }
+
+            // Set teacher_id from class (even if it's NULL - classes can have no teacher)
+            $teacher_id = $class ? $class['teacher_id'] : null;
+        } else {
+            // If no class is selected, student should not have a teacher
+            $teacher_id = null;
         }
         
         // Update student with class and teacher assignment

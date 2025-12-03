@@ -1,12 +1,11 @@
 // admin/js/teacher-accounts.js
 document.addEventListener('DOMContentLoaded', function() {
     
-    // TEMPORARY DEBUG - Add this at the very top of teacher-accounts.js
     console.log('=== TEACHER ACCOUNTS JS LOADED ===');
-    console.log('Script version: 2.0 - Year Groups Debug');
     
     // Helper function to escape HTML
     function escapeHtml(unsafe) {
+        if (!unsafe) return '';
         return unsafe
             .replace(/&/g, "&amp;")
             .replace(/</g, "&lt;")
@@ -20,11 +19,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const toastEl = document.getElementById('liveToast');
         const toastBody = toastEl.querySelector('.toast-body');
 
-        // Set toast type and message
         toastEl.className = `toast align-items-center ${type === 'success' ? 'bg-success' : 'bg-danger'}`;
         toastBody.textContent = message;
 
-        // Show toast
         const toast = new bootstrap.Toast(toastEl);
         toast.show();
     }
@@ -40,8 +37,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Modal elements
     const filterModal = new bootstrap.Modal(document.getElementById('filterModal'));
     const statusSelect = document.getElementById('statusSelect');
-    const yearGroupFilterSelect = document.getElementById('yearGroupFilterSelect');
-    const programFilterSelect = document.getElementById('programFilterSelect');
     const applyFilterBtn = document.getElementById('applyFilterBtn');
     const clearFilterBtn = document.getElementById('clearFilterBtn');
     
@@ -50,14 +45,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const editTeacherId = document.getElementById('editTeacherId');
     const editName = document.getElementById('editName');
     const editEmail = document.getElementById('editEmail');
-    const editYearGroup = document.getElementById('editYearGroup');
-    const editProgram = document.getElementById('editProgram');
     const editApproved = document.getElementById('editApproved');
     const saveChangesBtn = document.getElementById('saveChangesBtn');
-    
-    // Multi-select elements
-    const yearGroupCount = document.getElementById('yearGroupCount');
-    const programCount = document.getElementById('programCount');
     
     // Approve/Remove modal elements
     const approveModal = new bootstrap.Modal(document.getElementById('approveModal'));
@@ -71,19 +60,16 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Current filter state
     let currentStatusFilter = 'all';
-    let currentYearGroupFilter = 'all';
-    let currentProgramFilter = 'all';
     let originalFormData = {};
     let currentActionTeacherId = null;
 
     // Get all rows (will be updated on refresh)
     let rows = [];
 
-    // In the refreshTableData function - add cache buster
+    // Refresh table data
     function refreshTableData(shouldShowToast = false) {
         console.log('Refreshing teacher table data...');
 
-        // Show loading state
         teacherTableBody.innerHTML = `
             <tr>
                 <td colspan="7" class="text-center text-muted py-4">
@@ -93,12 +79,10 @@ document.addEventListener('DOMContentLoaded', function() {
             </tr>
         `;
 
-        // Add cache buster to prevent caching
         const timestamp = new Date().getTime();
         fetch(`../php/get_teachers.php?bid=${browserInstanceId}&_=${timestamp}`)
             .then(response => response.json())
             .then(data => {
-                console.log('Received data from server:', data);
                 if (data.success) {
                     updateTable(data.teachers);
                     if (shouldShowToast) {
@@ -132,47 +116,116 @@ document.addEventListener('DOMContentLoaded', function() {
             });
     }
     
-    // Function to load classes for the edit modal
-    function loadClassesForModal() {
+    // Initialize multi-select functionality
+    function initMultiSelect() {
+        const options = document.querySelectorAll('.multi-select-option');
+        options.forEach(option => {
+            option.addEventListener('click', function() {
+                this.classList.toggle('selected');
+                updateClassSelection();
+                checkFormChanges();
+            });
+        });
+        updateClassSelection();
+    }
+
+    // Update class selection count
+    function updateClassSelection() {
+        const selectedCount = document.querySelectorAll('.multi-select-option.selected').length;
+        const classCount = document.getElementById('classCount');
+        if (classCount) {
+            classCount.textContent = `${selectedCount} selected`;
+        }
+        
+        // Update hidden input with selected class IDs
+        const selectedClasses = Array.from(document.querySelectorAll('.multi-select-option.selected'))
+            .map(option => option.getAttribute('data-value'));
+
+        const editClassesInput = document.getElementById('editClasses');
+        if (editClassesInput) {
+            editClassesInput.value = selectedClasses.join(',');
+        }
+    }
+
+    // Clear all selections
+    function clearMultiSelectSelections() {
+        document.querySelectorAll('.multi-select-option.selected').forEach(option => {
+            option.classList.remove('selected');
+        });
+        updateClassSelection();
+    }
+    
+    // Enable/disable multi-select based on approval status
+    function setMultiSelectEnabled(enabled) {
         const classGrid = document.getElementById('classGrid');
         if (!classGrid) return;
 
-        classGrid.innerHTML = '<div class="text-center py-3"><div class="spinner-border spinner-border-sm" role="status"></div><span class="ms-2">Loading classes...</span></div>';
-
-        fetch(`../php/get_classes_for_dropdown.php?bid=${browserInstanceId}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    classGrid.innerHTML = '';
-
-                    data.classes.forEach(cls => {
-                        const option = document.createElement('div');
-                        option.className = 'multi-select-option';
-                        option.setAttribute('data-value', cls.id);
-                        option.innerHTML = `
-                            <div class="option-checkbox">
-                                <i class="bi bi-check-lg"></i>
-                            </div>
-                            <span class="option-label">${escapeHtml(cls.class_name)}</span>
-                        `;
-
-                        // Add click event
-                        option.addEventListener('click', function() {
-                            this.classList.toggle('selected');
-                            updateClassSelection();
-                        });
-
-                        classGrid.appendChild(option);
-                    });
-
-                    // Initialize multi-select functionality
-                    initMultiSelect();
-                }
-            })
-            .catch(error => {
-                console.error('Error loading classes:', error);
-                classGrid.innerHTML = '<div class="text-center text-danger py-3">Error loading classes</div>';
+        if (enabled) {
+            classGrid.classList.remove('disabled');
+            classGrid.querySelectorAll('.multi-select-option').forEach(option => {
+                option.style.pointerEvents = 'auto';
+                option.style.opacity = '1';
             });
+        } else {
+            classGrid.classList.add('disabled');
+            classGrid.querySelectorAll('.multi-select-option').forEach(option => {
+                option.style.pointerEvents = 'none';
+                option.style.opacity = '0.5';
+            });
+            clearMultiSelectSelections();
+        }
+    }
+    
+    // Function to load classes for the edit modal
+    function loadClassesForModal() {
+        return new Promise((resolve, reject) => {
+            const classGrid = document.getElementById('classGrid');
+            if (!classGrid) {
+                reject('Class grid element not found');
+                return;
+            }
+
+            classGrid.innerHTML = '<div class="text-center py-3"><div class="spinner-border spinner-border-sm" role="status"></div><span class="ms-2">Loading classes...</span></div>';
+
+            fetch(`../php/get_classes_for_dropdown.php?bid=${browserInstanceId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        classGrid.innerHTML = '';
+
+                        if (data.classes && data.classes.length > 0) {
+                            data.classes.forEach(cls => {
+                                const option = document.createElement('div');
+                                option.className = 'multi-select-option';
+                                option.setAttribute('data-value', cls.id);
+                                option.innerHTML = `
+                                    <div class="option-checkbox">
+                                        <i class="bi bi-check-lg"></i>
+                                    </div>
+                                    <span class="option-label">${escapeHtml(cls.class_name)}</span>
+                                `;
+                                classGrid.appendChild(option);
+                            });
+
+                            initMultiSelect();
+                            setMultiSelectEnabled(editApproved.checked);
+                            console.log('Loaded classes:', data.classes.length);
+                            resolve();
+                        } else {
+                            classGrid.innerHTML = '<div class="text-center text-muted py-3">No classes available</div>';
+                            resolve();
+                        }
+                    } else {
+                        classGrid.innerHTML = '<div class="text-center text-danger py-3">Error loading classes</div>';
+                        reject(data.message || 'Failed to load classes');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading classes:', error);
+                    classGrid.innerHTML = '<div class="text-center text-danger py-3">Error loading classes</div>';
+                    reject(error);
+                });
+        });
     }
     
     function formatUKDateTime(dateTimeString) {
@@ -189,28 +242,8 @@ document.addEventListener('DOMContentLoaded', function() {
             hour12: true
         });
     }
-    
-    // Helper function to format program names for display
-    function formatProgramNames(programValues) {
-        const programMap = {
-            'weekday_morning_hifdh': 'Weekday Morning Hifdh',
-            'weekday_evening_hifdh': 'Weekday Evening Hifdh',
-            'weekend_evening_islamic_studies': 'Weekend Evening Islamic Studies',
-            'weekend_hifdh': 'Weekend Hifdh',
-            'weekend_islamic_studies': 'Weekend Islamic Studies'
-        };
-        
-        if (!programValues) return 'Not set';
-        
-        const programs = programValues.split(',');
-        const formattedPrograms = programs.map(program => {
-            return programMap[program.trim()] || program.trim();
-        });
-        
-        return formattedPrograms.join(', ');
-    }
 
-    // In the updateTable function - make sure year groups are properly displayed
+    // Update table with teachers data
     function updateTable(teachers) {
         console.log('Updating table with teachers:', teachers);
         teacherTableBody.innerHTML = '';
@@ -290,21 +323,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Attach event listeners to dynamic buttons
     function attachEventListeners() {
-        // Edit buttons
         document.querySelectorAll('.edit-btn').forEach(button => {
-            button.removeEventListener('click', handleEditClick);
             button.addEventListener('click', handleEditClick);
         });
         
-        // Approve buttons
         document.querySelectorAll('.approve-btn').forEach(button => {
-            button.removeEventListener('click', handleApproveClick);
             button.addEventListener('click', handleApproveClick);
         });
         
-        // Remove buttons
         document.querySelectorAll('.remove-btn').forEach(button => {
-            button.removeEventListener('click', handleRemoveClick);
             button.addEventListener('click', handleRemoveClick);
         });
     }
@@ -318,29 +345,11 @@ document.addEventListener('DOMContentLoaded', function() {
             const name = row.getAttribute('data-name');
             const email = row.getAttribute('data-email');
             const status = row.getAttribute('data-status');
-            const yearGroup = row.getAttribute('data-year-group');
-            const program = row.getAttribute('data-program') || 'not_set';
 
             const matchesSearch = name.includes(searchTerm) || email.includes(searchTerm);
             const matchesStatus = currentStatusFilter === 'all' || status === currentStatusFilter;
-            
-            // For year group filtering, check if the year group string contains the filter value
-            let matchesYearGroup = currentYearGroupFilter === 'all';
-            if (currentYearGroupFilter === 'not_set') {
-                matchesYearGroup = yearGroup === 'not_set';
-            } else if (currentYearGroupFilter !== 'all') {
-                matchesYearGroup = yearGroup.includes(currentYearGroupFilter);
-            }
-            
-            // For program filtering, check if the program string contains the filter value
-            let matchesProgram = currentProgramFilter === 'all';
-            if (currentProgramFilter === 'not_set') {
-                matchesProgram = program === 'not_set';
-            } else if (currentProgramFilter !== 'all') {
-                matchesProgram = program.includes(currentProgramFilter);
-            }
 
-            if (matchesSearch && matchesStatus && matchesYearGroup && matchesProgram) {
+            if (matchesSearch && matchesStatus) {
                 row.style.display = '';
                 visibleRows++;
             } else {
@@ -348,11 +357,8 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
-        // Update visible count
         visibleCount.textContent = visibleRows;
-
-        // Update filter button appearance
-        const hasActiveFilter = currentStatusFilter !== 'all' || currentYearGroupFilter !== 'all' || currentProgramFilter !== 'all';
+        const hasActiveFilter = currentStatusFilter !== 'all';
         filterBtn.classList.toggle('btn-success', hasActiveFilter);
         filterBtn.classList.toggle('btn-outline-primary', !hasActiveFilter);
     }
@@ -362,75 +368,29 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Refresh functionality
     refreshBtn.addEventListener('click', function() {
-        const button = this;
-        const originalHTML = button.innerHTML;
-
-        // Show loading state on button only
-        button.disabled = true;
-        button.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Refreshing...';
-
-        // Add refresh animation to icon
-        const refreshIcon = button.querySelector('.spinner-border') || button.querySelector('i');
-        if (refreshIcon) {
-            refreshIcon.classList.add('refresh-spin');
-        }
-
-        fetch(`../php/get_teachers.php?bid=${browserInstanceId}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    updateTable(data.teachers);
-                    showToast('Teachers list refreshed successfully!', 'success');
-                } else {
-                    showToast('Error refreshing table', 'error');
-                }
-            })
-            .catch(error => {
-                console.error('Error refreshing table:', error);
-                showToast('Error refreshing table', 'error');
-            })
-            .finally(() => {
-                // Restore button state
-                setTimeout(() => {
-                    button.disabled = false;
-                    button.innerHTML = originalHTML;
-
-                    // Remove refresh animation
-                    if (refreshIcon) {
-                        refreshIcon.classList.remove('refresh-spin');
-                    }
-                }, 300);
-            });
+        refreshTableData(true);
     });
     
     // Filter modal functionality
     filterBtn.addEventListener('click', function() {
         statusSelect.value = currentStatusFilter;
-        yearGroupFilterSelect.value = currentYearGroupFilter;
-        programFilterSelect.value = currentProgramFilter;
         filterModal.show();
     });
 
     applyFilterBtn.addEventListener('click', function() {
         currentStatusFilter = statusSelect.value;
-        currentYearGroupFilter = yearGroupFilterSelect.value;
-        currentProgramFilter = programFilterSelect.value;
         filterTable();
         filterModal.hide();
     });
 
     clearFilterBtn.addEventListener('click', function() {
         currentStatusFilter = 'all';
-        currentYearGroupFilter = 'all';
-        currentProgramFilter = 'all';
         statusSelect.value = 'all';
-        yearGroupFilterSelect.value = 'all';
-        programFilterSelect.value = 'all';
         filterTable();
         filterModal.hide();
     });
 
-    // Edit teacher functionality - FIXED VERSION
+    // Edit teacher functionality
     function handleEditClick() {
         console.log('Edit button clicked');
 
@@ -450,39 +410,56 @@ document.addEventListener('DOMContentLoaded', function() {
         const isApproved = teacherApproved === '1';
         editApproved.checked = isApproved;
 
-        // Fetch teacher's classes and populate the edit modal
-        fetch(`../php/get_teacher_classes.php?teacher_id=${teacherId}&bid=${browserInstanceId}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Clear existing selections
-                    clearMultiSelectSelections();
-
-                    // Select classes this teacher is assigned to
-                    if (data.classes && data.classes.length > 0) {
-                        data.classes.forEach(classId => {
-                            const option = document.querySelector(`.multi-select-option[data-value="${classId}"]`);
-                            if (option) {
-                                option.classList.add('selected');
-                            }
-                        });
-                        updateSelectionCount();
-                    }
-                }
-            })
-            .catch(error => {
-                console.error('Error fetching teacher classes:', error);
-            });
-
-        // Store original data for comparison
-        originalFormData = {
-            name: teacherName,
-            email: teacherEmail,
-            is_approved: isApproved
-        };
+        // Set multi-select enabled/disabled based on approval
+        setMultiSelectEnabled(isApproved);
 
         // Reset save button
         saveChangesBtn.disabled = true;
+        saveChangesBtn.innerHTML = 'Save Changes';
+
+        // Clear existing form data
+        originalFormData = {
+            name: teacherName,
+            email: teacherEmail,
+            is_approved: isApproved,
+            classes: []
+        };
+
+        // Load classes and then fetch teacher's assigned classes
+        loadClassesForModal().then(() => {
+            // After classes are loaded, fetch teacher's assigned classes
+            fetch(`../php/get_teacher_classes.php?teacher_id=${teacherId}&bid=${browserInstanceId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Clear existing selections
+                        clearMultiSelectSelections();
+
+                        // Select classes this teacher is assigned to
+                        if (data.classes && data.classes.length > 0) {
+                            console.log('Selecting classes:', data.classes);
+                            data.classes.forEach(classId => {
+                                const option = document.querySelector(`.multi-select-option[data-value="${classId}"]`);
+                                if (option) {
+                                    option.classList.add('selected');
+                                }
+                            });
+                            updateClassSelection();
+                            
+                            // Update original form data with classes
+                            originalFormData.classes = data.classes.sort();
+                        }
+                        
+                        // Update form change detection
+                        checkFormChanges();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching teacher classes:', error);
+                });
+        }).catch(error => {
+            console.error('Error loading classes:', error);
+        });
 
         // Show the modal
         console.log('Showing edit modal');
@@ -490,54 +467,72 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Form change detection
-    [editName, editEmail].forEach(element => {
-        element.addEventListener('input', checkFormChanges);
-    });
-
+    editName.addEventListener('input', checkFormChanges);
+    editEmail.addEventListener('input', checkFormChanges);
     editApproved.addEventListener('change', function() {
+        // Enable/disable multi-select based on approval status
         setMultiSelectEnabled(this.checked);
-        if (!this.checked) {
-            clearMultiSelectSelections();
-        }
         checkFormChanges();
     });
 
     // Check form changes
     function checkFormChanges() {
-        const currentYearGroups = editYearGroup.value;
-        const currentPrograms = editProgram.value;
+        // Get selected classes
+        const selectedClasses = Array.from(document.querySelectorAll('.multi-select-option.selected'))
+            .map(option => option.getAttribute('data-value'))
+            .sort();
 
+        // Get current form values
         const currentData = {
-            name: editName.value,
-            email: editEmail.value,
-            is_approved: editApproved.checked
+            name: editName.value.trim(),
+            email: editEmail.value.trim(),
+            is_approved: editApproved.checked,
+            classes: selectedClasses
         };
 
-        const hasChanges = currentData.name !== originalFormData.name ||
-                          currentData.email !== originalFormData.email ||
-                          currentData.is_approved !== originalFormData.is_approved;
+        // Compare with original data
+        const hasChanges = 
+            currentData.name !== originalFormData.name ||
+            currentData.email !== originalFormData.email ||
+            currentData.is_approved !== originalFormData.is_approved ||
+            JSON.stringify(currentData.classes) !== JSON.stringify(originalFormData.classes);
+
+        console.log('Form changes check:', {
+            currentData,
+            originalFormData,
+            hasChanges
+        });
 
         saveChangesBtn.disabled = !hasChanges;
     }
 
-    // In the save teacher changes function - add more detailed debugging
+    // Save teacher changes
     saveChangesBtn.addEventListener('click', function() {
         console.log('=== SAVE TEACHER DEBUG ===');
 
+        // Validate form
+        if (!editName.value.trim() || !editEmail.value.trim()) {
+            showToast('Name and email are required', 'error');
+            return;
+        }
+
+        // Collect selected class IDs
+        const selectedClasses = Array.from(document.querySelectorAll('.multi-select-option.selected'))
+            .map(option => option.getAttribute('data-value'));
+
+        console.log('Selected classes:', selectedClasses);
+
         const formData = new FormData();
-        const isApproved = editApproved.checked ? '1' : '0';
-
-        console.log('Selected Year Groups:', selectedYearGroups);
-        console.log('Selected Programs:', selectedPrograms);
-        console.log('Year Group Input Value:', editYearGroup.value);
-        console.log('Program Input Value:', editProgram.value);
-
         formData.append('teacher_id', editTeacherId.value);
-        formData.append('name', editName.value);
-        formData.append('email', editEmail.value);
-        formData.append('is_approved', isApproved);
+        formData.append('name', editName.value.trim());
+        formData.append('email', editEmail.value.trim());
+        formData.append('is_approved', editApproved.checked ? '1' : '0');
+        
+        // Add each class individually
+        selectedClasses.forEach(classId => {
+            formData.append('classes[]', classId);
+        });
 
-        // Debug: Check what's being appended to FormData
         console.log('FormData contents:');
         for (let [key, value] of formData.entries()) {
             console.log(`${key}:`, value);
@@ -560,13 +555,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 refreshTableData(false);
             } else {
                 showToast('Error: ' + data.message, 'error');
+                saveChangesBtn.disabled = false;
+                saveChangesBtn.innerHTML = 'Save Changes';
             }
         })
         .catch(error => {
             console.error('Fetch error details:', error);
-            showToast('Error updating teacher: ' + error.message, 'error');
-        })
-        .finally(() => {
+            showToast('Error updating teacher', 'error');
             saveChangesBtn.disabled = false;
             saveChangesBtn.innerHTML = 'Save Changes';
         });
@@ -663,17 +658,29 @@ document.addEventListener('DOMContentLoaded', function() {
             currentActionTeacherId = null;
         });
     });
+    
+    // When edit modal is hidden, clear selections
+    document.getElementById('editModal').addEventListener('hidden.bs.modal', function() {
+        // Re-enable multi-select when modal closes (for next time)
+        setMultiSelectEnabled(true);
+        clearMultiSelectSelections();
+        originalFormData = {};
+    });
 
-    // Initialize everything
+    // When edit modal is hidden, clear selections
+    document.getElementById('editModal').addEventListener('hidden.bs.modal', function() {
+        clearMultiSelectSelections();
+        originalFormData = {};
+    });
+
+    // Initialize page
     function initializePage() {
         console.log('Initializing teacher accounts page...');
         refreshTableData(false);
-        attachEventListeners();
     }
 
     // Start the page
     initializePage();
     
-    // Debug: Check if variables are properly set
     console.log('Teacher accounts page initialized - Browser Instance ID:', browserInstanceId);
 });

@@ -52,6 +52,40 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Get all rows
     let rows = studentsTableBody.querySelectorAll('tr[data-student]');
+    
+    // Add after the edit modal initialization (around line 50):
+    const editClassSelect = document.getElementById('editClass');
+    const editTeacherSelect = document.getElementById('editTeacher');
+    const editTeacherHidden = document.getElementById('editTeacherHidden');
+
+    if (editClassSelect) {
+        editClassSelect.addEventListener('change', function() {
+            const classId = this.value;
+
+            if (classId) {
+                // Fetch teacher for this class
+                fetch(`../php/get_class_teacher.php?class_id=${classId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success && data.teacher_id) {
+                            editTeacherSelect.value = data.teacher_id;
+                            editTeacherHidden.value = data.teacher_id;
+                        } else {
+                            editTeacherSelect.value = '';
+                            editTeacherHidden.value = '';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching class teacher:', error);
+                        editTeacherSelect.value = '';
+                        editTeacherHidden.value = '';
+                    });
+            } else {
+                editTeacherSelect.value = '';
+                editTeacherHidden.value = '';
+            }
+        });
+    }
 
     // Enhanced search function with filtering
     function searchAndFilterStudents(searchTerm) {
@@ -222,7 +256,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <td>
                     ${student.teacher_name ? escapeHtml(student.teacher_name) : '<span class="text-muted">Unassigned</span>'}
                 </td>
-                <td> <!-- ADDED CLASS COLUMN -->
+                <td>
                     ${classBadge}
                 </td>
                 <td>
@@ -237,7 +271,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 data-student-id="${student.id}"
                                 data-student-name="${escapeHtml(student.student_first_name + ' ' + student.student_last_name)}"
                                 data-teacher-id="${student.teacher_id || ''}"
-                                data-class-id="${student.class_id || ''}"> <!-- Added class_id -->
+                                data-class-id="${student.class_id || ''}">
                             <i class="bi bi-pencil"></i> Edit
                         </button>
                         <button type="button" 
@@ -677,7 +711,17 @@ document.addEventListener('DOMContentLoaded', function() {
                     document.getElementById('editAge').value = student.student_age || '';
                     document.getElementById('editProgram').value = student.interested_program || '';
                     document.getElementById('editYearGroup').value = student.year_group || '';
-                    document.getElementById('editTeacher').value = student.teacher_id || '';
+
+                    // Teacher is read-only - will be set based on class selection
+                    const teacherSelect = document.getElementById('editTeacher');
+                    const teacherHidden = document.getElementById('editTeacherHidden');
+                    if (student.teacher_id && student.teacher_name) {
+                        teacherSelect.value = student.teacher_id;
+                        teacherHidden.value = student.teacher_id;
+                    } else {
+                        teacherSelect.value = '';
+                        teacherHidden.value = '';
+                    }
 
                     // Store student data for later use
                     const currentStudentClassId = student.class_id;

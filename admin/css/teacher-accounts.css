@@ -323,3 +323,13 @@
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
+
+.multi-select-card.disabled {
+    background-color: #f8f9fa;
+    border-color: #dee2e6;
+}
+
+.multi-select-card.disabled .multi-select-option {
+    pointer-events: none;
+    opacity: 0.5;
+}
