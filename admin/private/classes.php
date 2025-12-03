@@ -359,9 +359,16 @@ ALTER TABLE students ADD FOREIGN KEY (class_id) REFERENCES classes(id) ON DELETE
                                                         data-class-name="<?= htmlspecialchars($class['class_name']) ?>"
                                                         data-year-group="<?= htmlspecialchars($class['year_group']) ?>"
                                                         data-program="<?= htmlspecialchars($class['program'] ?? '') ?>"
-                                                        data-gender="<?= htmlspecialchars($class['gender'] ?? 'Mixed') ?>"
+                                                        data-gender="<?= htmlspecialchars($class['gender'] ?? 'Male') ?>"
                                                         data-teacher-id="<?= $class['teacher_id'] ?? '' ?>">
                                                     <i class="bi bi-pencil"></i> Edit
+                                                </button>
+                                                <button type="button" 
+                                                        class="btn btn-outline-danger remove-class-btn"
+                                                        data-class-id="<?= $class['class_id'] ?>"
+                                                        data-class-name="<?= htmlspecialchars($class['class_name']) ?>"
+                                                        data-student-count="<?= $class['student_count'] ?>">
+                                                    <i class="bi bi-trash"></i> Remove
                                                 </button>
                                             </div>
                                         </td>
@@ -505,7 +512,6 @@ ALTER TABLE students ADD FOREIGN KEY (class_id) REFERENCES classes(id) ON DELETE
                                     <option value="">Select Gender</option>
                                     <option value="Male">Male</option>
                                     <option value="Female">Female</option>
-                                    <option value="Mixed">Mixed</option>
                                 </select>
                             </div>
 
@@ -599,7 +605,6 @@ ALTER TABLE students ADD FOREIGN KEY (class_id) REFERENCES classes(id) ON DELETE
                                     <option value="">Select Gender</option>
                                     <option value="Male">Male</option>
                                     <option value="Female">Female</option>
-                                    <option value="Mixed">Mixed</option>
                                 </select>
                             </div>
 
@@ -623,6 +628,33 @@ ALTER TABLE students ADD FOREIGN KEY (class_id) REFERENCES classes(id) ON DELETE
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                         <button type="button" id="confirmEditClass" class="btn btn-primary">Update Class</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Remove Confirmation Modal -->
+        <div class="modal fade" id="removeClassModal" tabindex="-1" aria-labelledby="removeClassModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="removeClassModalLabel">Confirm Class Removal</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Are you sure you want to remove the class: <strong id="removeClassName"></strong>?</p>
+                        <div class="alert alert-warning">
+                            <i class="bi bi-exclamation-triangle"></i> <strong>Warning:</strong>
+                            <ul class="mb-0 mt-2">
+                                <li>All students in this class will have their class assignment removed</li>
+                                <li>Teachers assigned to this class will have it removed from their profile</li>
+                                <li>This action cannot be undone</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" id="confirmRemoveClass" class="btn btn-danger">Remove Class</button>
                     </div>
                 </div>
             </div>

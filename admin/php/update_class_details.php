@@ -10,7 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $class_name = trim($_POST['class_name'] ?? '');
     $year_group = trim($_POST['year_group'] ?? '');
     $program = trim($_POST['program'] ?? '');
-    $gender = trim($_POST['gender'] ?? 'Mixed');
+    $gender = trim($_POST['gender'] ?? 'Male');
     $teacher_id = !empty($_POST['teacher_id']) ? intval($_POST['teacher_id']) : null;
     
     // Validate required fields

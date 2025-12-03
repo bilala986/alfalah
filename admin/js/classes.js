@@ -67,6 +67,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const editClassTeacher = document.getElementById('editClassTeacher');
     const editClassId = document.getElementById('editClassId');
     const confirmEditClass = document.getElementById('confirmEditClass');
+    
+    // Remove class modal elements
+    const removeClassModal = new bootstrap.Modal(document.getElementById('removeClassModal'));
+    const removeClassName = document.getElementById('removeClassName');
+    const confirmRemoveClass = document.getElementById('confirmRemoveClass');
+    let currentClassToRemove = null;
 
     // Current filter state
     let currentYearGroupFilter = 'all';
@@ -253,7 +259,7 @@ document.addEventListener('DOMContentLoaded', function() {
             row.setAttribute('data-class-name', (cls.class_name || '').toLowerCase());
             row.setAttribute('data-program', (cls.program || '').toLowerCase());
             row.setAttribute('data-year-group', (cls.year_group || '').toLowerCase());
-            row.setAttribute('data-gender', (cls.gender || 'Mixed').toLowerCase());
+            row.setAttribute('data-gender', (cls.gender || 'Male'));
             row.setAttribute('data-teacher', (cls.teacher_name || 'Unassigned').toLowerCase());
             row.setAttribute('data-teacher-id', cls.teacher_id || '');
             row.setAttribute('data-students', (cls.student_names || '').toLowerCase());
@@ -300,9 +306,16 @@ document.addEventListener('DOMContentLoaded', function() {
                                 data-class-name="${escapeHtml(cls.class_name)}"
                                 data-year-group="${escapeHtml(cls.year_group)}"
                                 data-program="${escapeHtml(cls.program || '')}"
-                                data-gender="${escapeHtml(cls.gender || 'Mixed')}"
+                                data-gender="${escapeHtml(cls.gender || 'Male')}"
                                 data-teacher-id="${cls.teacher_id || ''}">
                             <i class="bi bi-pencil"></i> Edit
+                        </button>
+                        <button type="button" 
+                                class="btn btn-outline-danger remove-class-btn"
+                                data-class-id="${cls.class_id}"
+                                data-class-name="${escapeHtml(cls.class_name)}"
+                                data-student-count="${cls.student_count || 0}">
+                            <i class="bi bi-trash"></i> Remove
                         </button>
                     </div>
                 </td>
@@ -356,15 +369,13 @@ document.addEventListener('DOMContentLoaded', function() {
             editClassYearGroup.value = yearGroup;
             editClassProgram.value = program;
             
-            // FIX 2: Set the gender correctly (case-sensitive match)
+            // Set the gender correctly
             if (gender) {
-                // Convert to proper case for the select option
-                const genderValue = gender.charAt(0).toUpperCase() + gender.slice(1).toLowerCase();
-                editClassGender.value = genderValue;
-                console.log('Setting gender to:', genderValue);
+                // gender should now be 'Male' or 'Female' (not lowercase)
+                editClassGender.value = gender;
+                console.log('Setting gender to:', gender);
             } else {
-                editClassGender.value = 'Mixed';
-                console.log('Gender not found, defaulting to Mixed');
+                editClassGender.value = 'Male'; // Default to Male
             }
             
             editClassTeacher.value = teacherId || '';
@@ -375,6 +386,69 @@ document.addEventListener('DOMContentLoaded', function() {
             // Show the modal
             editClassModal.show();
         }
+    });
+    
+    // Remove button event delegation
+    classesTableBody.addEventListener('click', function(event) {
+        // Check if the clicked element is a remove button or inside a remove button
+        const removeButton = event.target.closest('.remove-class-btn');
+
+        if (removeButton) {
+            event.preventDefault();
+            event.stopPropagation();
+
+            const classId = removeButton.getAttribute('data-class-id');
+            const className = removeButton.getAttribute('data-class-name');
+            const studentCount = removeButton.getAttribute('data-student-count');
+
+            console.log('Remove button clicked:', { classId, className, studentCount });
+
+            // Store the class to remove
+            currentClassToRemove = classId;
+
+            // Update modal text
+            removeClassName.textContent = `${className} (${studentCount} students)`;
+
+            // Show the modal
+            removeClassModal.show();
+        }
+    });
+    
+    // Confirm remove class
+    confirmRemoveClass.addEventListener('click', function() {
+        if (!currentClassToRemove) return;
+
+        const button = this;
+        button.disabled = true;
+        button.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Removing...';
+
+        const formData = new FormData();
+        formData.append('class_id', currentClassToRemove);
+
+        fetch('../php/remove_class.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                removeClassModal.hide();
+                showToast('Class removed successfully!', 'success');
+                refreshTableData(false);
+            } else {
+                showToast('Error: ' + data.message, 'error');
+            }
+            currentClassToRemove = null;
+        })
+        .catch(error => {
+            console.error('Remove class error:', error);
+            showToast('Error removing class', 'error');
+            currentClassToRemove = null;
+        })
+        .finally(() => {
+            button.disabled = false;
+            button.innerHTML = 'Remove Class';
+        });
     });
 
     // Search functionality
