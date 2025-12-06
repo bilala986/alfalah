@@ -1,63 +1,193 @@
-/* ====== PAGE HEADER SECTION ====== */
-.admissions-header {
-    position: relative;
+/* ===== NAVBAR STYLING (EXACTLY like contact page) ===== */
+.navbar-custom {
+    background: linear-gradient(135deg, #198754 0%, #28a745 50%, #38b27c 100%);
+    padding: 1rem 0;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1000;
+}
+
+.navbar-custom .navbar-brand {
     color: white;
-    padding: 90px 0;
-    text-align: center;
-    background: linear-gradient(135deg, #0e8a4a, #066b35);
+}
+
+.navbar-custom .nav-link {
+    color: rgba(255, 255, 255, 0.9) !important;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    transition: all 0.3s ease;
+    border-radius: 0.5rem;
+    margin: 0 0.25rem;
+}
+
+.navbar-custom .nav-link:hover {
+    color: white !important;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.navbar-custom .nav-link.active {
+    color: white !important;
+    font-weight: 700;
+    background-color: rgba(255, 255, 255, 0.15);
+}
+
+.navbar-custom .navbar-toggler {
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.navbar-custom .navbar-toggler-icon {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.9%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}
+
+/* Dropdown styling */
+.navbar-custom .dropdown-menu {
+    background: white;
+    border: none;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    border-radius: 0.75rem;
+    margin-top: 0.5rem;
+}
+
+.navbar-custom .dropdown-item {
+    padding: 0.75rem 1rem;
+    color: #333;
+    transition: all 0.3s ease;
+}
+
+.navbar-custom .dropdown-item:hover {
+    background-color: rgba(25, 135, 84, 0.1);
+    color: #198754;
+}
+
+.navbar-custom .dropdown-arrow {
+    font-size: 0.8rem;
+    transition: transform 0.3s ease;
+}
+
+.navbar-custom .dropdown-toggle.show .dropdown-arrow {
+    transform: rotate(180deg);
+}
+
+/* ===== ADMISSIONS HERO SECTION (EXACTLY like contact page) ===== */
+.admissions-hero-section {
+    position: relative;
+    min-height: 50vh;
+    background: linear-gradient(135deg, #198754 0%, #28a745 50%, #38b27c 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
     overflow: hidden;
+    padding: 4rem 0;
+    margin-top: 70px; /* Account for fixed navbar */
 }
 
-/* --- Decorative Islamic geometric pattern overlay --- */
-.admissions-header::before {
-    content: "";
+.hero-content {
+    position: relative;
+    z-index: 3;
+    text-align: center;
+    color: white;
+}
+
+.hero-badge {
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    padding: 0.5rem 1.25rem;
+    border-radius: 50px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    animation: fadeInUp 0.8s ease-out;
+    transition: all 0.3s ease;
+}
+
+.hero-badge:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+}
+
+.hero-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    animation: fadeInUp 0.8s ease-out 0.2s both;
+}
+
+.hero-subtitle {
+    font-size: 1.1rem;
+    margin-bottom: 0;
+    opacity: 0.9;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+    animation: fadeInUp 0.8s ease-out 0.4s both;
+    line-height: 1.6;
+}
+
+.warning-text {
+    display: inline-block;
+    color: #ffd966;
+    font-weight: 600;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    margin-top: 1rem;
+    font-size: 0.95rem;
+}
+
+/* Remove scroll indicator */
+.hero-scroll-indicator {
+    display: none;
+}
+
+/* Hero Background Shapes */
+.hero-background {
     position: absolute;
-    inset: 0;
-    background-image: url('https://www.toptal.com/designers/subtlepatterns/uploads/moroccan-flower-dark.png');
-    opacity: 0.13;
-    mix-blend-mode: overlay;
-    pointer-events: none;
-}
-
-/* --- Soft glow vignette for luxury feel --- */
-.admissions-header::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(circle at center, rgba(255,255,255,0.15), transparent 70%);
-    pointer-events: none;
-}
-
-/* --- Elegant text styling --- */
-.admissions-header h1 {
-    font-size: 3.2rem;
-    font-weight: 800;
-    letter-spacing: 1px;
-    text-shadow: 0 3px 8px rgba(0,0,0,0.25);
-    margin-bottom: 10px;
-}
-
-.admissions-header p {
-    font-size: 1.25rem;
-    opacity: 0.95;
-    max-width: 750px;
-    margin: 0 auto;
-    text-shadow: 0 2px 6px rgba(0,0,0,0.2);
-}
-
-/* --- Decorative wave at bottom --- */
-.admissions-header .wave {
-    position: absolute;
-    bottom: -1px;
+    top: 0;
     left: 0;
     width: 100%;
-    height: 80px;
-    background: url('https://raw.githubusercontent.com/emmabostian/wave-component/master/wave.svg');
-    background-size: cover;
-    opacity: 0.55;
+    height: 100%;
+    z-index: 1;
 }
 
-/* ====== FORM CARD ====== */
+.hero-shape-1 {
+    position: absolute;
+    top: 20%;
+    right: 10%;
+    width: 120px;
+    height: 120px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    animation: float 6s ease-in-out infinite;
+}
+
+.hero-shape-2 {
+    position: absolute;
+    bottom: 30%;
+    left: 8%;
+    width: 80px;
+    height: 80px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+    animation: float 8s ease-in-out infinite reverse;
+}
+
+.hero-shape-3 {
+    position: absolute;
+    top: 60%;
+    left: 60%;
+    width: 100px;
+    height: 100px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 40% 60% 60% 40% / 40% 40% 60% 60%;
+    animation: rotate 15s linear infinite;
+}
+
+/* ===== KEEPING YOUR ORIGINAL FORM STYLING ===== */
 .form-card {
     background: white;
     border-radius: 18px;
@@ -79,7 +209,6 @@
     font-size: 1.5rem;
 }
     
-/* ====== INPUTS ====== */
 .form-control, .form-select {
     border-radius: 8px;
     padding: 12px 14px;
@@ -91,8 +220,6 @@
     box-shadow: 0 0 5px rgba(11, 125, 65, 0.4);
 }
 
-/* ====== SUBMIT BUTTON ====== */
-/* Modern, glossy gradient button */
 .btn-submit {
   position: relative;
   display: inline-block;
@@ -135,9 +262,123 @@
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
 }
     
-/* ====== DIVIDER ====== */
 .form-divider {
     margin: 40px 0;
     height: 2px;
     background: linear-gradient(to right, transparent, #0e8a4a, transparent);
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-20px);
+    }
+}
+
+@keyframes rotate {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 768px) {
+    .admissions-hero-section {
+        min-height: 40vh;
+        padding: 3rem 0;
+        margin-top: 60px;
+    }
+    
+    .hero-title {
+        font-size: 2rem;
+    }
+    
+    .hero-subtitle {
+        font-size: 1rem;
+    }
+    
+    .hero-badge {
+        font-size: 0.8rem;
+        padding: 0.4rem 1rem;
+    }
+    
+    .warning-text {
+        font-size: 0.85rem;
+        padding: 0.4rem 0.8rem;
+    }
+    
+    .hero-shape-1 {
+        width: 80px;
+        height: 80px;
+        right: 5%;
+    }
+    
+    .hero-shape-2 {
+        width: 60px;
+        height: 60px;
+        left: 5%;
+    }
+    
+    .hero-shape-3 {
+        width: 70px;
+        height: 70px;
+    }
+    
+    .form-card {
+        padding: 2rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .admissions-hero-section {
+        min-height: 35vh;
+        padding: 2.5rem 0;
+        margin-top: 60px;
+    }
+    
+    .hero-title {
+        font-size: 1.75rem;
+    }
+    
+    .hero-subtitle {
+        font-size: 0.9rem;
+    }
+    
+    .hero-badge {
+        font-size: 0.75rem;
+        padding: 0.35rem 0.9rem;
+        margin-bottom: 1rem;
+    }
+    
+    .warning-text {
+        font-size: 0.8rem;
+        padding: 0.35rem 0.7rem;
+    }
+    
+    .hero-shape-1,
+    .hero-shape-2,
+    .hero-shape-3 {
+        display: none;
+    }
+    
+    .form-card {
+        padding: 1.5rem;
+    }
 }

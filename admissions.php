@@ -16,50 +16,87 @@
     </head>
 
     <body class="bg-light">
-        <!-- Navbar -->
-        <nav class="navbar navbar-expand-lg navbar-custom">
+        <!-- Navbar (EXACTLY like contact page) -->
+        <nav class="navbar navbar-expand-lg navbar-custom fixed-top">
             <div class="container">
+                <!-- Brand Logo -->
                 <a class="navbar-brand d-flex align-items-center" href="index.html">
-                    <img src="img/logo.png" alt="Al Falah Logo" height="50" class="me-2" />
+                    <img src="img/logo.png" alt="Al Falah Logo" height="50" class="me-2">
                 </a>
 
+                <!-- Toggler -->
                 <button
-                  class="navbar-toggler"
-                  type="button"
-                  data-bs-toggle="collapse"
-                  data-bs-target="#navbarNav"
-                >
+                        class="navbar-toggler"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#navbarNav"
+                        aria-controls="navbarNav"
+                        aria-expanded="false"
+                        aria-label="Toggle navigation"
+                        >
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
+                <!-- Nav Links -->
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav ms-auto">
-                        <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#">Curriculum</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#">Hifdh</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#">Fees</a></li>
                         <li class="nav-item">
-                            <a class="nav-link active" href="admissions.php">Admissions</a>
+                            <a class="nav-link" href="index.html">Home</a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Our Madrassah <i class="bi bi-chevron-down dropdown-arrow"></i>
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="#">About Us</a></li>
+                                <li><a class="dropdown-item" href="#">Calendar</a></li>
+                                <li><a class="dropdown-item" href="#">Curriculum</a></li>
+                            </ul>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Newsletters</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="donations.html">Donations</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active fw-bold" href="admissions.php">Admissions</a>
                         </li>
                     </ul>
                 </div>
             </div>
         </nav>
 
-        <!-- HEADER SECTION -->
-        <section class="admissions-header">
-            <div class="header-card">
-                <h1>Madrasah Admissions</h1>
-                <p>
-                    Submit your application below. A member of our staff will contact you shortly.<br>
-                    <strong class="text-warning">
-                        Please note: Submitting this form does NOT guarantee admission.
-                    </strong>
-                </p>
+        <!-- Admissions Hero Section (EXACTLY like contact page structure) -->
+        <section class="admissions-hero-section">
+            <div class="hero-content">
+                <div class="container">
+                    <div class="row justify-content-center text-center">
+                        <div class="col-lg-8">
+                            <a href="#contact-form">
+                                <div class="hero-badge text-white">Apply Now</div>
+                            </a>
+                            <h1 class="hero-title">Madrasah Admissions</h1>
+                            <p class="hero-subtitle">
+                                Submit your application below. A member of our staff will contact you shortly.
+                                <br>
+                                <span class="warning-text">
+                                    <strong>Please note:</strong> Submitting this form does NOT guarantee admission.
+                                </span>
+                            </p>
+                            <div class="hero-scroll-indicator">
+                                <i class="bi bi-chevron-down"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-background">
+                <div class="hero-shape-1"></div>
+                <div class="hero-shape-2"></div>
+                <div class="hero-shape-3"></div>
             </div>
         </section>
-
-
 
         <!-- ADMISSIONS FORM -->
         <section class="py-5">
