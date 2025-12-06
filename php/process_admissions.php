@@ -32,13 +32,13 @@ require_once __DIR__ . '/db_connect.php';
 // Check if it's a POST request
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     http_response_code(405);
-    die("Method not allowed.");
+    sendError("Method not allowed.");
 }
 
 // Check content type
 if (isset($_SERVER['CONTENT_TYPE']) && stripos($_SERVER['CONTENT_TYPE'], 'application/x-www-form-urlencoded') === false) {
     http_response_code(415);
-    die("Unsupported media type.");
+    sendError("Unsupported media type.");
 }
 
 // Rate limiting - simple implementation
@@ -55,7 +55,37 @@ if ($currentTime - $lastSubmissionTime > 3600) {
 // Allow maximum 5 submissions per hour
 if ($submissionCount >= 5) {
     http_response_code(429);
-    die("Too many submissions. Please try again later.");
+    sendError("Too many submissions. Please try again later.");
+}
+
+// -----------------------------
+//  HELPER FUNCTIONS
+// -----------------------------
+
+function sendError($message, $field = null) {
+    $response = [
+        'success' => false,
+        'error' => $message
+    ];
+    
+    if ($field !== null) {
+        $response['field'] = $field;
+    }
+    
+    header('Content-Type: application/json');
+    echo json_encode($response);
+    exit;
+}
+
+function sendSuccess() {
+    $response = [
+        'success' => true,
+        'redirect' => '/alfalah/admission-success.php'
+    ];
+    
+    header('Content-Type: application/json');
+    echo json_encode($response);
+    exit;
 }
 
 // -----------------------------
@@ -186,16 +216,14 @@ foreach ($validationRules as $field => $type) {
     ];
     
     if (in_array($field, $requiredFields) && empty($input)) {
-        http_response_code(400);
-        die("Required field missing: $field");
+        sendError("Required field missing: $field", $field);
     }
     
     $data[$field] = sanitizeInput($input, $type);
     
     // Additional validation for specific fields
     if (in_array($field, $requiredFields) && $data[$field] === null) {
-        http_response_code(400);
-        die("Invalid data in field: $field");
+        sendError("Invalid data in field: $field", $field);
     }
 }
 
@@ -206,8 +234,7 @@ if (!empty($data['student_dob']) && !empty($data['student_age'])) {
     $calculatedAge = $today->diff($dob)->y;
     
     if ($calculatedAge != $data['student_age']) {
-        http_response_code(400);
-        die("Age calculation mismatch.");
+        sendError("Age calculation mismatch.", 'student_dob');
     }
 }
 
@@ -269,9 +296,9 @@ try {
         // Clear sensitive data from memory
         unset($data, $_POST);
         
-        // Redirect
-        header("Location: ../admission-success.php");
-        exit;
+        // Send success response
+        sendSuccess();
+        
     } else {
         $pdo->rollBack();
         throw new Exception("Failed to execute database query.");
@@ -283,8 +310,7 @@ try {
     }
     
     error_log("Admission form error: " . $e->getMessage());
-    http_response_code(500);
-    die("An error occurred while processing your application. Please try again.");
+    sendError("An error occurred while processing your application. Please try again.");
 }
 
 // Clear sensitive data

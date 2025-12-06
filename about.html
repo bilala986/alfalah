@@ -39,7 +39,7 @@
                             <a class="nav-link" href="index.html">Home</a>
                         </li>
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle active fw-bold" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 Our Madrassah <i class="bi bi-chevron-down dropdown-arrow"></i>
                             </a>
                             <ul class="dropdown-menu">
@@ -56,6 +56,9 @@
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="contact.html">Contact Us</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="admissions.php">Admissions</a>
                         </li>
                     </ul>
                 </div>
@@ -155,24 +158,22 @@
             </div>
         </section>
 
-        <!-- Vision & Mission Section -->
-        <section class="vision-mission-section py-5 position-relative overflow-hidden">
+        <!-- Vision & Mission Section - Redesigned -->
+        <section class="vision-mission-section py-6 position-relative overflow-hidden">
             <div class="container">
-                <div class="row align-items-stretch">
-                    <!-- Vision - Left Side -->
-                    <div class="col-lg-6 mb-5 mb-lg-0">
-                        <div class="vision-content position-relative h-100">
-                            <!-- Decorative Background -->
-                            <div class="vision-bg-shape"></div>
-
-                            <!-- Content -->
-                            <div class="position-relative z-2">
-                                <div class="section-badge mb-3">
-                                    <i class="bi bi-eye-fill me-2"></i>
-                                    Our Vision
+                <!-- Vision Section -->
+                <div class="row align-items-center mb-7">
+                    <div class="col-lg-6">
+                        <div class="vision-card p-5 rounded-4">
+                            <div class="section-header mb-4">
+                                <div class="vision-badge d-inline-flex align-items-center mb-3">
+                                    <div class="vision-icon">
+                                        <i class="bi bi-eye-fill"></i>
+                                    </div>
+                                    <span class="vision-label ms-2">Our Vision</span>
                                 </div>
                                 <h2 class="text-success fw-bold mb-4">Shaping Future Generations</h2>
-                                <div class="vision-text">
+                                <div class="vision-content">
                                     <p class="text-dark mb-4 fs-5">
                                         To establish a <span class="highlight-text">safe and inspiring learning environment</span> where students can develop strong Islamic identities, connect with the Qur'an, and build character that will guide them throughout their lives.
                                     </p>
@@ -182,35 +183,83 @@
                                 </div>
                             </div>
 
-                            <!-- Decorative Elements -->
-                            <div class="vision-decoration">
-                                <div class="decoration-item item-1">
-                                    <i class="bi bi-book"></i>
+                            <!-- Vision Features -->
+                            <div class="row g-3 mt-5">
+                                <div class="col-6">
+                                    <div class="feature-item d-flex align-items-center">
+                                        <div class="feature-icon me-3">
+                                            <i class="bi bi-shield-check text-success"></i>
+                                        </div>
+                                        <span class="feature-text">Safe Environment</span>
+                                    </div>
                                 </div>
-                                <div class="decoration-item item-2">
-                                    <i class="bi bi-heart"></i>
+                                <div class="col-6">
+                                    <div class="feature-item d-flex align-items-center">
+                                        <div class="feature-icon me-3">
+                                            <i class="bi bi-lightbulb text-success"></i>
+                                        </div>
+                                        <span class="feature-text">Inspiring Learning</span>
+                                    </div>
                                 </div>
-                                <div class="decoration-item item-3">
-                                    <i class="bi bi-star"></i>
+                                <div class="col-6">
+                                    <div class="feature-item d-flex align-items-center">
+                                        <div class="feature-icon me-3">
+                                            <i class="bi bi-people text-success"></i>
+                                        </div>
+                                        <span class="feature-text">Community Focus</span>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="feature-item d-flex align-items-center">
+                                        <div class="feature-icon me-3">
+                                            <i class="bi bi-award text-success"></i>
+                                        </div>
+                                        <span class="feature-text">Excellence</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Mission - Right Side -->
-                    <div class="col-lg-6">
-                        <div class="mission-content position-relative h-100">
-                            <!-- Decorative Background -->
-                            <div class="mission-bg-shape"></div>
+                    <div class="col-lg-6 mt-5 mt-lg-0">
+                        <div class="vision-image-container">
+                            <div class="image-wrapper rounded-4 overflow-hidden shadow-lg">
+                                <img src="img/man-teaching.png" alt="Male teacher educating students" class="img-fluid">
+                            </div>
+                            <div class="vision-stat-card p-4 rounded-3 shadow-sm">
+                                <div class="stat-icon">
+                                    <i class="bi bi-graph-up-arrow"></i>
+                                </div>
+                                <div class="stat-content">
+                                    <h4 class="stat-number mb-1">25+ Years</h4>
+                                    <p class="stat-label mb-0">Of Educational Excellence</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-                            <!-- Content -->
-                            <div class="position-relative z-2">
-                                <div class="section-badge mb-3">
-                                    <i class="bi bi-bullseye me-2"></i>
-                                    Our Mission
+                <!-- Separator -->
+                <div class="separator my-6 position-relative">
+                    <div class="separator-line"></div>
+                    <div class="separator-icon">
+                        <i class="bi bi-heart-fill"></i>
+                    </div>
+                </div>
+
+                <!-- Mission Section -->
+                <div class="row align-items-center">
+                    <div class="col-lg-6 order-lg-1 order-2 mt-5 mt-lg-0">
+                        <div class="mission-card p-5 rounded-4">
+                            <div class="section-header mb-4">
+                                <div class="mission-badge d-inline-flex align-items-center mb-3">
+                                    <div class="mission-icon">
+                                        <i class="bi bi-bullseye"></i>
+                                    </div>
+                                    <span class="mission-label ms-2">Our Mission</span>
                                 </div>
                                 <h2 class="text-success fw-bold mb-4">Nurturing Faith & Knowledge</h2>
-                                <div class="mission-text">
+                                <div class="mission-content">
                                     <p class="text-dark mb-4 fs-5">
                                         To provide <span class="highlight-text">authentic Islamic education</span> that nurtures faith, knowledge, and character through comprehensive Qur'anic studies, Hifdh programs, and Islamic education tailored to contemporary needs.
                                     </p>
@@ -220,28 +269,60 @@
                                 </div>
                             </div>
 
-                            <!-- Decorative Elements -->
-                            <div class="mission-decoration">
-                                <div class="decoration-item item-1">
-                                    <i class="bi bi-mortarboard"></i>
+                            <!-- Mission Features -->
+                            <div class="row g-3 mt-5">
+                                <div class="col-6">
+                                    <div class="feature-item d-flex align-items-center">
+                                        <div class="feature-icon me-3">
+                                            <i class="bi bi-book text-success"></i>
+                                        </div>
+                                        <span class="feature-text">Qur'an Focus</span>
+                                    </div>
                                 </div>
-                                <div class="decoration-item item-2">
-                                    <i class="bi bi-tree"></i>
+                                <div class="col-6">
+                                    <div class="feature-item d-flex align-items-center">
+                                        <div class="feature-icon me-3">
+                                            <i class="bi bi-mortarboard text-success"></i>
+                                        </div>
+                                        <span class="feature-text">Comprehensive Education</span>
+                                    </div>
                                 </div>
-                                <div class="decoration-item item-3">
-                                    <i class="bi bi-gem"></i>
+                                <div class="col-6">
+                                    <div class="feature-item d-flex align-items-center">
+                                        <div class="feature-icon me-3">
+                                            <i class="bi bi-heart text-success"></i>
+                                        </div>
+                                        <span class="feature-text">Character Building</span>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="feature-item d-flex align-items-center">
+                                        <div class="feature-icon me-3">
+                                            <i class="bi bi-tree text-success"></i>
+                                        </div>
+                                        <span class="feature-text">Continuous Growth</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
 
-            <!-- Connecting Line -->
-            <div class="connecting-line d-none d-lg-block">
-                <div class="line"></div>
-                <div class="center-circle">
-                    <i class="bi bi-infinity"></i>
+                    <div class="col-lg-6 order-lg-2 order-1">
+                        <div class="mission-image-container">
+                            <div class="image-wrapper rounded-4 overflow-hidden shadow-lg">
+                                <img src="img/woman-teaching.png" alt="Female teacher guiding students" class="img-fluid">
+                            </div>
+                            <div class="mission-stat-card p-4 rounded-3 shadow-sm">
+                                <div class="stat-icon">
+                                    <i class="bi bi-people-fill"></i>
+                                </div>
+                                <div class="stat-content">
+                                    <h4 class="stat-number mb-1">800+</h4>
+                                    <p class="stat-label mb-0">Students Nurtured</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>

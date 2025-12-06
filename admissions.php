@@ -16,7 +16,7 @@
     </head>
 
     <body class="bg-light">
-        <!-- Navbar (EXACTLY like contact page) -->
+        <!-- Navbar -->
         <nav class="navbar navbar-expand-lg navbar-custom fixed-top">
             <div class="container">
                 <!-- Brand Logo -->
@@ -60,6 +60,9 @@
                             <a class="nav-link" href="donations.html">Donations</a>
                         </li>
                         <li class="nav-item">
+                            <a class="nav-link" href="donations.html">Contact Us</a>
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link active fw-bold" href="admissions.php">Admissions</a>
                         </li>
                     </ul>
@@ -73,7 +76,7 @@
                 <div class="container">
                     <div class="row justify-content-center text-center">
                         <div class="col-lg-8">
-                            <a href="#contact-form">
+                            <a href="#application-form">
                                 <div class="hero-badge text-white">Apply Now</div>
                             </a>
                             <h1 class="hero-title">Madrasah Admissions</h1>
@@ -99,10 +102,10 @@
         </section>
 
         <!-- ADMISSIONS FORM -->
-        <section class="py-5">
+        <section class="py-5" id="application-form">
             <div class="container">
                 <div class="col-lg-10 mx-auto form-card">
-                    <form action="php/process_admissions.php" method="POST" novalidate>
+                    <form action="php/process_admissions.php" method="POST" novalidate id="admissionForm">
                         <!-- ========================= -->
                         <!-- STUDENT DETAILS (3-col) -->
                         <!-- ========================= -->
