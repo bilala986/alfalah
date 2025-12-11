@@ -1,5 +1,5 @@
 <?php
-// teacher/php/mark_attendance.php - ADD DEBUG LOGGING
+// teacher/php/mark_attendance.php - UPDATED WITH REMOVE FUNCTIONALITY
 header('Content-Type: application/json');
 require_once 'teacher_protect.php';
 
@@ -30,22 +30,11 @@ try {
         // Debug
         error_log("Saving attendance - Student: $student_id, Status: $status, Date: $date");
         
-        if (!$student_id || !$date || !$status) {
+        if (!$student_id || !$date) {
             error_log("Missing required fields - Student: $student_id, Status: $status, Date: $date");
             echo json_encode([
                 'success' => false,
                 'message' => 'Missing required fields'
-            ]);
-            exit;
-        }
-        
-        // Validate status
-        $valid_statuses = ['Present', 'Absent', 'Late', 'Excused'];
-        if (!in_array($status, $valid_statuses)) {
-            error_log("Invalid status: $status");
-            echo json_encode([
-                'success' => false,
-                'message' => 'Invalid status'
             ]);
             exit;
         }
@@ -65,6 +54,49 @@ try {
         $stmt = $pdo->prepare($sql);
         $stmt->execute([$student_id, $date]);
         $existing = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        // Handle "remove" status (clear attendance)
+        if ($status === 'remove') {
+            if ($existing) {
+                // Delete existing record
+                $sql = "DELETE FROM attendance WHERE id = ?";
+                $stmt = $pdo->prepare($sql);
+                $success = $stmt->execute([$existing['id']]);
+                error_log("Deleted attendance record ID: " . $existing['id'] . " - Success: " . ($success ? 'Yes' : 'No'));
+                
+                if ($success) {
+                    echo json_encode([
+                        'success' => true,
+                        'message' => 'Attendance record removed successfully'
+                    ]);
+                } else {
+                    $errorInfo = $stmt->errorInfo();
+                    error_log("Database error: " . print_r($errorInfo, true));
+                    echo json_encode([
+                        'success' => false,
+                        'message' => 'Failed to remove attendance: ' . ($errorInfo[2] ?? 'Unknown error')
+                    ]);
+                }
+            } else {
+                // No record to remove - still successful
+                echo json_encode([
+                    'success' => true,
+                    'message' => 'No attendance record to remove'
+                ]);
+            }
+            exit;
+        }
+        
+        // Validate regular status
+        $valid_statuses = ['Present', 'Absent', 'Late', 'Excused'];
+        if (!in_array($status, $valid_statuses)) {
+            error_log("Invalid status: $status");
+            echo json_encode([
+                'success' => false,
+                'message' => 'Invalid status'
+            ]);
+            exit;
+        }
         
         if ($existing) {
             // Update existing record

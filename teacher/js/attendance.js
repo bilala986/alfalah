@@ -1,4 +1,4 @@
-// teacher/js/attendance.js - UPDATED WITH CLEAR BUTTONS & DATE RESTRICTIONS
+// teacher/js/attendance.js - UPDATED WITH CLEAR SAVING & WEEKEND CLASS SUPPORT
 document.addEventListener("DOMContentLoaded", () => {
     // Elements
     const attendanceTableBody = document.getElementById("attendanceTableBody");
@@ -39,10 +39,11 @@ document.addEventListener("DOMContentLoaded", () => {
     let allClasses = [];
     let selectedAttendanceDate = new Date();
     let isCalendarVisible = false;
-    let pendingChanges = {}; // {studentId: "status"}
+    let pendingChanges = {}; // {studentId: "status"} - "–" means clear/remove
     let savedAttendance = {}; // Track saved attendance for current date/class
     let currentChart = null;
     let summaryMonth = new Date();
+    let currentClassIsWeekend = false; // Track if current class is a weekend class
 
     // --- Helper Functions ---
     function pad(n) { return String(n).padStart(2, "0"); }
@@ -82,6 +83,51 @@ document.addEventListener("DOMContentLoaded", () => {
     function isWeekend(date) {
         const day = date.getDay();
         return day === 0 || day === 5 || day === 6; // Sun, Fri, Sat
+    }
+
+    // Check if class is a weekend class (based on class name)
+    function isWeekendClass(className) {
+        if (!className) return false;
+        const lowerName = className.toLowerCase();
+        return lowerName.includes('weekend') || 
+               lowerName.includes('saturday') || 
+               lowerName.includes('sunday') ||
+               lowerName.includes('fri') ||
+               lowerName.includes('sat') ||
+               lowerName.includes('sun');
+    }
+
+    // Check if a specific day should be enabled for the current class
+    function shouldEnableDay(date) {
+        const day = date.getDay();
+        
+        if (currentClassIsWeekend) {
+            // Weekend classes: Enable only Saturday (6) and Sunday (0), disable others
+            return day === 0 || day === 6; // Sun = 0, Sat = 6
+        } else {
+            // Regular classes: Enable Mon-Thu, disable weekends
+            return day >= 1 && day <= 4; // Mon = 1, Tue = 2, Wed = 3, Thu = 4
+        }
+    }
+
+    // Get day status for display
+    function getDayStatus(date) {
+        const day = date.getDay();
+        const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        
+        if (currentClassIsWeekend) {
+            if (day === 0 || day === 6) {
+                return { enabled: true, title: `${dayNames[day]} - Class day` };
+            } else {
+                return { enabled: false, title: `${dayNames[day]} - No weekend class` };
+            }
+        } else {
+            if (day >= 1 && day <= 4) {
+                return { enabled: true, title: `${dayNames[day]} - Class day` };
+            } else {
+                return { enabled: false, title: `${dayNames[day]} - Weekend - No classes` };
+            }
+        }
     }
 
     // --- API Functions ---
@@ -190,6 +236,23 @@ document.addEventListener("DOMContentLoaded", () => {
         if (allClasses.length > 0) {
             classSelect.value = allClasses[0].id;
             summaryClassSelect.value = allClasses[0].id;
+            // Check if selected class is a weekend class
+            updateCurrentClassType();
+        }
+    }
+
+    function updateCurrentClassType() {
+        const selectedClassId = classSelect.value;
+        if (!selectedClassId) {
+            currentClassIsWeekend = false;
+            return;
+        }
+        
+        const selectedClass = allClasses.find(cls => cls.id == selectedClassId);
+        if (selectedClass) {
+            currentClassIsWeekend = isWeekendClass(selectedClass.class_name);
+        } else {
+            currentClassIsWeekend = false;
         }
     }
 
@@ -215,6 +278,9 @@ document.addEventListener("DOMContentLoaded", () => {
         // Update date displays
         selectedDateEl.textContent = toDisplayDate(selectedAttendanceDate);
         if (datePicker) datePicker.value = dateStr;
+
+        // Update current class type (weekend or regular)
+        updateCurrentClassType();
 
         // Fetch data
         const [students, attendanceMap] = await Promise.all([
@@ -259,6 +325,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Check if current date is in the future
         const isFuture = isFutureDate(selectedAttendanceDate);
+
+        // Check if current date is enabled for this class type
+        const dayStatus = getDayStatus(selectedAttendanceDate);
+        const isDateEnabled = dayStatus.enabled;
 
         // Render table (NO # column, NO class column)
         const frag = document.createDocumentFragment();
@@ -306,8 +376,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 btn.dataset.status = statusOption.value;
                 btn.title = `Mark as ${statusOption.value}`;
                 
-                // Disable buttons for future dates
-                if (isFuture) {
+                // Disable buttons for future dates or disabled days
+                if (isFuture || !isDateEnabled) {
                     btn.disabled = true;
                     btn.classList.add("opacity-50");
                 }
@@ -330,10 +400,10 @@ document.addEventListener("DOMContentLoaded", () => {
             clearBtn.type = "button";
             clearBtn.className = `btn btn-sm btn-outline-secondary btn-clear-attendance`;
             clearBtn.dataset.studentId = student.id;
-            clearBtn.title = "Clear status";
+            clearBtn.title = "Clear status (set to –)";
             
-            // Disable clear button for future dates
-            if (isFuture) {
+            // Disable clear button for future dates or disabled days
+            if (isFuture || !isDateEnabled) {
                 clearBtn.disabled = true;
                 clearBtn.classList.add("opacity-50");
             }
@@ -352,11 +422,14 @@ document.addEventListener("DOMContentLoaded", () => {
         attendanceTableBody.innerHTML = "";
         attendanceTableBody.appendChild(frag);
         
-        // Update save button state (disable for future dates)
+        // Update save button state (disable for future dates or disabled days)
         if (saveBtn) {
-            saveBtn.disabled = Object.keys(pendingChanges).length === 0 || isFuture;
+            saveBtn.disabled = Object.keys(pendingChanges).length === 0 || isFuture || !isDateEnabled;
             if (isFuture) {
                 saveBtn.title = "Cannot save attendance for future dates";
+                saveBtn.classList.add("opacity-50");
+            } else if (!isDateEnabled) {
+                saveBtn.title = dayStatus.title;
                 saveBtn.classList.add("opacity-50");
             } else {
                 saveBtn.title = "";
@@ -369,7 +442,8 @@ document.addEventListener("DOMContentLoaded", () => {
     function getCurrentStatus(studentId) {
         // First check pending changes
         if (pendingChanges[studentId]) {
-            return pendingChanges[studentId];
+            // If pending change is "–", it means clear/remove
+            return pendingChanges[studentId] === "–" ? "–" : pendingChanges[studentId];
         }
         // Then check saved attendance
         if (savedAttendance[studentId]) {
@@ -390,7 +464,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // --- Calendar Functions (Smaller Calendar with Weekend Disabled) ---
+    // --- Calendar Functions (Dynamic based on class type) ---
     function renderCalendar(date) {
         if (!calendarContainer) return;
         calendarContainer.innerHTML = "";
@@ -455,9 +529,10 @@ document.addEventListener("DOMContentLoaded", () => {
             dayCell.style.fontSize = "0.85rem";
             dayCell.textContent = day;
             
-            // Highlight weekends (Sun=0, Fri=5, Sat=6)
-            if (index === 0 || index === 5 || index === 6) {
-                dayCell.style.color = "#dc3545"; // Red color for weekends
+            // Color code based on class type
+            const dayStatus = getDayStatus(new Date(year, month, index + 1)); // Rough estimate
+            if (!dayStatus.enabled) {
+                dayCell.style.color = "#dc3545"; // Red for disabled days
             }
             
             weekdayRow.appendChild(dayCell);
@@ -483,40 +558,41 @@ document.addEventListener("DOMContentLoaded", () => {
             const dayCell = document.createElement("button");
             const cellDate = new Date(year, month, day);
             
-            // Check if weekend
-            const isWeekendDay = isWeekend(cellDate);
+            // Check if this day should be enabled for current class type
+            const dayStatus = getDayStatus(cellDate);
+            const isEnabled = dayStatus.enabled;
             
-            dayCell.className = `btn ${isWeekendDay ? 'btn-light' : 'btn-outline-secondary'} day-cell`;
+            dayCell.className = `btn ${isEnabled ? 'btn-outline-secondary' : 'btn-light'} day-cell`;
             dayCell.style.height = "35px";
             dayCell.style.padding = "0";
             dayCell.style.fontSize = "0.9rem";
             dayCell.textContent = day;
+            dayCell.title = dayStatus.title;
             
-            // Style weekend days differently
-            if (isWeekendDay) {
+            // Style disabled days differently
+            if (!isEnabled) {
                 dayCell.style.color = "#dc3545";
                 dayCell.style.opacity = "0.6";
                 dayCell.style.cursor = "not-allowed";
                 dayCell.disabled = true;
-                dayCell.title = "Weekend - No classes";
             }
             
             // Highlight today
             const today = new Date();
-            if (cellDate.toDateString() === today.toDateString() && !isWeekendDay) {
+            if (cellDate.toDateString() === today.toDateString() && isEnabled) {
                 dayCell.classList.add("btn-success", "text-white");
                 dayCell.classList.remove("btn-outline-secondary", "btn-light");
             }
 
             // Highlight selected date
             if (cellDate.toDateString() === selectedAttendanceDate.toDateString()) {
-                if (!isWeekendDay) {
+                if (isEnabled) {
                     dayCell.classList.add("selected-date-btn");
                     dayCell.classList.remove("btn-outline-secondary", "btn-light");
                 }
             }
 
-            if (!isWeekendDay) {
+            if (isEnabled) {
                 dayCell.addEventListener("click", () => {
                     selectedAttendanceDate = cellDate;
                     loadAttendance();
@@ -545,8 +621,15 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
             
-            // Clear the pending change for this student
-            delete pendingChanges[studentId];
+            // Check if date is enabled for this class type
+            const dayStatus = getDayStatus(selectedAttendanceDate);
+            if (!dayStatus.enabled) {
+                showToast(dayStatus.title, "warning");
+                return;
+            }
+            
+            // Set pending change to "–" which means clear/remove
+            pendingChanges[studentId] = "–";
             
             // Update ALL buttons in this row to outline style
             const row = clearBtn.closest("tr");
@@ -560,9 +643,8 @@ document.addEventListener("DOMContentLoaded", () => {
             
             // Update the status badge to dash
             const badge = row.querySelector(".badge");
-            const displayStatus = getCurrentStatus(studentId); // Will be dash now
-            badge.textContent = displayStatus;
-            badge.className = `badge attendance-badge ${getStatusBadgeClass(displayStatus)}`;
+            badge.textContent = "–";
+            badge.className = `badge attendance-badge text-bg-secondary`;
             
             // Update save button state
             if (saveBtn) saveBtn.disabled = Object.keys(pendingChanges).length === 0;
@@ -576,6 +658,13 @@ document.addEventListener("DOMContentLoaded", () => {
         // Check if date is in the future
         if (isFutureDate(selectedAttendanceDate)) {
             showToast("Cannot modify attendance for future dates", "warning");
+            return;
+        }
+        
+        // Check if date is enabled for this class type
+        const dayStatus = getDayStatus(selectedAttendanceDate);
+        if (!dayStatus.enabled) {
+            showToast(dayStatus.title, "warning");
             return;
         }
 
@@ -639,6 +728,13 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
         
+        // Check if date is enabled for this class type
+        const dayStatus = getDayStatus(selectedAttendanceDate);
+        if (!dayStatus.enabled) {
+            showToast(dayStatus.title, "warning");
+            return;
+        }
+        
         const changes = Object.entries(pendingChanges);
         if (!changes.length) return;
 
@@ -665,7 +761,15 @@ document.addEventListener("DOMContentLoaded", () => {
                 const formData = new FormData();
                 formData.append("student_id", studentId);
                 formData.append("class_id", student.class_id || classId);
-                formData.append("status", status);
+                
+                // If status is "–" (dash), we need to remove the attendance record
+                // We'll send a special status that PHP can interpret as "remove"
+                if (status === "–") {
+                    formData.append("status", "remove"); // Special value for removal
+                } else {
+                    formData.append("status", status);
+                }
+                
                 formData.append("date", dateStr);
 
                 const res = await fetch(`../php/mark_attendance.php?bid=${getBrowserInstanceId()}`, {
@@ -678,7 +782,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (data.success) {
                     successCount++;
                     // Update saved attendance
-                    savedAttendance[studentId] = status;
+                    if (status === "–") {
+                        // Remove from saved attendance
+                        delete savedAttendance[studentId];
+                    } else {
+                        savedAttendance[studentId] = status;
+                    }
                 } else {
                     errorCount++;
                     console.error("Save error:", data);
@@ -753,6 +862,10 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
+        // Get class info to determine if it's a weekend class
+        const selectedClass = allClasses.find(cls => cls.id == classId);
+        const isWeekendClassForSummary = selectedClass ? isWeekendClass(selectedClass.class_name) : false;
+
         const monthStr = `${summaryMonth.getFullYear()}-${pad(summaryMonth.getMonth() + 1)}`;
         const monthLabel = summaryMonth.toLocaleString('default', { month: 'long', year: 'numeric' });
         
@@ -772,7 +885,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
 
-            renderSummaryTable(data.data, monthStr);
+            renderSummaryTable(data.data, monthStr, isWeekendClassForSummary);
         } catch (err) {
             console.error("Error loading summary:", err);
             summaryTableContainer.innerHTML = `
@@ -783,7 +896,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    function renderSummaryTable(data, monthStr) {
+    function renderSummaryTable(data, monthStr, isWeekendClassForSummary = false) {
         if (!data || data.length === 0) {
             summaryTableContainer.innerHTML = `
                 <div class="text-center py-4 text-muted">
@@ -810,9 +923,9 @@ document.addEventListener("DOMContentLoaded", () => {
         days.forEach(day => {
             const date = new Date(year, month - 1, day);
             const weekday = date.toLocaleDateString('en-US', { weekday: 'short' });
-            const isWeekendDay = isWeekend(date);
+            const dayStatus = getDayStatusForSummary(date, isWeekendClassForSummary);
             
-            html += `<th class="text-center ${isWeekendDay ? 'text-danger' : ''}">${day}<br><small class="text-muted">${weekday}</small></th>`;
+            html += `<th class="text-center ${!dayStatus.enabled ? 'text-danger' : ''}">${day}<br><small class="text-muted">${weekday}</small></th>`;
         });
         
         html += `<th class="text-center">Total</th></tr></thead><tbody>`;
@@ -827,14 +940,14 @@ document.addEventListener("DOMContentLoaded", () => {
             
             days.forEach(day => {
                 const date = new Date(year, month - 1, day);
-                const isWeekendDay = isWeekend(date);
+                const dayStatus = getDayStatusForSummary(date, isWeekendClassForSummary);
                 const status = student.attendance && student.attendance[day] ? student.attendance[day] : '';
                 let cellClass = '';
                 let cellTitle = 'No record';
                 
-                if (isWeekendDay) {
+                if (!dayStatus.enabled) {
                     cellClass = 'bg-light';
-                    cellTitle = 'Weekend - No classes';
+                    cellTitle = dayStatus.title;
                 } else if (status === 'Present') {
                     cellClass = 'bg-success bg-opacity-25';
                     cellTitle = 'Present';
@@ -858,7 +971,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 html += `<td class="text-center ${cellClass}" title="${cellTitle}">`;
                 if (status) {
                     html += `<i class="bi ${getStatusIcon(status)}"></i>`;
-                } else if (isWeekendDay) {
+                } else if (!dayStatus.enabled) {
                     html += `<small class="text-muted">–</small>`;
                 }
                 html += `</td>`;
@@ -878,6 +991,26 @@ document.addEventListener("DOMContentLoaded", () => {
         
         // Hide student detail section
         document.getElementById("studentDetailSection").classList.add("d-none");
+    }
+
+    // Helper for summary view
+    function getDayStatusForSummary(date, isWeekendClass) {
+        const day = date.getDay();
+        const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        
+        if (isWeekendClass) {
+            if (day === 0 || day === 6) {
+                return { enabled: true, title: `${dayNames[day]} - Class day` };
+            } else {
+                return { enabled: false, title: `${dayNames[day]} - No weekend class` };
+            }
+        } else {
+            if (day >= 1 && day <= 4) {
+                return { enabled: true, title: `${dayNames[day]} - Class day` };
+            } else {
+                return { enabled: false, title: `${dayNames[day]} - Weekend - No classes` };
+            }
+        }
     }
 
     function getStatusIcon(status) {
@@ -921,9 +1054,14 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Class select change
+    // Class select change - reload with new class type
     if (classSelect) {
-        classSelect.addEventListener("change", loadAttendance);
+        classSelect.addEventListener("change", () => {
+            // Update current class type first
+            updateCurrentClassType();
+            // Then load attendance
+            loadAttendance();
+        });
     }
 
     // Search input
