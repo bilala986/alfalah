@@ -41,7 +41,7 @@ if (isset($_GET['bid']) && $_GET['bid'] !== $browser_instance_id) {
         </div>
 
         <a href="dashboard.php?bid=<?= $browser_instance_id ?>" class="active"><i class="bi bi-speedometer2"></i> Dashboard</a>
-        <a href="#?bid=<?= $browser_instance_id ?>"><i class="bi bi-calendar-check"></i> Attendance</a>
+        <a href="private/attendance.php?bid=<?= $browser_instance_id ?>"><i class="bi bi-calendar-check"></i> Attendance</a>
         <a href="#?bid=<?= $browser_instance_id ?>"><i class="bi bi-emoji-smile"></i> Behaviour</a>
         <a href="#?bid=<?= $browser_instance_id ?>"><i class="bi bi-journal-text"></i> Classes</a>
         <a href="#?bid=<?= $browser_instance_id ?>"><i class="bi bi-gear"></i> Settings</a>
@@ -93,7 +93,7 @@ if (isset($_GET['bid']) && $_GET['bid'] !== $browser_instance_id) {
                 <div class="card shadow-sm p-3">
                     <h5><i class="bi bi-calendar-check text-success"></i> Attendance</h5>
                     <p class="text-muted">Take and manage student attendance.</p>
-                    <a href="#?bid=<?= $browser_instance_id ?>" class="btn btn-success-modern btn-sm">Manage</a>
+                    <a href="private/attendance.php?bid=<?= $browser_instance_id ?>" class="btn btn-success-modern btn-sm">Manage</a>
                 </div>
             </div>
 

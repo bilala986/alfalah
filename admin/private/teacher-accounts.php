@@ -1,5 +1,5 @@
 <?php
-// admin/teacher-accounts.php
+// admin/private/teacher-accounts.php
 require_once '../php/admin_protect.php';
 
 // Only allow approved admins to access this page
