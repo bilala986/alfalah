@@ -1,4 +1,4 @@
-// teacher/js/attendance.js - FIXED VERSION
+// teacher/js/attendance.js - UPDATED WITH CLEAR BUTTONS & DATE RESTRICTIONS
 document.addEventListener("DOMContentLoaded", () => {
     // Elements
     const attendanceTableBody = document.getElementById("attendanceTableBody");
@@ -67,6 +67,21 @@ document.addEventListener("DOMContentLoaded", () => {
             </div>`;
         document.body.appendChild(div);
         setTimeout(() => div.remove(), 3200);
+    }
+
+    // Check if date is in the future
+    function isFutureDate(date) {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const compareDate = new Date(date);
+        compareDate.setHours(0, 0, 0, 0);
+        return compareDate > today;
+    }
+
+    // Check if date is a weekend (Friday = 5, Saturday = 6, Sunday = 0)
+    function isWeekend(date) {
+        const day = date.getDay();
+        return day === 0 || day === 5 || day === 6; // Sun, Fri, Sat
     }
 
     // --- API Functions ---
@@ -242,6 +257,9 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
+        // Check if current date is in the future
+        const isFuture = isFutureDate(selectedAttendanceDate);
+
         // Render table (NO # column, NO class column)
         const frag = document.createDocumentFragment();
 
@@ -288,6 +306,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 btn.dataset.status = statusOption.value;
                 btn.title = `Mark as ${statusOption.value}`;
                 
+                // Disable buttons for future dates
+                if (isFuture) {
+                    btn.disabled = true;
+                    btn.classList.add("opacity-50");
+                }
+                
                 const icon = document.createElement("i");
                 icon.className = `bi ${statusOption.icon}`;
                 btn.appendChild(icon);
@@ -301,6 +325,24 @@ document.addEventListener("DOMContentLoaded", () => {
                 actionsDiv.appendChild(btn);
             });
 
+            // ADD CLEAR BUTTON (after Excused button)
+            const clearBtn = document.createElement("button");
+            clearBtn.type = "button";
+            clearBtn.className = `btn btn-sm btn-outline-secondary btn-clear-attendance`;
+            clearBtn.dataset.studentId = student.id;
+            clearBtn.title = "Clear status";
+            
+            // Disable clear button for future dates
+            if (isFuture) {
+                clearBtn.disabled = true;
+                clearBtn.classList.add("opacity-50");
+            }
+            
+            const clearIcon = document.createElement("i");
+            clearIcon.className = "bi bi-eraser";
+            clearBtn.appendChild(clearIcon);
+            
+            actionsDiv.appendChild(clearBtn);
             actionsCell.appendChild(actionsDiv);
             row.appendChild(actionsCell);
 
@@ -310,9 +352,16 @@ document.addEventListener("DOMContentLoaded", () => {
         attendanceTableBody.innerHTML = "";
         attendanceTableBody.appendChild(frag);
         
-        // Update save button state
+        // Update save button state (disable for future dates)
         if (saveBtn) {
-            saveBtn.disabled = Object.keys(pendingChanges).length === 0;
+            saveBtn.disabled = Object.keys(pendingChanges).length === 0 || isFuture;
+            if (isFuture) {
+                saveBtn.title = "Cannot save attendance for future dates";
+                saveBtn.classList.add("opacity-50");
+            } else {
+                saveBtn.title = "";
+                saveBtn.classList.remove("opacity-50");
+            }
         }
     }
 
@@ -341,7 +390,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // --- Calendar Functions (Smaller Calendar) ---
+    // --- Calendar Functions (Smaller Calendar with Weekend Disabled) ---
     function renderCalendar(date) {
         if (!calendarContainer) return;
         calendarContainer.innerHTML = "";
@@ -398,13 +447,19 @@ document.addEventListener("DOMContentLoaded", () => {
         const weekdayRow = document.createElement("div");
         weekdayRow.className = "d-flex mb-2";
 
-        weekdays.forEach(day => {
+        weekdays.forEach((day, index) => {
             const dayCell = document.createElement("div");
             dayCell.className = "text-center fw-bold";
             dayCell.style.width = "14.28%";
             dayCell.style.padding = "3px";
             dayCell.style.fontSize = "0.85rem";
             dayCell.textContent = day;
+            
+            // Highlight weekends (Sun=0, Fri=5, Sat=6)
+            if (index === 0 || index === 5 || index === 6) {
+                dayCell.style.color = "#dc3545"; // Red color for weekends
+            }
+            
             weekdayRow.appendChild(dayCell);
         });
 
@@ -426,32 +481,48 @@ document.addEventListener("DOMContentLoaded", () => {
         // Day cells (smaller)
         for (let day = 1; day <= lastDay; day++) {
             const dayCell = document.createElement("button");
-            dayCell.className = "btn btn-outline-secondary day-cell";
+            const cellDate = new Date(year, month, day);
+            
+            // Check if weekend
+            const isWeekendDay = isWeekend(cellDate);
+            
+            dayCell.className = `btn ${isWeekendDay ? 'btn-light' : 'btn-outline-secondary'} day-cell`;
             dayCell.style.height = "35px";
             dayCell.style.padding = "0";
             dayCell.style.fontSize = "0.9rem";
             dayCell.textContent = day;
-
-            const cellDate = new Date(year, month, day);
+            
+            // Style weekend days differently
+            if (isWeekendDay) {
+                dayCell.style.color = "#dc3545";
+                dayCell.style.opacity = "0.6";
+                dayCell.style.cursor = "not-allowed";
+                dayCell.disabled = true;
+                dayCell.title = "Weekend - No classes";
+            }
             
             // Highlight today
             const today = new Date();
-            if (cellDate.toDateString() === today.toDateString()) {
+            if (cellDate.toDateString() === today.toDateString() && !isWeekendDay) {
                 dayCell.classList.add("btn-success", "text-white");
-                dayCell.classList.remove("btn-outline-secondary");
+                dayCell.classList.remove("btn-outline-secondary", "btn-light");
             }
 
             // Highlight selected date
             if (cellDate.toDateString() === selectedAttendanceDate.toDateString()) {
-                dayCell.classList.add("selected-date-btn");
-                dayCell.classList.remove("btn-outline-secondary");
+                if (!isWeekendDay) {
+                    dayCell.classList.add("selected-date-btn");
+                    dayCell.classList.remove("btn-outline-secondary", "btn-light");
+                }
             }
 
-            dayCell.addEventListener("click", () => {
-                selectedAttendanceDate = cellDate;
-                loadAttendance();
-                renderCalendar(date); // Re-render to update highlight
-            });
+            if (!isWeekendDay) {
+                dayCell.addEventListener("click", () => {
+                    selectedAttendanceDate = cellDate;
+                    loadAttendance();
+                    renderCalendar(date); // Re-render to update highlight
+                });
+            }
 
             grid.appendChild(dayCell);
         }
@@ -463,8 +534,50 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // --- Attendance Marking ---
     document.addEventListener("click", (e) => {
+        // Handle clear button click
+        const clearBtn = e.target.closest(".btn-clear-attendance");
+        if (clearBtn) {
+            const studentId = clearBtn.dataset.studentId;
+            
+            // Check if date is in the future
+            if (isFutureDate(selectedAttendanceDate)) {
+                showToast("Cannot modify attendance for future dates", "warning");
+                return;
+            }
+            
+            // Clear the pending change for this student
+            delete pendingChanges[studentId];
+            
+            // Update ALL buttons in this row to outline style
+            const row = clearBtn.closest("tr");
+            const allButtons = row.querySelectorAll(".btn-attendance-toggle");
+            allButtons.forEach(btn => {
+                const btnStatus = btn.dataset.status;
+                const colorClass = getColorClass(btnStatus);
+                btn.classList.remove(`btn-${colorClass}`);
+                btn.classList.add(`btn-outline-${colorClass}`);
+            });
+            
+            // Update the status badge to dash
+            const badge = row.querySelector(".badge");
+            const displayStatus = getCurrentStatus(studentId); // Will be dash now
+            badge.textContent = displayStatus;
+            badge.className = `badge attendance-badge ${getStatusBadgeClass(displayStatus)}`;
+            
+            // Update save button state
+            if (saveBtn) saveBtn.disabled = Object.keys(pendingChanges).length === 0;
+            return;
+        }
+        
+        // Handle attendance toggle button click
         const toggleBtn = e.target.closest(".btn-attendance-toggle");
         if (!toggleBtn) return;
+        
+        // Check if date is in the future
+        if (isFutureDate(selectedAttendanceDate)) {
+            showToast("Cannot modify attendance for future dates", "warning");
+            return;
+        }
 
         const row = toggleBtn.closest("tr");
         const studentId = row.dataset.id;
@@ -520,6 +633,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Save attendance
     saveBtn?.addEventListener("click", async () => {
+        // Check if date is in the future
+        if (isFutureDate(selectedAttendanceDate)) {
+            showToast("Cannot save attendance for future dates", "warning");
+            return;
+        }
+        
         const changes = Object.entries(pendingChanges);
         if (!changes.length) return;
 
@@ -691,7 +810,9 @@ document.addEventListener("DOMContentLoaded", () => {
         days.forEach(day => {
             const date = new Date(year, month - 1, day);
             const weekday = date.toLocaleDateString('en-US', { weekday: 'short' });
-            html += `<th class="text-center">${day}<br><small class="text-muted">${weekday}</small></th>`;
+            const isWeekendDay = isWeekend(date);
+            
+            html += `<th class="text-center ${isWeekendDay ? 'text-danger' : ''}">${day}<br><small class="text-muted">${weekday}</small></th>`;
         });
         
         html += `<th class="text-center">Total</th></tr></thead><tbody>`;
@@ -705,11 +826,16 @@ document.addEventListener("DOMContentLoaded", () => {
             html += `<tr><td class="fw-semibold">${student.student_name}</td>`;
             
             days.forEach(day => {
+                const date = new Date(year, month - 1, day);
+                const isWeekendDay = isWeekend(date);
                 const status = student.attendance && student.attendance[day] ? student.attendance[day] : '';
                 let cellClass = '';
                 let cellTitle = 'No record';
                 
-                if (status === 'Present') {
+                if (isWeekendDay) {
+                    cellClass = 'bg-light';
+                    cellTitle = 'Weekend - No classes';
+                } else if (status === 'Present') {
                     cellClass = 'bg-success bg-opacity-25';
                     cellTitle = 'Present';
                     presents++;
@@ -732,6 +858,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 html += `<td class="text-center ${cellClass}" title="${cellTitle}">`;
                 if (status) {
                     html += `<i class="bi ${getStatusIcon(status)}"></i>`;
+                } else if (isWeekendDay) {
+                    html += `<small class="text-muted">–</small>`;
                 }
                 html += `</td>`;
             });
