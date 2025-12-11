@@ -1,4 +1,5 @@
 <?php
+// teacher/php/get_attendance.php - CORRECTED VERSION
 header('Content-Type: application/json');
 require_once 'teacher_protect.php';
 
@@ -20,26 +21,17 @@ try {
     }
     
     if ($class_id) {
-        $sql = "SELECT a.id, a.student_id, a.status, a.attendance_date,
-                       s.student_first_name, s.student_last_name,
-                       c.class_name
+        $sql = "SELECT a.student_id, a.status
                 FROM attendance a
                 JOIN students s ON a.student_id = s.id
-                JOIN classes c ON s.class_id = c.id
-                WHERE a.teacher_id = ? AND s.class_id = ? AND a.attendance_date = ?
-                ORDER BY s.student_first_name, s.student_last_name";
+                WHERE a.teacher_id = ? AND s.class_id = ? AND a.attendance_date = ?";
         
         $stmt = $pdo->prepare($sql);
         $stmt->execute([$teacher_id, $class_id, $date]);
     } else {
-        $sql = "SELECT a.id, a.student_id, a.status, a.attendance_date,
-                       s.student_first_name, s.student_last_name,
-                       c.class_name
+        $sql = "SELECT a.student_id, a.status
                 FROM attendance a
-                JOIN students s ON a.student_id = s.id
-                JOIN classes c ON s.class_id = c.id
-                WHERE a.teacher_id = ? AND a.attendance_date = ?
-                ORDER BY c.class_name, s.student_first_name, s.student_last_name";
+                WHERE a.teacher_id = ? AND a.attendance_date = ?";
         
         $stmt = $pdo->prepare($sql);
         $stmt->execute([$teacher_id, $date]);
@@ -47,6 +39,7 @@ try {
     
     $attendance = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
+    // Create simple map: student_id => status
     $attendanceMap = [];
     foreach ($attendance as $record) {
         $attendanceMap[$record['student_id']] = $record['status'];

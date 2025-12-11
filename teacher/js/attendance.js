@@ -1,4 +1,4 @@
-// teacher/js/attendance.js
+// teacher/js/attendance.js - FIXED VERSION
 document.addEventListener("DOMContentLoaded", () => {
     // Elements
     const attendanceTableBody = document.getElementById("attendanceTableBody");
@@ -39,7 +39,8 @@ document.addEventListener("DOMContentLoaded", () => {
     let allClasses = [];
     let selectedAttendanceDate = new Date();
     let isCalendarVisible = false;
-    let pendingChanges = {};
+    let pendingChanges = {}; // {studentId: "status"}
+    let savedAttendance = {}; // Track saved attendance for current date/class
     let currentChart = null;
     let summaryMonth = new Date();
 
@@ -126,7 +127,17 @@ document.addEventListener("DOMContentLoaded", () => {
             const data = await res.json();
             
             if (data.success) {
-                return data.attendance;
+                // Convert attendance map to simple status strings
+                const simpleMap = {};
+                Object.entries(data.attendance).forEach(([studentId, attendanceData]) => {
+                    // Handle both string status and object with status property
+                    if (typeof attendanceData === 'string') {
+                        simpleMap[studentId] = attendanceData;
+                    } else if (attendanceData && attendanceData.status) {
+                        simpleMap[studentId] = attendanceData.status;
+                    }
+                });
+                return simpleMap;
             } else {
                 showToast("Failed to load attendance", "warning");
                 return {};
@@ -173,12 +184,13 @@ document.addEventListener("DOMContentLoaded", () => {
         // Show loading
         attendanceTableBody.innerHTML = `
             <tr>
-                <td colspan="5" class="text-center text-muted py-4">
+                <td colspan="3" class="text-center text-muted py-4">
                     <div class="spinner-border spinner-border-sm text-success me-2" role="status"></div>
                     Loading attendance data...
                 </td>
             </tr>`;
 
+        // Clear pending changes when loading new data
         pendingChanges = {};
         if (saveBtn) saveBtn.disabled = true;
 
@@ -195,22 +207,26 @@ document.addEventListener("DOMContentLoaded", () => {
             fetchAttendance(classId, dateStr)
         ]);
 
+        // Store saved attendance for reference
+        savedAttendance = { ...attendanceMap };
+
         // Filter students by search
         let filteredStudents = students;
         const searchTerm = searchInput?.value.trim().toLowerCase();
         if (searchTerm) {
             filteredStudents = students.filter(s => 
                 s.full_name.toLowerCase().includes(searchTerm) ||
-                s.admission_id?.toString().includes(searchTerm)
+                (s.admission_id && s.admission_id.toString().includes(searchTerm))
             );
         }
 
         // Filter by status if set
         const filterStatus = filterStatusSelect?.value;
         if (filterStatus) {
-            filteredStudents = filteredStudents.filter(s => 
-                (attendanceMap[s.id] || "–") === filterStatus
-            );
+            filteredStudents = filteredStudents.filter(s => {
+                const currentStatus = getCurrentStatus(s.id);
+                return currentStatus === filterStatus;
+            });
         }
 
         // Update student count
@@ -219,53 +235,45 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!filteredStudents.length) {
             attendanceTableBody.innerHTML = `
                 <tr>
-                    <td colspan="5" class="text-center text-muted py-4">
+                    <td colspan="3" class="text-center text-muted py-4">
                         No students found for the selected criteria.
                     </td>
                 </tr>`;
             return;
         }
 
-        // Render table
+        // Render table (NO # column, NO class column)
         const frag = document.createDocumentFragment();
 
-        filteredStudents.forEach((student, index) => {
-            const status = attendanceMap[student.id] || "–";
+        filteredStudents.forEach((student) => {
+            const currentStatus = getCurrentStatus(student.id);
+            
             const row = document.createElement("tr");
             row.dataset.id = student.id;
             row.dataset.classId = student.class_id;
 
-            // Index
-            const idxCell = document.createElement("td");
-            idxCell.className = "d-none d-sm-table-cell";
-            idxCell.textContent = index + 1;
-            row.appendChild(idxCell);
-
-            // Name
+            // Student Name ONLY
             const nameCell = document.createElement("td");
             nameCell.textContent = student.full_name;
-            nameCell.title = `Admission ID: ${student.admission_id}`;
+            if (student.admission_id) {
+                nameCell.title = `Admission ID: ${student.admission_id}`;
+            }
             row.appendChild(nameCell);
-
-            // Class
-            const classCell = document.createElement("td");
-            classCell.textContent = student.class_name || "N/A";
-            row.appendChild(classCell);
 
             // Status badge
             const statusCell = document.createElement("td");
             const badge = document.createElement("span");
-            badge.className = "badge attendance-badge " + getStatusBadgeClass(status);
-            badge.textContent = status;
+            badge.className = "badge attendance-badge " + getStatusBadgeClass(currentStatus);
+            badge.textContent = currentStatus;
             statusCell.appendChild(badge);
             row.appendChild(statusCell);
 
-            // Actions
+            // Actions (buttons are always outline/stroked, not filled)
             const actionsCell = document.createElement("td");
             const actionsDiv = document.createElement("div");
             actionsDiv.className = "d-flex gap-2 justify-content-center";
 
-            // Action buttons
+            // Action buttons - always outline style
             const statuses = [
                 { value: "Present", class: "success", icon: "bi-check-circle" },
                 { value: "Absent", class: "danger", icon: "bi-x-circle" },
@@ -284,10 +292,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 icon.className = `bi ${statusOption.icon}`;
                 btn.appendChild(icon);
                 
-                // If this is the current status, make button active
-                if (status === statusOption.value) {
-                    btn.classList.remove(`btn-outline-${statusOption.class}`);
+                // Highlight if this is the PENDING status for this student
+                if (pendingChanges[student.id] === statusOption.value) {
                     btn.classList.add(`btn-${statusOption.class}`);
+                    btn.classList.remove(`btn-outline-${statusOption.class}`);
                 }
                 
                 actionsDiv.appendChild(btn);
@@ -301,6 +309,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
         attendanceTableBody.innerHTML = "";
         attendanceTableBody.appendChild(frag);
+        
+        // Update save button state
+        if (saveBtn) {
+            saveBtn.disabled = Object.keys(pendingChanges).length === 0;
+        }
+    }
+
+    // Helper to get current status (pending or saved)
+    function getCurrentStatus(studentId) {
+        // First check pending changes
+        if (pendingChanges[studentId]) {
+            return pendingChanges[studentId];
+        }
+        // Then check saved attendance
+        if (savedAttendance[studentId]) {
+            return savedAttendance[studentId];
+        }
+        // Default to dash
+        return "–";
     }
 
     function getStatusBadgeClass(status) {
@@ -309,11 +336,12 @@ document.addEventListener("DOMContentLoaded", () => {
             case "Absent": return "text-bg-danger";
             case "Late": return "text-bg-warning";
             case "Excused": return "text-bg-info";
+            case "–": return "text-bg-secondary";
             default: return "text-bg-secondary";
         }
     }
 
-    // --- Calendar Functions ---
+    // --- Calendar Functions (Smaller Calendar) ---
     function renderCalendar(date) {
         if (!calendarContainer) return;
         calendarContainer.innerHTML = "";
@@ -328,7 +356,17 @@ document.addEventListener("DOMContentLoaded", () => {
             "July", "August", "September", "October", "November", "December"
         ];
 
-        // Header with navigation
+        // Container for calendar with max width
+        const calendarWrapper = document.createElement("div");
+        calendarWrapper.style.maxWidth = "400px";
+        calendarWrapper.style.margin = "0 auto";
+        calendarWrapper.style.border = "1px solid #dee2e6";
+        calendarWrapper.style.borderRadius = "8px";
+        calendarWrapper.style.padding = "15px";
+        calendarWrapper.style.backgroundColor = "white";
+        calendarWrapper.style.boxShadow = "0 2px 8px rgba(0,0,0,0.1)";
+
+        // Header with navigation (centered)
         const header = document.createElement("div");
         header.className = "d-flex justify-content-between align-items-center mb-3";
 
@@ -353,9 +391,9 @@ document.addEventListener("DOMContentLoaded", () => {
         header.appendChild(prevBtn);
         header.appendChild(monthLabel);
         header.appendChild(nextBtn);
-        calendarContainer.appendChild(header);
+        calendarWrapper.appendChild(header);
 
-        // Weekday headers
+        // Weekday headers (smaller)
         const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
         const weekdayRow = document.createElement("div");
         weekdayRow.className = "d-flex mb-2";
@@ -364,14 +402,15 @@ document.addEventListener("DOMContentLoaded", () => {
             const dayCell = document.createElement("div");
             dayCell.className = "text-center fw-bold";
             dayCell.style.width = "14.28%";
-            dayCell.style.padding = "5px";
+            dayCell.style.padding = "3px";
+            dayCell.style.fontSize = "0.85rem";
             dayCell.textContent = day;
             weekdayRow.appendChild(dayCell);
         });
 
-        calendarContainer.appendChild(weekdayRow);
+        calendarWrapper.appendChild(weekdayRow);
 
-        // Days grid
+        // Days grid (smaller cells)
         const grid = document.createElement("div");
         grid.style.display = "grid";
         grid.style.gridTemplateColumns = "repeat(7, 1fr)";
@@ -380,15 +419,17 @@ document.addEventListener("DOMContentLoaded", () => {
         // Empty cells for days before the first of the month
         for (let i = 0; i < firstDay; i++) {
             const empty = document.createElement("div");
-            empty.style.height = "40px";
+            empty.style.height = "35px";
             grid.appendChild(empty);
         }
 
-        // Day cells
+        // Day cells (smaller)
         for (let day = 1; day <= lastDay; day++) {
             const dayCell = document.createElement("button");
             dayCell.className = "btn btn-outline-secondary day-cell";
-            dayCell.style.height = "40px";
+            dayCell.style.height = "35px";
+            dayCell.style.padding = "0";
+            dayCell.style.fontSize = "0.9rem";
             dayCell.textContent = day;
 
             const cellDate = new Date(year, month, day);
@@ -403,6 +444,7 @@ document.addEventListener("DOMContentLoaded", () => {
             // Highlight selected date
             if (cellDate.toDateString() === selectedAttendanceDate.toDateString()) {
                 dayCell.classList.add("selected-date-btn");
+                dayCell.classList.remove("btn-outline-secondary");
             }
 
             dayCell.addEventListener("click", () => {
@@ -414,7 +456,8 @@ document.addEventListener("DOMContentLoaded", () => {
             grid.appendChild(dayCell);
         }
 
-        calendarContainer.appendChild(grid);
+        calendarWrapper.appendChild(grid);
+        calendarContainer.appendChild(calendarWrapper);
         calendarContainer.style.display = "block";
     }
 
@@ -425,37 +468,44 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const row = toggleBtn.closest("tr");
         const studentId = row.dataset.id;
-        const classId = row.dataset.classId;
-        const status = toggleBtn.dataset.status;
+        const newStatus = toggleBtn.dataset.status;
 
-        // Update all buttons in this row
+        // Get current pending status (if any)
+        const currentPendingStatus = pendingChanges[studentId];
+        
+        // If clicking the same status, remove the pending change
+        if (currentPendingStatus === newStatus) {
+            delete pendingChanges[studentId];
+        } else {
+            // Set the new pending status
+            pendingChanges[studentId] = newStatus;
+        }
+
+        // Update ALL buttons in this row to show pending status visually
         const allButtons = row.querySelectorAll(".btn-attendance-toggle");
         allButtons.forEach(btn => {
             const btnStatus = btn.dataset.status;
             const colorClass = getColorClass(btnStatus);
             
-            if (btnStatus === status) {
+            // Reset all buttons to outline style first
+            btn.classList.remove(`btn-${colorClass}`);
+            btn.classList.add(`btn-outline-${colorClass}`);
+            
+            // Then fill the button if it matches the pending status
+            if (pendingChanges[studentId] === btnStatus) {
                 btn.classList.remove(`btn-outline-${colorClass}`);
                 btn.classList.add(`btn-${colorClass}`);
-            } else {
-                btn.classList.remove(`btn-${colorClass}`);
-                btn.classList.add(`btn-outline-${colorClass}`);
             }
         });
 
-        // Update status badge
+        // Update the status badge
         const badge = row.querySelector(".badge");
-        badge.textContent = status;
-        badge.className = `badge attendance-badge ${getStatusBadgeClass(status)}`;
+        const displayStatus = getCurrentStatus(studentId);
+        badge.textContent = displayStatus;
+        badge.className = `badge attendance-badge ${getStatusBadgeClass(displayStatus)}`;
 
-        // Track change
-        pendingChanges[studentId] = {
-            student_id: studentId,
-            class_id: classId,
-            status: status
-        };
-
-        if (saveBtn) saveBtn.disabled = false;
+        // Update save button state
+        if (saveBtn) saveBtn.disabled = Object.keys(pendingChanges).length === 0;
     });
 
     function getColorClass(status) {
@@ -470,10 +520,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Save attendance
     saveBtn?.addEventListener("click", async () => {
-        const changes = Object.values(pendingChanges);
+        const changes = Object.entries(pendingChanges);
         if (!changes.length) return;
 
         const dateStr = toISODateLocal(selectedAttendanceDate);
+        const classId = classSelect.value;
         let successCount = 0;
         let errorCount = 0;
 
@@ -482,12 +533,20 @@ document.addEventListener("DOMContentLoaded", () => {
         saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Saving...';
         saveBtn.disabled = true;
 
-        for (const change of changes) {
+        for (const [studentId, status] of changes) {
             try {
+                // Get student data
+                const student = allStudents.find(s => s.id == studentId);
+                if (!student) {
+                    console.error(`Student ${studentId} not found`);
+                    errorCount++;
+                    continue;
+                }
+
                 const formData = new FormData();
-                formData.append("student_id", change.student_id);
-                formData.append("class_id", change.class_id);
-                formData.append("status", change.status);
+                formData.append("student_id", studentId);
+                formData.append("class_id", student.class_id || classId);
+                formData.append("status", status);
                 formData.append("date", dateStr);
 
                 const res = await fetch(`../php/mark_attendance.php?bid=${getBrowserInstanceId()}`, {
@@ -499,13 +558,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 
                 if (data.success) {
                     successCount++;
-                    // Remove from pending changes
-                    delete pendingChanges[change.student_id];
+                    // Update saved attendance
+                    savedAttendance[studentId] = status;
                 } else {
                     errorCount++;
+                    console.error("Save error:", data);
                     if (data.requires_approval) {
                         showToast("Your account needs approval to modify attendance", "warning");
-                        break; // Stop trying if approval required
+                        break;
                     }
                 }
             } catch (err) {
@@ -514,9 +574,31 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         }
 
+        // Clear pending changes
+        pendingChanges = {};
+        
         // Restore save button
         saveBtn.innerHTML = originalText;
+        saveBtn.disabled = true;
         
+        // Reset all action buttons to outline style
+        document.querySelectorAll(".btn-attendance-toggle").forEach(btn => {
+            const btnStatus = btn.dataset.status;
+            const colorClass = getColorClass(btnStatus);
+            btn.classList.remove(`btn-${colorClass}`);
+            btn.classList.add(`btn-outline-${colorClass}`);
+        });
+
+        // Update status badges to show saved values
+        document.querySelectorAll("tr[data-id]").forEach(row => {
+            const studentId = row.dataset.id;
+            const badge = row.querySelector(".badge");
+            const currentStatus = getCurrentStatus(studentId);
+            badge.textContent = currentStatus;
+            badge.className = `badge attendance-badge ${getStatusBadgeClass(currentStatus)}`;
+        });
+
+        // Show results
         if (successCount > 0) {
             showToast(`Successfully saved ${successCount} attendance record(s)`, "success");
         }
@@ -524,9 +606,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if (errorCount > 0) {
             showToast(`Failed to save ${errorCount} record(s)`, "danger");
         }
-
-        // Update save button state
-        saveBtn.disabled = Object.keys(pendingChanges).length === 0;
     });
 
     // --- Summary View Functions ---
@@ -724,11 +803,13 @@ document.addEventListener("DOMContentLoaded", () => {
         searchInput.addEventListener("input", loadAttendance);
     }
 
-    // Refresh button
+    // Refresh button (also clears pending changes)
     if (refreshBtn) {
         refreshBtn.addEventListener("click", () => {
             searchInput.value = "";
             if (filterStatusSelect) filterStatusSelect.value = "";
+            pendingChanges = {};
+            if (saveBtn) saveBtn.disabled = true;
             loadAttendance();
         });
     }

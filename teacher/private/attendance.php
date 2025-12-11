@@ -195,16 +195,15 @@ if (isset($_GET['bid']) && $_GET['bid'] !== $browser_instance_id) {
                     <table class="table table-hover align-middle text-center attendance-table">
                         <thead class="table-light">
                             <tr>
-                                <th class="d-none d-sm-table-cell">#</th>
                                 <th>Student Name</th>
-                                <th>Class</th>
                                 <th>Status</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody id="attendanceTableBody">
+                            <!-- Populated by JavaScript -->
                             <tr>
-                                <td colspan="5" class="text-center text-muted py-4">
+                                <td colspan="3" class="text-center text-muted py-4">
                                     <div class="spinner-border spinner-border-sm text-success me-2" role="status"></div>
                                     Loading attendance data...
                                 </td>
