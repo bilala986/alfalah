@@ -1,9 +1,8 @@
-// teacher/js/attendance.js - UPDATED WITH CLEAR SAVING & WEEKEND CLASS SUPPORT
+// teacher/js/attendance.js - SUMMARY SECTION REMOVED
 document.addEventListener("DOMContentLoaded", () => {
     // Elements
     const attendanceTableBody = document.getElementById("attendanceTableBody");
     const classSelect = document.getElementById("attendanceClassSelect");
-    const summaryClassSelect = document.getElementById("summaryClassSelect");
     const datePicker = document.getElementById("datePicker");
     const todayBtn = document.getElementById("todayBtn");
     const toggleCalendarBtn = document.getElementById("toggleCalendarBtn");
@@ -23,16 +22,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const filterStatusSelect = document.getElementById("attendanceFilterStatus");
     const applyFiltersBtn = document.getElementById("attendanceApplyFilters");
     const clearFiltersBtn = document.getElementById("attendanceClearFilters");
-    
-    // Section toggle elements
-    const entrySection = document.getElementById("attendanceEntrySection");
-    const summarySection = document.getElementById("attendanceSummarySection");
-    const entryBtn = document.getElementById("attendanceEntryBtn");
-    const summaryBtn = document.getElementById("attendanceSummaryBtn");
-
-    const summaryTableContainer = document.getElementById("summaryTableContainer");
-    const summaryStatsContainer = document.getElementById("summaryStatsContainer");
-    const summaryChartsContainer = document.getElementById("summaryChartsContainer");
 
     // Global variables
     let allStudents = [];
@@ -41,8 +30,6 @@ document.addEventListener("DOMContentLoaded", () => {
     let isCalendarVisible = false;
     let pendingChanges = {}; // {studentId: "status"} - "–" means clear/remove
     let savedAttendance = {}; // Track saved attendance for current date/class
-    let currentChart = null;
-    let summaryMonth = new Date();
     let currentClassIsWeekend = false; // Track if current class is a weekend class
 
     // --- Helper Functions ---
@@ -77,12 +64,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const compareDate = new Date(date);
         compareDate.setHours(0, 0, 0, 0);
         return compareDate > today;
-    }
-
-    // Check if date is a weekend (Friday = 5, Saturday = 6, Sunday = 0)
-    function isWeekend(date) {
-        const day = date.getDay();
-        return day === 0 || day === 5 || day === 6; // Sun, Fri, Sat
     }
 
     // Check if class is a weekend class (based on class name)
@@ -138,7 +119,7 @@ document.addEventListener("DOMContentLoaded", () => {
             
             if (data.success) {
                 allClasses = data.classes;
-                updateClassSelects();
+                updateClassSelect();
                 return data.classes;
             } else {
                 showToast("Failed to load classes", "danger");
@@ -215,27 +196,21 @@ document.addEventListener("DOMContentLoaded", () => {
         return urlParams.get('bid') || '';
     }
 
-    function updateClassSelects() {
+    function updateClassSelect() {
         // Clear options
         classSelect.innerHTML = '<option value="">Select Class</option>';
-        summaryClassSelect.innerHTML = '<option value="">Select Class</option>';
         
         // Add classes
         allClasses.forEach(cls => {
             const option = document.createElement('option');
             option.value = cls.id;
             option.textContent = `${cls.class_name} (${cls.year_group})`;
-            
-            const option2 = option.cloneNode(true);
-            
             classSelect.appendChild(option);
-            summaryClassSelect.appendChild(option2);
         });
         
         // Auto-select first class if available
         if (allClasses.length > 0) {
             classSelect.value = allClasses[0].id;
-            summaryClassSelect.value = allClasses[0].id;
             // Check if selected class is a weekend class
             updateCurrentClassType();
         }
@@ -836,193 +811,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // --- Summary View Functions ---
-    function showEntrySection() {
-        entrySection.classList.remove("d-none");
-        summarySection.classList.add("d-none");
-        entryBtn.classList.replace("btn-outline-secondary", "btn-success-modern");
-        summaryBtn.classList.replace("btn-success-modern", "btn-outline-secondary");
-    }
-
-    function showSummarySection() {
-        entrySection.classList.add("d-none");
-        summarySection.classList.remove("d-none");
-        entryBtn.classList.replace("btn-success-modern", "btn-outline-secondary");
-        summaryBtn.classList.replace("btn-outline-secondary", "btn-success-modern");
-        loadSummaryView();
-    }
-
-    async function loadSummaryView() {
-        const classId = summaryClassSelect.value;
-        if (!classId) {
-            summaryTableContainer.innerHTML = `
-                <div class="text-center py-4 text-muted">
-                    <p>Please select a class to view attendance summary</p>
-                </div>`;
-            return;
-        }
-
-        // Get class info to determine if it's a weekend class
-        const selectedClass = allClasses.find(cls => cls.id == classId);
-        const isWeekendClassForSummary = selectedClass ? isWeekendClass(selectedClass.class_name) : false;
-
-        const monthStr = `${summaryMonth.getFullYear()}-${pad(summaryMonth.getMonth() + 1)}`;
-        const monthLabel = summaryMonth.toLocaleString('default', { month: 'long', year: 'numeric' });
-        
-        document.getElementById("summaryMonthLabel").textContent = monthLabel;
-
-        try {
-            const url = `../php/get_monthly_attendance.php?bid=${getBrowserInstanceId()}&month=${monthStr}&class_id=${classId}`;
-            const res = await fetch(url);
-            const data = await res.json();
-
-            if (!data.success) {
-                summaryTableContainer.innerHTML = `
-                    <div class="alert alert-warning">
-                        <i class="bi bi-exclamation-triangle me-2"></i>
-                        ${data.message || 'Failed to load summary data'}
-                    </div>`;
-                return;
-            }
-
-            renderSummaryTable(data.data, monthStr, isWeekendClassForSummary);
-        } catch (err) {
-            console.error("Error loading summary:", err);
-            summaryTableContainer.innerHTML = `
-                <div class="alert alert-danger">
-                    <i class="bi bi-x-circle me-2"></i>
-                    Network error loading attendance summary
-                </div>`;
-        }
-    }
-
-    function renderSummaryTable(data, monthStr, isWeekendClassForSummary = false) {
-        if (!data || data.length === 0) {
-            summaryTableContainer.innerHTML = `
-                <div class="text-center py-4 text-muted">
-                    <i class="bi bi-calendar-x display-6"></i>
-                    <p class="mt-2">No attendance records found for this month</p>
-                </div>`;
-            return;
-        }
-
-        // Get days in month
-        const [year, month] = monthStr.split('-').map(Number);
-        const daysInMonth = new Date(year, month, 0).getDate();
-        const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
-
-        // Create table
-        let html = `
-            <div class="table-responsive">
-                <table class="table table-bordered table-sm">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Student</th>`;
-        
-        // Add day headers
-        days.forEach(day => {
-            const date = new Date(year, month - 1, day);
-            const weekday = date.toLocaleDateString('en-US', { weekday: 'short' });
-            const dayStatus = getDayStatusForSummary(date, isWeekendClassForSummary);
-            
-            html += `<th class="text-center ${!dayStatus.enabled ? 'text-danger' : ''}">${day}<br><small class="text-muted">${weekday}</small></th>`;
-        });
-        
-        html += `<th class="text-center">Total</th></tr></thead><tbody>`;
-
-        // Add student rows
-        data.forEach(student => {
-            let presents = 0;
-            let absents = 0;
-            let totalClasses = 0;
-            
-            html += `<tr><td class="fw-semibold">${student.student_name}</td>`;
-            
-            days.forEach(day => {
-                const date = new Date(year, month - 1, day);
-                const dayStatus = getDayStatusForSummary(date, isWeekendClassForSummary);
-                const status = student.attendance && student.attendance[day] ? student.attendance[day] : '';
-                let cellClass = '';
-                let cellTitle = 'No record';
-                
-                if (!dayStatus.enabled) {
-                    cellClass = 'bg-light';
-                    cellTitle = dayStatus.title;
-                } else if (status === 'Present') {
-                    cellClass = 'bg-success bg-opacity-25';
-                    cellTitle = 'Present';
-                    presents++;
-                    totalClasses++;
-                } else if (status === 'Absent') {
-                    cellClass = 'bg-danger bg-opacity-25';
-                    cellTitle = 'Absent';
-                    absents++;
-                    totalClasses++;
-                } else if (status === 'Late') {
-                    cellClass = 'bg-warning bg-opacity-25';
-                    cellTitle = 'Late';
-                    totalClasses++;
-                } else if (status === 'Excused') {
-                    cellClass = 'bg-info bg-opacity-25';
-                    cellTitle = 'Excused';
-                    totalClasses++;
-                }
-                
-                html += `<td class="text-center ${cellClass}" title="${cellTitle}">`;
-                if (status) {
-                    html += `<i class="bi ${getStatusIcon(status)}"></i>`;
-                } else if (!dayStatus.enabled) {
-                    html += `<small class="text-muted">–</small>`;
-                }
-                html += `</td>`;
-            });
-            
-            // Total column
-            const attendanceRate = totalClasses > 0 ? Math.round((presents / totalClasses) * 100) : 0;
-            html += `<td class="text-center fw-bold ${attendanceRate >= 80 ? 'text-success' : attendanceRate >= 60 ? 'text-warning' : 'text-danger'}">
-                ${attendanceRate}%
-                <br><small class="text-muted">${presents}/${totalClasses}</small>
-            </td></tr>`;
-        });
-        
-        html += `</tbody></table></div>`;
-        
-        summaryTableContainer.innerHTML = html;
-        
-        // Hide student detail section
-        document.getElementById("studentDetailSection").classList.add("d-none");
-    }
-
-    // Helper for summary view
-    function getDayStatusForSummary(date, isWeekendClass) {
-        const day = date.getDay();
-        const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-        
-        if (isWeekendClass) {
-            if (day === 0 || day === 6) {
-                return { enabled: true, title: `${dayNames[day]} - Class day` };
-            } else {
-                return { enabled: false, title: `${dayNames[day]} - No weekend class` };
-            }
-        } else {
-            if (day >= 1 && day <= 4) {
-                return { enabled: true, title: `${dayNames[day]} - Class day` };
-            } else {
-                return { enabled: false, title: `${dayNames[day]} - Weekend - No classes` };
-            }
-        }
-    }
-
-    function getStatusIcon(status) {
-        switch (status) {
-            case 'Present': return 'bi-check-circle-fill text-success';
-            case 'Absent': return 'bi-x-circle-fill text-danger';
-            case 'Late': return 'bi-clock-fill text-warning';
-            case 'Excused': return 'bi-clipboard-check-fill text-info';
-            default: return '';
-        }
-    }
-
     // --- Event Listeners ---
     // Date picker
     if (datePicker) {
@@ -1102,29 +890,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Section toggles
-    if (entryBtn) entryBtn.addEventListener("click", showEntrySection);
-    if (summaryBtn) summaryBtn.addEventListener("click", showSummarySection);
-
-    // Summary view controls
-    if (summaryClassSelect) {
-        summaryClassSelect.addEventListener("change", loadSummaryView);
-    }
-
-    if (document.getElementById("prevMonthBtn")) {
-        document.getElementById("prevMonthBtn").addEventListener("click", () => {
-            summaryMonth.setMonth(summaryMonth.getMonth() - 1);
-            loadSummaryView();
-        });
-    }
-
-    if (document.getElementById("nextMonthBtn")) {
-        document.getElementById("nextMonthBtn").addEventListener("click", () => {
-            summaryMonth.setMonth(summaryMonth.getMonth() + 1);
-            loadSummaryView();
-        });
-    }
-
     // Initialize
     async function init() {
         // Set today's date
@@ -1137,10 +902,6 @@ document.addEventListener("DOMContentLoaded", () => {
         
         // Load initial attendance
         await loadAttendance();
-        
-        // Set summary month label
-        const monthLabel = summaryMonth.toLocaleString('default', { month: 'long', year: 'numeric' });
-        document.getElementById("summaryMonthLabel").textContent = monthLabel;
     }
 
     init();

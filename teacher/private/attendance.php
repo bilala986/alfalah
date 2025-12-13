@@ -136,12 +136,6 @@ if (isset($_GET['bid']) && $_GET['bid'] !== $browser_instance_id) {
         </div>
         <?php endif; ?>
 
-        <!-- Toggle Buttons -->
-        <div class="mb-4 d-flex gap-2">
-            <button id="attendanceEntryBtn" class="btn btn-success-modern">Attendance Entry</button>
-            <button id="attendanceSummaryBtn" class="btn btn-outline-secondary">Attendance Summary</button>
-        </div>
-
         <!-- ATTENDANCE ENTRY SECTION -->
         <div id="attendanceEntrySection" class="container-fluid mt-4">
             <div class="card p-3 shadow-sm">
@@ -217,40 +211,6 @@ if (isset($_GET['bid']) && $_GET['bid'] !== $browser_instance_id) {
                 </div>
             </div>
         </div>
-
-        <!-- ATTENDANCE SUMMARY SECTION -->
-        <div id="attendanceSummarySection" class="d-none container-fluid mt-4">
-            <div class="card shadow-sm p-3">
-                <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
-                    <h4 class="fw-bold mb-0 text-success">Monthly Attendance Summary</h4>
-                    <div class="d-flex align-items-center gap-2">
-                        <select id="summaryClassSelect" class="form-select form-select-sm w-auto">
-                            <option value="">Select Class</option>
-                        </select>
-                        <button id="prevMonthBtn" class="btn btn-outline-success btn-sm">
-                            <i class="bi bi-chevron-left"></i>
-                        </button>
-                        <span id="summaryMonthLabel" class="fw-semibold text-success mx-2"></span>
-                        <button id="nextMonthBtn" class="btn btn-outline-success btn-sm">
-                            <i class="bi bi-chevron-right"></i>
-                        </button>
-                    </div>
-                </div>
-                <div id="summaryTableContainer" class="table-responsive mb-4">
-                    <div class="text-center py-4 text-muted">
-                        <i class="bi bi-calendar-check display-6"></i>
-                        <p class="mt-2">Select a class and month to view attendance summary</p>
-                    </div>
-                </div>
-                <div id="studentDetailSection" class="d-none card p-3 mt-3">
-                    <h5 class="fw-bold mb-3 text-success">
-                        <i class="bi bi-person-circle me-2"></i> Student Statistics
-                    </h5>
-                    <div id="summaryStatsContainer" class="mb-3"></div>
-                    <div id="summaryChartsContainer" class="mb-4"></div>
-                </div>
-            </div>
-        </div>
     </div>
 
     <!-- FILTER MODAL -->
@@ -289,7 +249,6 @@ if (isset($_GET['bid']) && $_GET['bid'] !== $browser_instance_id) {
     </div>
 
     <script src="../../bootstrap/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="../../admin/js/dashboard.js"></script>
     <script src="../js/attendance.js"></script>
 </body>
