@@ -1,14 +1,18 @@
-// teacher/js/attendance.js - SUMMARY SECTION REMOVED
+// teacher/js/attendance.js - WITH DATE NAVIGATION BUTTONS
 document.addEventListener("DOMContentLoaded", () => {
     // Elements
     const attendanceTableBody = document.getElementById("attendanceTableBody");
     const classSelect = document.getElementById("attendanceClassSelect");
-    const datePicker = document.getElementById("datePicker");
     const todayBtn = document.getElementById("todayBtn");
     const toggleCalendarBtn = document.getElementById("toggleCalendarBtn");
     const selectedDateEl = document.getElementById("selectedDate");
+    const selectedWeekdayEl = document.getElementById("selectedWeekday");
     const calendarContainer = document.getElementById("calendarContainer");
     const studentCountEl = document.getElementById("studentCount");
+
+    // Navigation buttons
+    const prevDayBtn = document.getElementById("prevDayBtn");
+    const nextDayBtn = document.getElementById("nextDayBtn");
 
     // Top controls
     const searchInput = document.getElementById("attendanceSearchInput");
@@ -40,7 +44,20 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function toDisplayDate(d) {
-        return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`;
+        const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        
+        const dayOfWeek = dayNames[d.getDay()];
+        const day = d.getDate();
+        const month = monthNames[d.getMonth()];
+        const year = d.getFullYear();
+        
+        return `${day} ${month} ${year}`;
+    }
+
+    function getWeekdayName(d) {
+        const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        return dayNames[d.getDay()];
     }
 
     function showToast(msg, type = "success") {
@@ -108,6 +125,19 @@ document.addEventListener("DOMContentLoaded", () => {
             } else {
                 return { enabled: false, title: `${dayNames[day]} - Weekend - No classes` };
             }
+        }
+    }
+
+    // Navigate to next/previous day - ALWAYS ALLOWED
+    function navigateDay(direction) {
+        const newDate = new Date(selectedAttendanceDate);
+        newDate.setDate(newDate.getDate() + direction);
+        selectedAttendanceDate = newDate;
+        loadAttendance();
+
+        // Update calendar if visible
+        if (isCalendarVisible) {
+            renderCalendar(selectedAttendanceDate);
         }
     }
 
@@ -231,6 +261,37 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    function updateDateDisplay() {
+        // Update date display
+        selectedDateEl.textContent = toDisplayDate(selectedAttendanceDate);
+        selectedWeekdayEl.textContent = getWeekdayName(selectedAttendanceDate);
+
+        // ALWAYS ENABLE navigation buttons regardless of class schedule
+        // Only disable if navigating to future dates
+        const tomorrow = new Date(selectedAttendanceDate);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+
+        if (prevDayBtn) {
+            prevDayBtn.disabled = false;
+            prevDayBtn.title = "Previous day";
+        }
+
+        if (nextDayBtn) {
+            const isTomorrowFuture = isFutureDate(tomorrow);
+            nextDayBtn.disabled = isTomorrowFuture;
+            nextDayBtn.title = isTomorrowFuture ? "Cannot go to future dates" : "Next day";
+        }
+
+        // Update today button - always enabled unless viewing today
+        if (todayBtn) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const isTodayOrPast = selectedAttendanceDate <= today;
+            todayBtn.disabled = !isTodayOrPast;
+            todayBtn.title = !isTodayOrPast ? "Already viewing today or future" : "Go to today";
+        }
+    }
+
     async function loadAttendance() {
         if (!attendanceTableBody) return;
 
@@ -250,12 +311,11 @@ document.addEventListener("DOMContentLoaded", () => {
         const classId = classSelect.value;
         const dateStr = toISODateLocal(selectedAttendanceDate);
         
-        // Update date displays
-        selectedDateEl.textContent = toDisplayDate(selectedAttendanceDate);
-        if (datePicker) datePicker.value = dateStr;
-
         // Update current class type (weekend or regular)
         updateCurrentClassType();
+        
+        // Update date display and navigation buttons
+        updateDateDisplay();
 
         // Fetch data
         const [students, attendanceMap] = await Promise.all([
@@ -305,7 +365,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const dayStatus = getDayStatus(selectedAttendanceDate);
         const isDateEnabled = dayStatus.enabled;
 
-        // Render table (NO # column, NO class column)
+        // Render table
         const frag = document.createDocumentFragment();
 
         filteredStudents.forEach((student) => {
@@ -812,19 +872,37 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // --- Event Listeners ---
-    // Date picker
-    if (datePicker) {
-        datePicker.addEventListener("change", (e) => {
-            selectedAttendanceDate = new Date(e.target.value);
-            loadAttendance();
+    // Previous day button
+    if (prevDayBtn) {
+        prevDayBtn.addEventListener("click", () => {
+            navigateDay(-1);
+        });
+    }
+
+    // Next day button
+    if (nextDayBtn) {
+        nextDayBtn.addEventListener("click", () => {
+            navigateDay(1);
         });
     }
 
     // Today button
     if (todayBtn) {
         todayBtn.addEventListener("click", () => {
-            selectedAttendanceDate = new Date();
+            const today = new Date();
+            // Check if today is enabled for current class
+            const dayStatus = getDayStatus(today);
+            if (!dayStatus.enabled) {
+                showToast(dayStatus.title, "warning");
+                return;
+            }
+            selectedAttendanceDate = today;
             loadAttendance();
+            
+            // Update calendar if visible
+            if (isCalendarVisible) {
+                renderCalendar(selectedAttendanceDate);
+            }
         });
     }
 
@@ -894,8 +972,6 @@ document.addEventListener("DOMContentLoaded", () => {
     async function init() {
         // Set today's date
         selectedAttendanceDate = new Date();
-        selectedDateEl.textContent = toDisplayDate(selectedAttendanceDate);
-        if (datePicker) datePicker.value = toISODateLocal(selectedAttendanceDate);
         
         // Load classes
         await fetchTeacherClasses();

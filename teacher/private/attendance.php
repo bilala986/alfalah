@@ -64,6 +64,29 @@ if (isset($_GET['bid']) && $_GET['bid'] !== $browser_instance_id) {
             height: 42px;
         }
         
+        .date-navigation {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .date-navigation button {
+            width: 36px;
+            height: 36px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .date-display {
+            font-size: 1.1rem;
+            font-weight: 600;
+            min-width: 120px;
+            text-align: center;
+        }
+        
         @media (max-width: 768px) {
             .btn-attendance-toggle {
                 padding: 0.25rem 0.5rem;
@@ -72,6 +95,15 @@ if (isset($_GET['bid']) && $_GET['bid'] !== $browser_instance_id) {
             
             .table-responsive {
                 font-size: 0.9rem;
+            }
+            
+            .date-navigation {
+                flex-direction: column;
+                gap: 5px;
+            }
+            
+            .date-display {
+                min-width: auto;
             }
         }
     </style>
@@ -163,20 +195,31 @@ if (isset($_GET['bid']) && $_GET['bid'] !== $browser_instance_id) {
                 <!-- Date Controls -->
                 <div class="row mb-3 align-items-center">
                     <div class="col-12 col-md-4 d-flex justify-content-start">
-                        <div class="input-group" style="max-width: 250px;">
-                            <span class="input-group-text"><i class="bi bi-calendar"></i></span>
-                            <input type="date" id="datePicker" class="form-control form-control-sm">
-                            <button id="todayBtn" class="btn btn-outline-success btn-sm" title="Today">
-                                Today
+                        <!-- Calendar toggle button only -->
+                        <button id="toggleCalendarBtn" class="btn btn-outline-success btn-sm">
+                            <i class="bi bi-calendar-week"></i> Show Calendar
+                        </button>
+                    </div>
+                    <div class="col-12 col-md-4 d-flex justify-content-center align-items-center">
+                        <!-- Date navigation with Previous/Next buttons -->
+                        <div class="date-navigation">
+                            <button id="prevDayBtn" class="btn btn-outline-secondary" title="Previous day">
+                                <i class="bi bi-chevron-left"></i>
+                            </button>
+                            <div class="date-display text-success">
+                                <span id="selectedDate"></span>
+                                <br>
+                                <small id="selectedWeekday" class="text-muted"></small>
+                            </div>
+                            <button id="nextDayBtn" class="btn btn-outline-secondary" title="Next day">
+                                <i class="bi bi-chevron-right"></i>
                             </button>
                         </div>
                     </div>
-                    <div class="col-12 col-md-4 d-flex justify-content-center align-items-center">
-                        <span id="selectedDate" class="fw-bold text-success"></span>
-                    </div>
                     <div class="col-12 col-md-4 d-flex justify-content-end">
-                        <button id="toggleCalendarBtn" class="btn btn-outline-success btn-sm">
-                            <i class="bi bi-calendar-week"></i> Show Calendar
+                        <!-- Today Button -->
+                        <button id="todayBtn" class="btn btn-outline-success btn-sm" title="Go to Today">
+                            <i class="bi bi-calendar-day"></i> Today
                         </button>
                     </div>
                 </div>
