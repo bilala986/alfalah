@@ -87,6 +87,46 @@ if (isset($_GET['bid']) && $_GET['bid'] !== $browser_instance_id) {
             text-align: center;
         }
         
+        /* Mobile Optimized Controls */
+        .mobile-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .search-container, .class-container {
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        
+        .button-row {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 5px;
+        }
+        
+        .button-row .btn {
+            flex: 0 0 auto;
+        }
+        
+        .date-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin: 15px 0 5px 0;
+        }
+        
+        .today-row {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+        
         @media (max-width: 768px) {
             .btn-attendance-toggle {
                 padding: 0.25rem 0.5rem;
@@ -98,12 +138,52 @@ if (isset($_GET['bid']) && $_GET['bid'] !== $browser_instance_id) {
             }
             
             .date-navigation {
-                flex-direction: column;
                 gap: 5px;
             }
             
             .date-display {
-                min-width: auto;
+                min-width: 100px;
+                font-size: 1rem;
+            }
+            
+            .button-row .btn {
+                padding: 0.25rem 0.5rem;
+                font-size: 0.8rem;
+            }
+            
+            .today-row .btn {
+                padding: 0.25rem 0.75rem;
+                font-size: 0.85rem;
+            }
+            
+            .date-navigation button {
+                width: 32px;
+                height: 32px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .date-display {
+                min-width: 80px;
+                font-size: 0.9rem;
+            }
+            
+            .date-navigation {
+                gap: 3px;
+            }
+            
+            .date-navigation button {
+                width: 28px;
+                height: 28px;
+            }
+            
+            .button-row {
+                gap: 5px;
+            }
+            
+            .button-row .btn {
+                padding: 0.2rem 0.4rem;
+                font-size: 0.75rem;
             }
         }
     </style>
@@ -171,15 +251,28 @@ if (isset($_GET['bid']) && $_GET['bid'] !== $browser_instance_id) {
         <!-- ATTENDANCE ENTRY SECTION -->
         <div id="attendanceEntrySection" class="container-fluid mt-4">
             <div class="card p-3 shadow-sm">
-                <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 top-controls">
-                    <div class="input-group me-3 mb-2" style="max-width: 300px;">
-                        <span class="input-group-text"><i class="bi bi-search"></i></span>
-                        <input id="attendanceSearchInput" type="text" class="form-control" placeholder="Search student name...">
+                <!-- Mobile Optimized Controls -->
+                <div class="mobile-controls">
+                    <!-- Search Bar - Centered, most but not all width -->
+                    <div class="search-container">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-search"></i></span>
+                            <input id="attendanceSearchInput" type="text" class="form-control" placeholder="Search student name...">
+                        </div>
                     </div>
-                    <div class="d-flex align-items-center gap-2 mb-2">
-                        <select id="attendanceClassSelect" class="form-select form-select-sm w-auto">
+                    
+                    <!-- Class Dropdown - Same width as search bar -->
+                    <div class="class-container">
+                        <select id="attendanceClassSelect" class="form-select">
                             <option value="">Select Class</option>
                         </select>
+                    </div>
+                    
+                    <!-- Action Buttons Row -->
+                    <div class="button-row">
+                        <button id="toggleCalendarBtn" class="btn btn-outline-success btn-sm" title="Show/Hide Calendar">
+                            <i class="bi bi-calendar-week"></i> Calendar
+                        </button>
                         <button id="attendanceRefreshBtn" class="btn btn-outline-secondary btn-sm" title="Refresh">
                             <i class="bi bi-arrow-clockwise"></i>
                         </button>
@@ -190,34 +283,24 @@ if (isset($_GET['bid']) && $_GET['bid'] !== $browser_instance_id) {
                             <i class="bi bi-save"></i> Save
                         </button>
                     </div>
-                </div>
-
-                <!-- Date Controls -->
-                <div class="row mb-3 align-items-center">
-                    <div class="col-12 col-md-4 d-flex justify-content-start">
-                        <!-- Calendar toggle button only -->
-                        <button id="toggleCalendarBtn" class="btn btn-outline-success btn-sm">
-                            <i class="bi bi-calendar-week"></i> Show Calendar
+                    
+                    <!-- Date Navigation Row -->
+                    <div class="date-row">
+                        <button id="prevDayBtn" class="btn btn-outline-secondary" title="Previous day">
+                            <i class="bi bi-chevron-left"></i>
+                        </button>
+                        <div class="date-display text-success">
+                            <span id="selectedDate"></span>
+                            <br>
+                            <small id="selectedWeekday" class="text-muted"></small>
+                        </div>
+                        <button id="nextDayBtn" class="btn btn-outline-secondary" title="Next day">
+                            <i class="bi bi-chevron-right"></i>
                         </button>
                     </div>
-                    <div class="col-12 col-md-4 d-flex justify-content-center align-items-center">
-                        <!-- Date navigation with Previous/Next buttons -->
-                        <div class="date-navigation">
-                            <button id="prevDayBtn" class="btn btn-outline-secondary" title="Previous day">
-                                <i class="bi bi-chevron-left"></i>
-                            </button>
-                            <div class="date-display text-success">
-                                <span id="selectedDate"></span>
-                                <br>
-                                <small id="selectedWeekday" class="text-muted"></small>
-                            </div>
-                            <button id="nextDayBtn" class="btn btn-outline-secondary" title="Next day">
-                                <i class="bi bi-chevron-right"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="col-12 col-md-4 d-flex justify-content-end">
-                        <!-- Today Button -->
+                    
+                    <!-- Today Button Row -->
+                    <div class="today-row">
                         <button id="todayBtn" class="btn btn-outline-success btn-sm" title="Go to Today">
                             <i class="bi bi-calendar-day"></i> Today
                         </button>
@@ -227,7 +310,7 @@ if (isset($_GET['bid']) && $_GET['bid'] !== $browser_instance_id) {
                 <!-- Calendar Container -->
                 <div id="calendarContainer" class="mt-2 mb-4" style="display:none;"></div>
 
-                <!-- Attendance Table -->
+                <!-- Attendance Table (Remains Perfect!) -->
                 <div class="table-responsive mt-3">
                     <table class="table table-hover align-middle text-center attendance-table">
                         <thead class="table-light">
