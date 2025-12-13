@@ -411,29 +411,34 @@ if (isset($_GET['bid']) && $_GET['bid'] !== $browser_instance_id) {
                     </div>
                 </div>
 
-                <!-- Legend -->
+                <!-- Alternative: Simple colored circles -->
                 <div class="row mb-3">
                     <div class="col-12">
-                        <div class="d-flex flex-wrap gap-2 justify-content-center">
+                        <div class="d-flex flex-wrap gap-3 justify-content-center">
                             <div class="d-flex align-items-center">
-                                <span class="badge bg-success me-1" style="width: 20px; height: 20px;"></span>
-                                <small>Present</small>
+                                <span class="rounded-circle me-2" 
+                                      style="width: 15px; height: 15px; background-color: #28a745;"></span>
+                                <small class="fw-medium">Present</small>
                             </div>
                             <div class="d-flex align-items-center">
-                                <span class="badge bg-danger me-1" style="width: 20px; height: 20px;"></span>
-                                <small>Absent</small>
+                                <span class="rounded-circle me-2" 
+                                      style="width: 15px; height: 15px; background-color: #dc3545;"></span>
+                                <small class="fw-medium">Absent</small>
                             </div>
                             <div class="d-flex align-items-center">
-                                <span class="badge bg-warning me-1" style="width: 20px; height: 20px;"></span>
-                                <small>Late</small>
+                                <span class="rounded-circle me-2" 
+                                      style="width: 15px; height: 15px; background-color: #ffc107;"></span>
+                                <small class="fw-medium">Late</small>
                             </div>
                             <div class="d-flex align-items-center">
-                                <span class="badge bg-info me-1" style="width: 20px; height: 20px;"></span>
-                                <small>Excused</small>
+                                <span class="rounded-circle me-2" 
+                                      style="width: 15px; height: 15px; background-color: #17a2b8;"></span>
+                                <small class="fw-medium">Excused</small>
                             </div>
                             <div class="d-flex align-items-center">
-                                <span class="badge bg-secondary me-1" style="width: 20px; height: 20px;"></span>
-                                <small>No Record</small>
+                                <span class="rounded-circle me-2" 
+                                      style="width: 15px; height: 15px; background-color: #6c757d;"></span>
+                                <small class="fw-medium">No Record</small>
                             </div>
                         </div>
                     </div>
