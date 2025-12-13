@@ -1,4 +1,4 @@
-// teacher/js/attendance.js - WITH DATE NAVIGATION BUTTONS
+// teacher/js/attendance.js - COMPLETE VERSION WITH BOTH TABS
 document.addEventListener("DOMContentLoaded", () => {
     // Elements
     const attendanceTableBody = document.getElementById("attendanceTableBody");
@@ -9,6 +9,19 @@ document.addEventListener("DOMContentLoaded", () => {
     const selectedWeekdayEl = document.getElementById("selectedWeekday");
     const calendarContainer = document.getElementById("calendarContainer");
     const studentCountEl = document.getElementById("studentCount");
+    const entryTabBtn = document.getElementById("entryTabBtn");
+    const summaryTabBtn = document.getElementById("summaryTabBtn");
+    const attendanceEntrySection = document.getElementById("attendanceEntrySection");
+    const attendanceSummarySection = document.getElementById("attendanceSummarySection");
+    const prevMonthBtn = document.getElementById("prevMonthBtn");
+    const nextMonthBtn = document.getElementById("nextMonthBtn");
+    const monthYearDisplay = document.getElementById("monthYearDisplay");
+    const summaryClassSelect = document.getElementById("summaryClassSelect");
+    const summaryTable = document.getElementById("summaryTable");
+    const summaryTableBody = document.getElementById("summaryTableBody");
+    const totalPresentEl = document.getElementById("totalPresent");
+    const totalAbsentEl = document.getElementById("totalAbsent");
+    const attendanceRateEl = document.getElementById("attendanceRate");
 
     // Navigation buttons
     const prevDayBtn = document.getElementById("prevDayBtn");
@@ -32,9 +45,13 @@ document.addEventListener("DOMContentLoaded", () => {
     let allClasses = [];
     let selectedAttendanceDate = new Date();
     let isCalendarVisible = false;
-    let pendingChanges = {}; // {studentId: "status"} - "–" means clear/remove
-    let savedAttendance = {}; // Track saved attendance for current date/class
-    let currentClassIsWeekend = false; // Track if current class is a weekend class
+    let pendingChanges = {};
+    let savedAttendance = {};
+    let currentClassIsWeekend = false;
+    
+    let summaryCurrentMonth = new Date();
+    let summaryCurrentClassId = null;
+    let summaryIsWeekendClass = false;
 
     // --- Helper Functions ---
     function pad(n) { return String(n).padStart(2, "0"); }
@@ -74,7 +91,6 @@ document.addEventListener("DOMContentLoaded", () => {
         setTimeout(() => div.remove(), 3200);
     }
 
-    // Check if date is in the future
     function isFutureDate(date) {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
@@ -83,7 +99,6 @@ document.addEventListener("DOMContentLoaded", () => {
         return compareDate > today;
     }
 
-    // Check if class is a weekend class (based on class name)
     function isWeekendClass(className) {
         if (!className) return false;
         const lowerName = className.toLowerCase();
@@ -95,20 +110,16 @@ document.addEventListener("DOMContentLoaded", () => {
                lowerName.includes('sun');
     }
 
-    // Check if a specific day should be enabled for the current class
     function shouldEnableDay(date) {
         const day = date.getDay();
         
         if (currentClassIsWeekend) {
-            // Weekend classes: Enable only Saturday (6) and Sunday (0), disable others
-            return day === 0 || day === 6; // Sun = 0, Sat = 6
+            return day === 0 || day === 6;
         } else {
-            // Regular classes: Enable Mon-Thu, disable weekends
-            return day >= 1 && day <= 4; // Mon = 1, Tue = 2, Wed = 3, Thu = 4
+            return day >= 1 && day <= 4;
         }
     }
 
-    // Get day status for display
     function getDayStatus(date) {
         const day = date.getDay();
         const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -128,14 +139,12 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // Navigate to next/previous day - ALWAYS ALLOWED
     function navigateDay(direction) {
         const newDate = new Date(selectedAttendanceDate);
         newDate.setDate(newDate.getDate() + direction);
         selectedAttendanceDate = newDate;
         loadAttendance();
 
-        // Update calendar if visible
         if (isCalendarVisible) {
             renderCalendar(selectedAttendanceDate);
         }
@@ -150,6 +159,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (data.success) {
                 allClasses = data.classes;
                 updateClassSelect();
+                populateSummaryClassSelect();
                 return data.classes;
             } else {
                 showToast("Failed to load classes", "danger");
@@ -199,10 +209,8 @@ document.addEventListener("DOMContentLoaded", () => {
             const data = await res.json();
             
             if (data.success) {
-                // Convert attendance map to simple status strings
                 const simpleMap = {};
                 Object.entries(data.attendance).forEach(([studentId, attendanceData]) => {
-                    // Handle both string status and object with status property
                     if (typeof attendanceData === 'string') {
                         simpleMap[studentId] = attendanceData;
                     } else if (attendanceData && attendanceData.status) {
@@ -227,10 +235,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function updateClassSelect() {
-        // Clear options
+        if (!classSelect) return;
+        
         classSelect.innerHTML = '<option value="">Select Class</option>';
         
-        // Add classes
         allClasses.forEach(cls => {
             const option = document.createElement('option');
             option.value = cls.id;
@@ -238,16 +246,14 @@ document.addEventListener("DOMContentLoaded", () => {
             classSelect.appendChild(option);
         });
         
-        // Auto-select first class if available
         if (allClasses.length > 0) {
             classSelect.value = allClasses[0].id;
-            // Check if selected class is a weekend class
             updateCurrentClassType();
         }
     }
 
     function updateCurrentClassType() {
-        const selectedClassId = classSelect.value;
+        const selectedClassId = classSelect ? classSelect.value : null;
         if (!selectedClassId) {
             currentClassIsWeekend = false;
             return;
@@ -262,14 +268,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function updateDateDisplay() {
-        // Update date display
+        if (!selectedDateEl || !selectedWeekdayEl) return;
+        
         selectedDateEl.textContent = toDisplayDate(selectedAttendanceDate);
         selectedWeekdayEl.textContent = getWeekdayName(selectedAttendanceDate);
-
-        // ALWAYS ENABLE navigation buttons regardless of class schedule
-        // Only disable if navigating to future dates
-        const tomorrow = new Date(selectedAttendanceDate);
-        tomorrow.setDate(tomorrow.getDate() + 1);
 
         if (prevDayBtn) {
             prevDayBtn.disabled = false;
@@ -277,12 +279,13 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         if (nextDayBtn) {
+            const tomorrow = new Date(selectedAttendanceDate);
+            tomorrow.setDate(tomorrow.getDate() + 1);
             const isTomorrowFuture = isFutureDate(tomorrow);
             nextDayBtn.disabled = isTomorrowFuture;
             nextDayBtn.title = isTomorrowFuture ? "Cannot go to future dates" : "Next day";
         }
 
-        // Update today button - always enabled unless viewing today
         if (todayBtn) {
             const today = new Date();
             today.setHours(0, 0, 0, 0);
@@ -295,7 +298,6 @@ document.addEventListener("DOMContentLoaded", () => {
     async function loadAttendance() {
         if (!attendanceTableBody) return;
 
-        // Show loading
         attendanceTableBody.innerHTML = `
             <tr>
                 <td colspan="3" class="text-center text-muted py-4">
@@ -304,29 +306,22 @@ document.addEventListener("DOMContentLoaded", () => {
                 </td>
             </tr>`;
 
-        // Clear pending changes when loading new data
         pendingChanges = {};
         if (saveBtn) saveBtn.disabled = true;
 
-        const classId = classSelect.value;
+        const classId = classSelect ? classSelect.value : null;
         const dateStr = toISODateLocal(selectedAttendanceDate);
         
-        // Update current class type (weekend or regular)
         updateCurrentClassType();
-        
-        // Update date display and navigation buttons
         updateDateDisplay();
 
-        // Fetch data
         const [students, attendanceMap] = await Promise.all([
             fetchTeacherStudents(classId),
             fetchAttendance(classId, dateStr)
         ]);
 
-        // Store saved attendance for reference
         savedAttendance = { ...attendanceMap };
 
-        // Filter students by search
         let filteredStudents = students;
         const searchTerm = searchInput?.value.trim().toLowerCase();
         if (searchTerm) {
@@ -336,7 +331,6 @@ document.addEventListener("DOMContentLoaded", () => {
             );
         }
 
-        // Filter by status if set
         const filterStatus = filterStatusSelect?.value;
         if (filterStatus) {
             filteredStudents = filteredStudents.filter(s => {
@@ -345,7 +339,6 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         }
 
-        // Update student count
         studentCountEl.textContent = filteredStudents.length;
 
         if (!filteredStudents.length) {
@@ -358,14 +351,10 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        // Check if current date is in the future
         const isFuture = isFutureDate(selectedAttendanceDate);
-
-        // Check if current date is enabled for this class type
         const dayStatus = getDayStatus(selectedAttendanceDate);
         const isDateEnabled = dayStatus.enabled;
 
-        // Render table
         const frag = document.createDocumentFragment();
 
         filteredStudents.forEach((student) => {
@@ -375,7 +364,6 @@ document.addEventListener("DOMContentLoaded", () => {
             row.dataset.id = student.id;
             row.dataset.classId = student.class_id;
 
-            // Student Name ONLY
             const nameCell = document.createElement("td");
             nameCell.textContent = student.full_name;
             if (student.admission_id) {
@@ -383,7 +371,6 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             row.appendChild(nameCell);
 
-            // Status badge
             const statusCell = document.createElement("td");
             const badge = document.createElement("span");
             badge.className = "badge attendance-badge " + getStatusBadgeClass(currentStatus);
@@ -391,12 +378,10 @@ document.addEventListener("DOMContentLoaded", () => {
             statusCell.appendChild(badge);
             row.appendChild(statusCell);
 
-            // Actions (buttons are always outline/stroked, not filled)
             const actionsCell = document.createElement("td");
             const actionsDiv = document.createElement("div");
             actionsDiv.className = "d-flex gap-2 justify-content-center";
 
-            // Action buttons - always outline style
             const statuses = [
                 { value: "Present", class: "success", icon: "bi-check-circle" },
                 { value: "Absent", class: "danger", icon: "bi-x-circle" },
@@ -411,7 +396,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 btn.dataset.status = statusOption.value;
                 btn.title = `Mark as ${statusOption.value}`;
                 
-                // Disable buttons for future dates or disabled days
                 if (isFuture || !isDateEnabled) {
                     btn.disabled = true;
                     btn.classList.add("opacity-50");
@@ -421,7 +405,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 icon.className = `bi ${statusOption.icon}`;
                 btn.appendChild(icon);
                 
-                // Highlight if this is the PENDING status for this student
                 if (pendingChanges[student.id] === statusOption.value) {
                     btn.classList.add(`btn-${statusOption.class}`);
                     btn.classList.remove(`btn-outline-${statusOption.class}`);
@@ -430,14 +413,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 actionsDiv.appendChild(btn);
             });
 
-            // ADD CLEAR BUTTON (after Excused button)
             const clearBtn = document.createElement("button");
             clearBtn.type = "button";
             clearBtn.className = `btn btn-sm btn-outline-secondary btn-clear-attendance`;
             clearBtn.dataset.studentId = student.id;
             clearBtn.title = "Clear status (set to –)";
             
-            // Disable clear button for future dates or disabled days
             if (isFuture || !isDateEnabled) {
                 clearBtn.disabled = true;
                 clearBtn.classList.add("opacity-50");
@@ -457,7 +438,6 @@ document.addEventListener("DOMContentLoaded", () => {
         attendanceTableBody.innerHTML = "";
         attendanceTableBody.appendChild(frag);
         
-        // Update save button state (disable for future dates or disabled days)
         if (saveBtn) {
             saveBtn.disabled = Object.keys(pendingChanges).length === 0 || isFuture || !isDateEnabled;
             if (isFuture) {
@@ -473,18 +453,13 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // Helper to get current status (pending or saved)
     function getCurrentStatus(studentId) {
-        // First check pending changes
         if (pendingChanges[studentId]) {
-            // If pending change is "–", it means clear/remove
             return pendingChanges[studentId] === "–" ? "–" : pendingChanges[studentId];
         }
-        // Then check saved attendance
         if (savedAttendance[studentId]) {
             return savedAttendance[studentId];
         }
-        // Default to dash
         return "–";
     }
 
@@ -499,7 +474,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // --- Calendar Functions (Dynamic based on class type) ---
+    // --- Calendar Functions ---
     function renderCalendar(date) {
         if (!calendarContainer) return;
         calendarContainer.innerHTML = "";
@@ -514,7 +489,6 @@ document.addEventListener("DOMContentLoaded", () => {
             "July", "August", "September", "October", "November", "December"
         ];
 
-        // Container for calendar with max width
         const calendarWrapper = document.createElement("div");
         calendarWrapper.style.maxWidth = "400px";
         calendarWrapper.style.margin = "0 auto";
@@ -524,7 +498,6 @@ document.addEventListener("DOMContentLoaded", () => {
         calendarWrapper.style.backgroundColor = "white";
         calendarWrapper.style.boxShadow = "0 2px 8px rgba(0,0,0,0.1)";
 
-        // Header with navigation (centered)
         const header = document.createElement("div");
         header.className = "d-flex justify-content-between align-items-center mb-3";
 
@@ -551,7 +524,6 @@ document.addEventListener("DOMContentLoaded", () => {
         header.appendChild(nextBtn);
         calendarWrapper.appendChild(header);
 
-        // Weekday headers (smaller)
         const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
         const weekdayRow = document.createElement("div");
         weekdayRow.className = "d-flex mb-2";
@@ -564,10 +536,9 @@ document.addEventListener("DOMContentLoaded", () => {
             dayCell.style.fontSize = "0.85rem";
             dayCell.textContent = day;
             
-            // Color code based on class type
-            const dayStatus = getDayStatus(new Date(year, month, index + 1)); // Rough estimate
+            const dayStatus = getDayStatus(new Date(year, month, index + 1));
             if (!dayStatus.enabled) {
-                dayCell.style.color = "#dc3545"; // Red for disabled days
+                dayCell.style.color = "#dc3545";
             }
             
             weekdayRow.appendChild(dayCell);
@@ -575,25 +546,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
         calendarWrapper.appendChild(weekdayRow);
 
-        // Days grid (smaller cells)
         const grid = document.createElement("div");
         grid.style.display = "grid";
         grid.style.gridTemplateColumns = "repeat(7, 1fr)";
         grid.style.gap = "2px";
 
-        // Empty cells for days before the first of the month
         for (let i = 0; i < firstDay; i++) {
             const empty = document.createElement("div");
             empty.style.height = "35px";
             grid.appendChild(empty);
         }
 
-        // Day cells (smaller)
         for (let day = 1; day <= lastDay; day++) {
             const dayCell = document.createElement("button");
             const cellDate = new Date(year, month, day);
             
-            // Check if this day should be enabled for current class type
             const dayStatus = getDayStatus(cellDate);
             const isEnabled = dayStatus.enabled;
             
@@ -604,7 +571,6 @@ document.addEventListener("DOMContentLoaded", () => {
             dayCell.textContent = day;
             dayCell.title = dayStatus.title;
             
-            // Style disabled days differently
             if (!isEnabled) {
                 dayCell.style.color = "#dc3545";
                 dayCell.style.opacity = "0.6";
@@ -612,14 +578,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 dayCell.disabled = true;
             }
             
-            // Highlight today
             const today = new Date();
             if (cellDate.toDateString() === today.toDateString() && isEnabled) {
                 dayCell.classList.add("btn-success", "text-white");
                 dayCell.classList.remove("btn-outline-secondary", "btn-light");
             }
 
-            // Highlight selected date
             if (cellDate.toDateString() === selectedAttendanceDate.toDateString()) {
                 if (isEnabled) {
                     dayCell.classList.add("selected-date-btn");
@@ -631,7 +595,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 dayCell.addEventListener("click", () => {
                     selectedAttendanceDate = cellDate;
                     loadAttendance();
-                    renderCalendar(date); // Re-render to update highlight
+                    renderCalendar(date);
                 });
             }
 
@@ -645,28 +609,23 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // --- Attendance Marking ---
     document.addEventListener("click", (e) => {
-        // Handle clear button click
         const clearBtn = e.target.closest(".btn-clear-attendance");
         if (clearBtn) {
             const studentId = clearBtn.dataset.studentId;
             
-            // Check if date is in the future
             if (isFutureDate(selectedAttendanceDate)) {
                 showToast("Cannot modify attendance for future dates", "warning");
                 return;
             }
             
-            // Check if date is enabled for this class type
             const dayStatus = getDayStatus(selectedAttendanceDate);
             if (!dayStatus.enabled) {
                 showToast(dayStatus.title, "warning");
                 return;
             }
             
-            // Set pending change to "–" which means clear/remove
             pendingChanges[studentId] = "–";
             
-            // Update ALL buttons in this row to outline style
             const row = clearBtn.closest("tr");
             const allButtons = row.querySelectorAll(".btn-attendance-toggle");
             allButtons.forEach(btn => {
@@ -676,27 +635,22 @@ document.addEventListener("DOMContentLoaded", () => {
                 btn.classList.add(`btn-outline-${colorClass}`);
             });
             
-            // Update the status badge to dash
             const badge = row.querySelector(".badge");
             badge.textContent = "–";
             badge.className = `badge attendance-badge text-bg-secondary`;
             
-            // Update save button state
             if (saveBtn) saveBtn.disabled = Object.keys(pendingChanges).length === 0;
             return;
         }
         
-        // Handle attendance toggle button click
         const toggleBtn = e.target.closest(".btn-attendance-toggle");
         if (!toggleBtn) return;
         
-        // Check if date is in the future
         if (isFutureDate(selectedAttendanceDate)) {
             showToast("Cannot modify attendance for future dates", "warning");
             return;
         }
         
-        // Check if date is enabled for this class type
         const dayStatus = getDayStatus(selectedAttendanceDate);
         if (!dayStatus.enabled) {
             showToast(dayStatus.title, "warning");
@@ -707,41 +661,33 @@ document.addEventListener("DOMContentLoaded", () => {
         const studentId = row.dataset.id;
         const newStatus = toggleBtn.dataset.status;
 
-        // Get current pending status (if any)
         const currentPendingStatus = pendingChanges[studentId];
         
-        // If clicking the same status, remove the pending change
         if (currentPendingStatus === newStatus) {
             delete pendingChanges[studentId];
         } else {
-            // Set the new pending status
             pendingChanges[studentId] = newStatus;
         }
 
-        // Update ALL buttons in this row to show pending status visually
         const allButtons = row.querySelectorAll(".btn-attendance-toggle");
         allButtons.forEach(btn => {
             const btnStatus = btn.dataset.status;
             const colorClass = getColorClass(btnStatus);
             
-            // Reset all buttons to outline style first
             btn.classList.remove(`btn-${colorClass}`);
             btn.classList.add(`btn-outline-${colorClass}`);
             
-            // Then fill the button if it matches the pending status
             if (pendingChanges[studentId] === btnStatus) {
                 btn.classList.remove(`btn-outline-${colorClass}`);
                 btn.classList.add(`btn-${colorClass}`);
             }
         });
 
-        // Update the status badge
         const badge = row.querySelector(".badge");
         const displayStatus = getCurrentStatus(studentId);
         badge.textContent = displayStatus;
         badge.className = `badge attendance-badge ${getStatusBadgeClass(displayStatus)}`;
 
-        // Update save button state
         if (saveBtn) saveBtn.disabled = Object.keys(pendingChanges).length === 0;
     });
 
@@ -757,13 +703,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Save attendance
     saveBtn?.addEventListener("click", async () => {
-        // Check if date is in the future
         if (isFutureDate(selectedAttendanceDate)) {
             showToast("Cannot save attendance for future dates", "warning");
             return;
         }
         
-        // Check if date is enabled for this class type
         const dayStatus = getDayStatus(selectedAttendanceDate);
         if (!dayStatus.enabled) {
             showToast(dayStatus.title, "warning");
@@ -774,18 +718,16 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!changes.length) return;
 
         const dateStr = toISODateLocal(selectedAttendanceDate);
-        const classId = classSelect.value;
+        const classId = classSelect ? classSelect.value : null;
         let successCount = 0;
         let errorCount = 0;
 
-        // Show loading on save button
         const originalText = saveBtn.innerHTML;
         saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Saving...';
         saveBtn.disabled = true;
 
         for (const [studentId, status] of changes) {
             try {
-                // Get student data
                 const student = allStudents.find(s => s.id == studentId);
                 if (!student) {
                     console.error(`Student ${studentId} not found`);
@@ -797,10 +739,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 formData.append("student_id", studentId);
                 formData.append("class_id", student.class_id || classId);
                 
-                // If status is "–" (dash), we need to remove the attendance record
-                // We'll send a special status that PHP can interpret as "remove"
                 if (status === "–") {
-                    formData.append("status", "remove"); // Special value for removal
+                    formData.append("status", "remove");
                 } else {
                     formData.append("status", status);
                 }
@@ -816,9 +756,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 
                 if (data.success) {
                     successCount++;
-                    // Update saved attendance
                     if (status === "–") {
-                        // Remove from saved attendance
                         delete savedAttendance[studentId];
                     } else {
                         savedAttendance[studentId] = status;
@@ -837,14 +775,11 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         }
 
-        // Clear pending changes
         pendingChanges = {};
         
-        // Restore save button
         saveBtn.innerHTML = originalText;
         saveBtn.disabled = true;
         
-        // Reset all action buttons to outline style
         document.querySelectorAll(".btn-attendance-toggle").forEach(btn => {
             const btnStatus = btn.dataset.status;
             const colorClass = getColorClass(btnStatus);
@@ -852,7 +787,6 @@ document.addEventListener("DOMContentLoaded", () => {
             btn.classList.add(`btn-outline-${colorClass}`);
         });
 
-        // Update status badges to show saved values
         document.querySelectorAll("tr[data-id]").forEach(row => {
             const studentId = row.dataset.id;
             const badge = row.querySelector(".badge");
@@ -861,7 +795,6 @@ document.addEventListener("DOMContentLoaded", () => {
             badge.className = `badge attendance-badge ${getStatusBadgeClass(currentStatus)}`;
         });
 
-        // Show results
         if (successCount > 0) {
             showToast(`Successfully saved ${successCount} attendance record(s)`, "success");
         }
@@ -872,25 +805,17 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // --- Event Listeners ---
-    // Previous day button
     if (prevDayBtn) {
-        prevDayBtn.addEventListener("click", () => {
-            navigateDay(-1);
-        });
+        prevDayBtn.addEventListener("click", () => navigateDay(-1));
     }
 
-    // Next day button
     if (nextDayBtn) {
-        nextDayBtn.addEventListener("click", () => {
-            navigateDay(1);
-        });
+        nextDayBtn.addEventListener("click", () => navigateDay(1));
     }
 
-    // Today button
     if (todayBtn) {
         todayBtn.addEventListener("click", () => {
             const today = new Date();
-            // Check if today is enabled for current class
             const dayStatus = getDayStatus(today);
             if (!dayStatus.enabled) {
                 showToast(dayStatus.title, "warning");
@@ -899,14 +824,12 @@ document.addEventListener("DOMContentLoaded", () => {
             selectedAttendanceDate = today;
             loadAttendance();
             
-            // Update calendar if visible
             if (isCalendarVisible) {
                 renderCalendar(selectedAttendanceDate);
             }
         });
     }
 
-    // Calendar toggle
     if (toggleCalendarBtn) {
         toggleCalendarBtn.addEventListener("click", () => {
             isCalendarVisible = !isCalendarVisible;
@@ -920,22 +843,17 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Class select change - reload with new class type
     if (classSelect) {
         classSelect.addEventListener("change", () => {
-            // Update current class type first
             updateCurrentClassType();
-            // Then load attendance
             loadAttendance();
         });
     }
 
-    // Search input
     if (searchInput) {
         searchInput.addEventListener("input", loadAttendance);
     }
 
-    // Refresh button (also clears pending changes)
     if (refreshBtn) {
         refreshBtn.addEventListener("click", () => {
             searchInput.value = "";
@@ -946,12 +864,10 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Filter button
     if (filterBtn) {
         filterBtn.addEventListener("click", () => filterModal?.show());
     }
 
-    // Apply filters
     if (applyFiltersBtn) {
         applyFiltersBtn.addEventListener("click", () => {
             loadAttendance();
@@ -959,7 +875,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Clear filters
     if (clearFiltersBtn) {
         clearFiltersBtn.addEventListener("click", () => {
             if (filterStatusSelect) filterStatusSelect.value = "";
@@ -968,16 +883,298 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    // --- Summary Tab Functions ---
+    function shouldEnableDayForSummary(date, isWeekendClass) {
+        const day = date.getDay();
+        if (isWeekendClass) {
+            return day === 0 || day === 6;
+        } else {
+            return day >= 1 && day <= 4;
+        }
+    }
+
+    function getStatusBadgeClassForSummary(status) {
+        switch (status) {
+            case "Present": return "bg-success";
+            case "Absent": return "bg-danger";
+            case "Late": return "bg-warning";
+            case "Excused": return "bg-info";
+            default: return "bg-secondary";
+        }
+    }
+
+    function renderSummaryHeaders(year, month) {
+        if (!summaryTable) return;
+        const thead = summaryTable.querySelector("thead");
+        const headerRow = thead.querySelector("tr");
+
+        while (headerRow.children.length > 1) {
+            headerRow.removeChild(headerRow.lastChild);
+        }
+
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+        for (let day = 1; day <= daysInMonth; day++) {
+            const th = document.createElement("th");
+            th.textContent = day;
+            th.style.width = "35px";
+            th.style.fontSize = "0.85rem";
+            th.style.padding = "5px 2px";
+
+            const date = new Date(year, month, day);
+            const dayOfWeek = date.getDay();
+
+            if (dayOfWeek === 0 || dayOfWeek === 6) {
+                th.style.backgroundColor = "#f8f9fa";
+            }
+
+            if (!shouldEnableDayForSummary(date, summaryIsWeekendClass)) {
+                th.style.opacity = "0.5";
+                th.style.backgroundColor = "#f5f5f5";
+                th.title = "No classes on this day";
+            }
+
+            headerRow.appendChild(th);
+        }
+    }
+
+    async function fetchMonthlyAttendance(year, month, classId) {
+        try {
+            const firstDay = `${year}-${String(month + 1).padStart(2, '0')}-01`;
+            const lastDay = new Date(year, month + 1, 0);
+            const lastDayStr = lastDay.toISOString().split('T')[0];
+
+            let url = `../php/get_monthly_attendance.php?bid=${getBrowserInstanceId()}&start_date=${firstDay}&end_date=${lastDayStr}`;
+            if (classId) {
+                url += `&class_id=${classId}`;
+            }
+
+            const res = await fetch(url);
+            const data = await res.json();
+
+            if (data.success) {
+                return data.attendance;
+            } else {
+                console.error("Failed to load monthly attendance:", data.message);
+                return {};
+            }
+        } catch (err) {
+            console.error("Error fetching monthly attendance:", err);
+            return {};
+        }
+    }
+
+    async function renderSummaryTable() {
+        if (!summaryTableBody || !monthYearDisplay) return;
+
+        const year = summaryCurrentMonth.getFullYear();
+        const month = summaryCurrentMonth.getMonth();
+        const classId = summaryClassSelect ? summaryClassSelect.value : null;
+
+        if (!classId) {
+            summaryTableBody.innerHTML = `
+                <tr>
+                    <td colspan="32" class="text-center text-muted py-4">
+                        Please select a class to view summary.
+                    </td>
+                </tr>`;
+            return;
+        }
+
+        summaryTableBody.innerHTML = `
+            <tr>
+                <td colspan="32" class="text-center text-muted py-4">
+                    <div class="spinner-border spinner-border-sm text-success me-2" role="status"></div>
+                    Loading attendance summary...
+                </td>
+            </tr>`;
+
+        const monthNames = ["January", "February", "March", "April", "May", "June",
+                           "July", "August", "September", "October", "November", "December"];
+        monthYearDisplay.textContent = `${monthNames[month]} ${year}`;
+
+        const selectedClass = allClasses.find(c => c.id == classId);
+        summaryIsWeekendClass = selectedClass ? isWeekendClass(selectedClass.class_name) : false;
+
+        renderSummaryHeaders(year, month);
+
+        const [students, attendanceData] = await Promise.all([
+            fetchTeacherStudents(classId),
+            fetchMonthlyAttendance(year, month, classId)
+        ]);
+
+        if (!students.length) {
+            summaryTableBody.innerHTML = `
+                <tr>
+                    <td colspan="32" class="text-center text-muted py-4">
+                        No students found for this class.
+                    </td>
+                </tr>`;
+            updateSummaryStats({});
+            return;
+        }
+
+        summaryTableBody.innerHTML = "";
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        let totalPresent = 0;
+        let totalAbsent = 0;
+        let totalDays = 0;
+
+        students.forEach(student => {
+            const row = document.createElement("tr");
+
+            const nameCell = document.createElement("td");
+            nameCell.textContent = student.full_name;
+            nameCell.style.fontWeight = "500";
+            row.appendChild(nameCell);
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const date = new Date(year, month, day);
+                const dateStr = date.toISOString().split('T')[0];
+                const cell = document.createElement("td");
+                cell.style.padding = "5px 2px";
+                cell.style.fontSize = "0.85rem";
+
+                if (shouldEnableDayForSummary(date, summaryIsWeekendClass)) {
+                    totalDays++;
+
+                    const studentAttendance = attendanceData[student.id] || {};
+                    const status = studentAttendance[dateStr] || "–";
+
+                    if (status !== "–") {
+                        const badge = document.createElement("span");
+                        badge.className = `badge ${getStatusBadgeClassForSummary(status)}`;
+                        badge.style.width = "20px";
+                        badge.style.height = "20px";
+                        badge.style.display = "inline-block";
+                        badge.title = `${status} - ${dateStr}`;
+                        cell.appendChild(badge);
+
+                        if (status === "Present") totalPresent++;
+                        if (status === "Absent") totalAbsent++;
+                    } else {
+                        cell.innerHTML = "–";
+                        cell.style.color = "#6c757d";
+                    }
+                } else {
+                    cell.innerHTML = "–";
+                    cell.style.color = "#dee2e6";
+                    cell.style.backgroundColor = "#f5f5f5";
+                    cell.title = "No classes on this day";
+                }
+
+                row.appendChild(cell);
+            }
+
+            summaryTableBody.appendChild(row);
+        });
+
+        updateSummaryStats({ totalPresent, totalAbsent, totalDays });
+    }
+
+    function updateSummaryStats(stats) {
+        const { totalPresent = 0, totalAbsent = 0, totalDays = 0 } = stats;
+
+        if (totalPresentEl) totalPresentEl.textContent = totalPresent;
+        if (totalAbsentEl) totalAbsentEl.textContent = totalAbsent;
+
+        if (totalDays > 0 && attendanceRateEl) {
+            const rate = Math.round((totalPresent / totalDays) * 100);
+            attendanceRateEl.textContent = `${rate}%`;
+        } else if (attendanceRateEl) {
+            attendanceRateEl.textContent = "0%";
+        }
+    }
+
+    function switchTab(tabName) {
+        if (tabName === "entry") {
+            entryTabBtn.classList.add("active");
+            entryTabBtn.classList.remove("btn-outline-success");
+            entryTabBtn.classList.add("btn-success-modern");
+
+            summaryTabBtn.classList.remove("active");
+            summaryTabBtn.classList.remove("btn-success-modern");
+            summaryTabBtn.classList.add("btn-outline-success");
+
+            attendanceEntrySection.style.display = "block";
+            attendanceSummarySection.style.display = "none";
+        } else {
+            summaryTabBtn.classList.add("active");
+            summaryTabBtn.classList.remove("btn-outline-success");
+            summaryTabBtn.classList.add("btn-success-modern");
+
+            entryTabBtn.classList.remove("active");
+            entryTabBtn.classList.remove("btn-success-modern");
+            entryTabBtn.classList.add("btn-outline-success");
+
+            attendanceEntrySection.style.display = "none";
+            attendanceSummarySection.style.display = "block";
+
+            if (summaryClassSelect && summaryClassSelect.options.length <= 1) {
+                populateSummaryClassSelect();
+            }
+            renderSummaryTable();
+        }
+    }
+
+    function populateSummaryClassSelect() {
+        if (!summaryClassSelect) return;
+        
+        summaryClassSelect.innerHTML = '<option value="">Select Class</option>';
+
+        allClasses.forEach(cls => {
+            const option = document.createElement('option');
+            option.value = cls.id;
+            option.textContent = `${cls.class_name} (${cls.year_group})`;
+            summaryClassSelect.appendChild(option);
+        });
+
+        if (allClasses.length > 0 && !summaryCurrentClassId) {
+            summaryCurrentClassId = allClasses[0].id;
+            summaryClassSelect.value = summaryCurrentClassId;
+        }
+    }
+
+    if (entryTabBtn) {
+        entryTabBtn.addEventListener("click", () => switchTab("entry"));
+    }
+
+    if (summaryTabBtn) {
+        summaryTabBtn.addEventListener("click", () => switchTab("summary"));
+    }
+
+    if (prevMonthBtn) {
+        prevMonthBtn.addEventListener("click", () => {
+            summaryCurrentMonth.setMonth(summaryCurrentMonth.getMonth() - 1);
+            renderSummaryTable();
+        });
+    }
+
+    if (nextMonthBtn) {
+        nextMonthBtn.addEventListener("click", () => {
+            summaryCurrentMonth.setMonth(summaryCurrentMonth.getMonth() + 1);
+            renderSummaryTable();
+        });
+    }
+
+    if (summaryClassSelect) {
+        summaryClassSelect.addEventListener("change", () => {
+            summaryCurrentClassId = summaryClassSelect.value;
+            renderSummaryTable();
+        });
+    }
+
     // Initialize
     async function init() {
-        // Set today's date
         selectedAttendanceDate = new Date();
         
-        // Load classes
         await fetchTeacherClasses();
         
-        // Load initial attendance
-        await loadAttendance();
+        if (classSelect && classSelect.value) {
+            await loadAttendance();
+        }
+        
+        populateSummaryClassSelect();
     }
 
     init();

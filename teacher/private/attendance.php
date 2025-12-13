@@ -127,6 +127,23 @@ if (isset($_GET['bid']) && $_GET['bid'] !== $browser_instance_id) {
             margin-bottom: 15px;
         }
         
+        .btn-success-modern {
+            background-color: #28a745;
+            color: white;
+            border-color: #28a745;
+        }
+        
+        .btn-success-modern:hover {
+            background-color: #218838;
+            border-color: #1e7e34;
+            color: white;
+        }
+        
+        .btn-success-modern.active {
+            background-color: #1e7e34;
+            border-color: #1c7430;
+        }
+        
         @media (max-width: 768px) {
             .btn-attendance-toggle {
                 padding: 0.25rem 0.5rem;
@@ -185,6 +202,26 @@ if (isset($_GET['bid']) && $_GET['bid'] !== $browser_instance_id) {
                 padding: 0.2rem 0.4rem;
                 font-size: 0.75rem;
             }
+        }
+        
+        /* Summary table styles */
+        #summaryTable th {
+            font-size: 0.85rem;
+            padding: 5px 2px;
+            text-align: center;
+        }
+        
+        #summaryTable td {
+            vertical-align: middle;
+            padding: 5px 2px;
+        }
+        
+        .summary-day-cell {
+            min-width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
     </style>
 </head>
@@ -248,12 +285,24 @@ if (isset($_GET['bid']) && $_GET['bid'] !== $browser_instance_id) {
         </div>
         <?php endif; ?>
 
+        <!-- Tab Buttons -->
+        <div class="text-center mb-4">
+            <div class="btn-group" role="group" aria-label="Attendance tabs">
+                <button type="button" id="entryTabBtn" class="btn btn-success-modern active" data-tab="entry">
+                    <i class="bi bi-calendar-check me-1"></i> Attendance Entry
+                </button>
+                <button type="button" id="summaryTabBtn" class="btn btn-outline-success" data-tab="summary">
+                    <i class="bi bi-calendar-month me-1"></i> Attendance Summary
+                </button>
+            </div>
+        </div>
+
         <!-- ATTENDANCE ENTRY SECTION -->
-        <div id="attendanceEntrySection" class="container-fluid mt-4">
+        <div id="attendanceEntrySection" class="container-fluid">
             <div class="card p-3 shadow-sm">
                 <!-- Mobile Optimized Controls -->
                 <div class="mobile-controls">
-                    <!-- Search Bar - Centered, most but not all width -->
+                    <!-- Search Bar -->
                     <div class="search-container">
                         <div class="input-group">
                             <span class="input-group-text"><i class="bi bi-search"></i></span>
@@ -261,7 +310,7 @@ if (isset($_GET['bid']) && $_GET['bid'] !== $browser_instance_id) {
                         </div>
                     </div>
                     
-                    <!-- Class Dropdown - Same width as search bar -->
+                    <!-- Class Dropdown -->
                     <div class="class-container">
                         <select id="attendanceClassSelect" class="form-select">
                             <option value="">Select Class</option>
@@ -310,7 +359,7 @@ if (isset($_GET['bid']) && $_GET['bid'] !== $browser_instance_id) {
                 <!-- Calendar Container -->
                 <div id="calendarContainer" class="mt-2 mb-4" style="display:none;"></div>
 
-                <!-- Attendance Table (Remains Perfect!) -->
+                <!-- Attendance Table -->
                 <div class="table-responsive mt-3">
                     <table class="table table-hover align-middle text-center attendance-table">
                         <thead class="table-light">
@@ -321,7 +370,6 @@ if (isset($_GET['bid']) && $_GET['bid'] !== $browser_instance_id) {
                             </tr>
                         </thead>
                         <tbody id="attendanceTableBody">
-                            <!-- Populated by JavaScript -->
                             <tr>
                                 <td colspan="3" class="text-center text-muted py-4">
                                     <div class="spinner-border spinner-border-sm text-success me-2" role="status"></div>
@@ -334,6 +382,109 @@ if (isset($_GET['bid']) && $_GET['bid'] !== $browser_instance_id) {
                 
                 <div class="text-muted mt-2">
                     <small><span id="studentCount">0</span> student(s) found</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- ATTENDANCE SUMMARY SECTION -->
+        <div id="attendanceSummarySection" class="container-fluid" style="display: none;">
+            <div class="card p-3 shadow-sm">
+                <!-- Summary Controls -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-center gap-3">
+                            <button id="prevMonthBtn" class="btn btn-outline-secondary">
+                                <i class="bi bi-chevron-left"></i>
+                            </button>
+                            <h4 id="monthYearDisplay" class="m-0 text-center" style="min-width: 200px;"></h4>
+                            <button id="nextMonthBtn" class="btn btn-outline-secondary">
+                                <i class="bi bi-chevron-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-flex justify-content-md-end">
+                            <select id="summaryClassSelect" class="form-select" style="max-width: 300px;">
+                                <option value="">Select Class</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Legend -->
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <div class="d-flex flex-wrap gap-2 justify-content-center">
+                            <div class="d-flex align-items-center">
+                                <span class="badge bg-success me-1" style="width: 20px; height: 20px;"></span>
+                                <small>Present</small>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <span class="badge bg-danger me-1" style="width: 20px; height: 20px;"></span>
+                                <small>Absent</small>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <span class="badge bg-warning me-1" style="width: 20px; height: 20px;"></span>
+                                <small>Late</small>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <span class="badge bg-info me-1" style="width: 20px; height: 20px;"></span>
+                                <small>Excused</small>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <span class="badge bg-secondary me-1" style="width: 20px; height: 20px;"></span>
+                                <small>No Record</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Summary Table -->
+                <div class="table-responsive">
+                    <table class="table table-bordered text-center" id="summaryTable">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Student Name</th>
+                                <!-- Days will be populated by JavaScript -->
+                            </tr>
+                        </thead>
+                        <tbody id="summaryTableBody">
+                            <tr>
+                                <td colspan="32" class="text-center text-muted py-4">
+                                    <div class="spinner-border spinner-border-sm text-success me-2" role="status"></div>
+                                    Loading attendance summary...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Statistics -->
+                <div class="row mt-3">
+                    <div class="col-md-4">
+                        <div class="card bg-light">
+                            <div class="card-body text-center">
+                                <h6 class="card-subtitle mb-2 text-muted">Total Present Days</h6>
+                                <h3 id="totalPresent" class="text-success">0</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card bg-light">
+                            <div class="card-body text-center">
+                                <h6 class="card-subtitle mb-2 text-muted">Total Absent Days</h6>
+                                <h3 id="totalAbsent" class="text-danger">0</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card bg-light">
+                            <div class="card-body text-center">
+                                <h6 class="card-subtitle mb-2 text-muted">Attendance Rate</h6>
+                                <h3 id="attendanceRate" class="text-primary">0%</h3>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
