@@ -126,6 +126,15 @@ if (isset($_GET['bid']) && $_GET['bid'] !== $browser_instance_id) {
                         <a href="private/classes.php?bid=<?= $browser_instance_id ?>" class="btn btn-success-modern btn-sm">View</a>
                     </div>
                 </div>
+                
+                <!-- ATTENDANCE -->
+                <div class="col-md-4 mb-3">
+                    <div class="card shadow-sm p-3">
+                        <h5><i class="bi bi-calendar-check text-success"></i> Attendance</h5>
+                        <p class="text-muted">Manage attendance for all classes.</p>
+                        <a href="private/attendance.php?bid=<?= $browser_instance_id ?>" class="btn btn-success-modern btn-sm">Manage</a>
+                    </div>
+                </div>
 
                 <!-- PARENTS -->
                 <div class="col-md-4 mb-3">

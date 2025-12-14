@@ -1,35 +1,10 @@
-// admin/js/attendance.js - Admin Attendance Management (Complete with Summary) - FIXED VERSION
+// admin/js/attendance.js - Admin Attendance Management
 document.addEventListener("DOMContentLoaded", () => {
-    // Elements - will be initialized after UI renders
-    let attendanceTableBody;
-    let classSelect;
-    let todayBtn;
-    let toggleCalendarBtn;
-    let selectedDateEl;
-    let selectedWeekdayEl;
-    let calendarContainer;
-    let studentCountEl;
-    let entryTabBtn;
-    let summaryTabBtn;
-    let attendanceEntrySection;
-    let attendanceSummarySection;
-    let prevMonthBtn;
-    let nextMonthBtn;
-    let monthYearDisplay;
-    let summaryClassSelect;
-    let summaryTable;
-    let summaryTableBody;
-    let totalPresentEl;
-    let totalAbsentEl;
-    let attendanceRateEl;
-    let teacherInfo;
-    let currentTeacherNameEl;
-    let prevDayBtn;
-    let nextDayBtn;
-    let searchInput;
-    let refreshBtn;
-    let saveBtn;
-
+    // Elements
+    const attendanceContainer = document.getElementById("attendanceContainer");
+    const loadingIndicator = document.getElementById("loadingIndicator");
+    const attendanceContent = document.getElementById("attendanceContent");
+    
     // Global variables
     let allClasses = [];
     let allStudents = [];
@@ -42,10 +17,6 @@ document.addEventListener("DOMContentLoaded", () => {
     let pendingChanges = {};
     let savedAttendance = {};
     let isCalendarVisible = false;
-    
-    let summaryCurrentMonth = new Date();
-    let summaryCurrentClassId = null;
-    let summaryIsWeekendClass = false;
 
     // --- Helper Functions ---
     function pad(n) { return String(n).padStart(2, "0"); }
@@ -210,144 +181,240 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    async function fetchMonthlyAttendanceAdmin(year, month, classId) {
-        try {
-            const firstDay = `${year}-${String(month + 1).padStart(2, '0')}-01`;
-            const lastDay = new Date(year, month + 1, 0);
-            const lastDayStr = lastDay.toISOString().split('T')[0];
-
-            if (!classId) {
-                return {};
-            }
-
-            const url = `../php/get_monthly_attendance_admin.php?bid=${browserInstanceId}&start_date=${firstDay}&end_date=${lastDayStr}&class_id=${classId}`;
-            const res = await fetch(url);
-            const data = await res.json();
-
-            if (data.success) {
-                return data.attendance;
-            } else {
-                console.error("Failed to load monthly attendance:", data.message);
-                return {};
-            }
-        } catch (err) {
-            console.error("Error fetching monthly attendance:", err);
-            return {};
-        }
-    }
-
-    // Replace the entire renderUI() function with:
-    async function loadInitialData() {
-        try {
-            allClasses = await fetchAllClasses();
-            if (allClasses.length === 0) {
-                showToast("No classes found", "warning");
-                return;
-            }
-
-            // Initialize DOM elements
-            initializeDOMElements();
-            initializeEventListeners();
-
-            // Populate class selects
-            updateClassSelect();
-            populateSummaryClassSelect();
-
-            // Initialize date display
-            updateDateDisplay();
-
-        } catch (error) {
-            console.error("Initialization error:", error);
-            showToast("Failed to load attendance system", "danger");
-        }
-    }
-
-
-    function initializeDOMElements() {
-        // Get references to all DOM elements
-        attendanceTableBody = document.getElementById("attendanceTableBody");
-        classSelect = document.getElementById("attendanceClassSelect");
-        todayBtn = document.getElementById("todayBtn");
-        toggleCalendarBtn = document.getElementById("toggleCalendarBtn");
-        selectedDateEl = document.getElementById("selectedDate");
-        selectedWeekdayEl = document.getElementById("selectedWeekday");
-        calendarContainer = document.getElementById("calendarContainer");
-        studentCountEl = document.getElementById("studentCount");
-        entryTabBtn = document.getElementById("entryTabBtn");
-        summaryTabBtn = document.getElementById("summaryTabBtn");
-        attendanceEntrySection = document.getElementById("attendanceEntrySection");
-        attendanceSummarySection = document.getElementById("attendanceSummarySection");
-        prevMonthBtn = document.getElementById("prevMonthBtn");
-        nextMonthBtn = document.getElementById("nextMonthBtn");
-        monthYearDisplay = document.getElementById("monthYearDisplay");
-        summaryClassSelect = document.getElementById("summaryClassSelect");
-        summaryTable = document.getElementById("summaryTable");
-        summaryTableBody = document.getElementById("summaryTableBody");
-        totalPresentEl = document.getElementById("totalPresent");
-        totalAbsentEl = document.getElementById("totalAbsent");
-        attendanceRateEl = document.getElementById("attendanceRate");
-        teacherInfo = document.getElementById("teacherInfo");
-        currentTeacherNameEl = document.getElementById("currentTeacherName");
-        prevDayBtn = document.getElementById("prevDayBtn");
-        nextDayBtn = document.getElementById("nextDayBtn");
-        searchInput = document.getElementById("attendanceSearchInput");
-        refreshBtn = document.getElementById("attendanceRefreshBtn");
-        saveBtn = document.getElementById("attendanceSaveBtn");
-    }
-
-    function updateClassSelect() {
-        if (!classSelect || !allClasses.length) return;
-        
-        classSelect.innerHTML = '<option value="">Select Class</option>';
-        
-        allClasses.forEach(cls => {
-            const option = document.createElement('option');
-            option.value = cls.id;
-            option.textContent = `${cls.class_name} (${cls.year_group}) - ${cls.teacher_name || 'No Teacher'} - ${cls.student_count || 0} students`;
-            option.setAttribute('data-teacher', cls.teacher_name || 'Unassigned');
-            option.setAttribute('data-teacher-id', cls.teacher_id || '');
-            classSelect.appendChild(option);
-        });
-        
-        if (allClasses.length > 0) {
-            classSelect.value = allClasses[0].id;
-            currentClassId = allClasses[0].id;
-            currentTeacherName = allClasses[0].teacher_name || 'Unassigned';
-            currentTeacherId = allClasses[0].teacher_id || null;
-            updateTeacherInfoDisplay();
-        }
-    }
-
-    function updateTeacherInfoDisplay() {
-        if (teacherInfo && currentTeacherNameEl) {
-            if (currentTeacherId) {
-                currentTeacherNameEl.textContent = currentTeacherName;
-                teacherInfo.style.display = 'block';
-            } else {
-                teacherInfo.style.display = 'none';
-            }
-        }
-    }
-
-    function updateCurrentClassType() {
-        if (!currentClassId) {
-            currentClassIsWeekend = false;
+    // --- UI Functions ---
+    function renderUI() {
+        if (allClasses.length === 0) {
+            attendanceContent.innerHTML = `
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    No classes found. Please create classes first in the Classes management section.
+                </div>`;
+            loadingIndicator.style.display = 'none';
+            attendanceContent.style.display = 'block';
             return;
         }
+
+        const classSelectOptions = allClasses.map(cls => 
+            `<option value="${cls.id}" data-teacher="${cls.teacher_name || 'Unassigned'}" data-teacher-id="${cls.teacher_id || ''}">
+                ${cls.class_name} (${cls.year_group}) - ${cls.teacher_name || 'No Teacher'} - ${cls.student_count} students
+            </option>`
+        ).join('');
+
+        attendanceContent.innerHTML = `
+            <!-- Attendance Entry Section -->
+            <div class="card p-3 shadow-sm">
+                <!-- Mobile Optimized Controls -->
+                <div class="mobile-controls">
+                    <!-- Class Dropdown -->
+                    <div class="class-container">
+                        <select id="attendanceClassSelect" class="form-select">
+                            <option value="">Select Class</option>
+                            ${classSelectOptions}
+                        </select>
+                    </div>
+                    
+                    <!-- Teacher Info -->
+                    <div id="teacherInfo" class="teacher-info" style="display: none;">
+                        <div class="alert alert-info py-2 mb-2">
+                            <i class="bi bi-person-badge me-2"></i>
+                            <strong>Teacher:</strong> <span id="currentTeacherName">Not assigned</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Search Bar -->
+                    <div class="search-container">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-search"></i></span>
+                            <input id="attendanceSearchInput" type="text" class="form-control" placeholder="Search student name...">
+                        </div>
+                    </div>
+                    
+                    <!-- Action Buttons Row -->
+                    <div class="button-row">
+                        <button id="toggleCalendarBtn" class="btn btn-outline-success btn-sm" title="Show/Hide Calendar">
+                            <i class="bi bi-calendar-week"></i> Calendar
+                        </button>
+                        <button id="attendanceRefreshBtn" class="btn btn-outline-secondary btn-sm" title="Refresh">
+                            <i class="bi bi-arrow-clockwise"></i>
+                        </button>
+                        <button id="attendanceSaveBtn" class="btn btn-success-modern btn-sm" disabled>
+                            <i class="bi bi-save"></i> Save
+                        </button>
+                    </div>
+                    
+                    <!-- Date Navigation Row -->
+                    <div class="date-row">
+                        <button id="prevDayBtn" class="btn btn-outline-secondary" title="Previous day">
+                            <i class="bi bi-chevron-left"></i>
+                        </button>
+                        <div class="date-display text-success">
+                            <span id="selectedDate"></span>
+                            <br>
+                            <small id="selectedWeekday" class="text-muted"></small>
+                        </div>
+                        <button id="nextDayBtn" class="btn btn-outline-secondary" title="Next day">
+                            <i class="bi bi-chevron-right"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- Today Button Row -->
+                    <div class="today-row">
+                        <button id="todayBtn" class="btn btn-outline-success btn-sm" title="Go to Today">
+                            <i class="bi bi-calendar-day"></i> Today
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Calendar Container -->
+                <div id="calendarContainer" class="mt-2 mb-4" style="display:none;"></div>
+
+                <!-- Attendance Table -->
+                <div class="table-responsive mt-3">
+                    <table class="table table-hover align-middle text-center attendance-table">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Student Name</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="attendanceTableBody">
+                            <tr>
+                                <td colspan="3" class="text-center text-muted py-4">
+                                    Select a class to view attendance
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="text-muted mt-2">
+                    <small><span id="studentCount">0</span> student(s) found</small>
+                </div>
+            </div>`;
+
+        loadingIndicator.style.display = 'none';
+        attendanceContent.style.display = 'block';
         
-        const selectedClass = allClasses.find(cls => cls.id == currentClassId);
-        if (selectedClass) {
-            currentClassIsWeekend = isWeekendClass(selectedClass.class_name);
-        } else {
-            currentClassIsWeekend = false;
-        }
+        // Initialize event listeners
+        initializeEventListeners();
+    }
+
+    function initializeEventListeners() {
+        const classSelect = document.getElementById("attendanceClassSelect");
+        const todayBtn = document.getElementById("todayBtn");
+        const toggleCalendarBtn = document.getElementById("toggleCalendarBtn");
+        const selectedDateEl = document.getElementById("selectedDate");
+        const selectedWeekdayEl = document.getElementById("selectedWeekday");
+        const calendarContainer = document.getElementById("calendarContainer");
+        const studentCountEl = document.getElementById("studentCount");
+        const prevDayBtn = document.getElementById("prevDayBtn");
+        const nextDayBtn = document.getElementById("nextDayBtn");
+        const searchInput = document.getElementById("attendanceSearchInput");
+        const refreshBtn = document.getElementById("attendanceRefreshBtn");
+        const saveBtn = document.getElementById("attendanceSaveBtn");
+
+        // Class select change
+        classSelect?.addEventListener("change", function() {
+            const selectedOption = this.options[this.selectedIndex];
+            currentClassId = this.value;
+            currentClassName = selectedOption.text;
+            currentTeacherName = selectedOption.getAttribute('data-teacher') || 'Unassigned';
+            currentTeacherId = selectedOption.getAttribute('data-teacher-id') || null;
+            
+            // Update teacher info display
+            const teacherInfo = document.getElementById("teacherInfo");
+            const teacherNameSpan = document.getElementById("currentTeacherName");
+            if (teacherInfo && teacherNameSpan) {
+                if (currentTeacherId) {
+                    teacherNameSpan.textContent = currentTeacherName;
+                    teacherInfo.style.display = 'block';
+                } else {
+                    teacherInfo.style.display = 'none';
+                }
+            }
+            
+            // Update class type
+            const selectedClass = allClasses.find(cls => cls.id == currentClassId);
+            if (selectedClass) {
+                currentClassIsWeekend = isWeekendClass(selectedClass.class_name);
+            }
+            
+            if (currentClassId) {
+                loadAttendance();
+            } else {
+                // Clear table if no class selected
+                document.getElementById("attendanceTableBody").innerHTML = `
+                    <tr>
+                        <td colspan="3" class="text-center text-muted py-4">
+                            Select a class to view attendance
+                        </td>
+                    </tr>`;
+                studentCountEl.textContent = '0';
+            }
+        });
+
+        // Today button
+        todayBtn?.addEventListener("click", () => {
+            const today = new Date();
+            const dayStatus = getDayStatus(today);
+            if (!dayStatus.enabled) {
+                showToast(dayStatus.title, "warning");
+                return;
+            }
+            selectedAttendanceDate = today;
+            loadAttendance();
+            
+            if (isCalendarVisible) {
+                renderCalendar(selectedAttendanceDate);
+            }
+        });
+
+        // Calendar toggle
+        toggleCalendarBtn?.addEventListener("click", () => {
+            isCalendarVisible = !isCalendarVisible;
+            if (isCalendarVisible) {
+                renderCalendar(selectedAttendanceDate);
+                toggleCalendarBtn.innerHTML = '<i class="bi bi-calendar-week"></i> Hide Calendar';
+            } else {
+                calendarContainer.style.display = "none";
+                toggleCalendarBtn.innerHTML = '<i class="bi bi-calendar-week"></i> Show Calendar';
+            }
+        });
+
+        // Day navigation
+        prevDayBtn?.addEventListener("click", () => navigateDay(-1));
+        nextDayBtn?.addEventListener("click", () => navigateDay(1));
+
+        // Search
+        searchInput?.addEventListener("input", loadAttendance);
+
+        // Refresh
+        refreshBtn?.addEventListener("click", () => {
+            searchInput.value = "";
+            pendingChanges = {};
+            if (saveBtn) saveBtn.disabled = true;
+            loadAttendance();
+        });
+
+        // Save
+        saveBtn?.addEventListener("click", saveAttendance);
+
+        // Initial date display
+        updateDateDisplay();
     }
 
     function updateDateDisplay() {
-        if (!selectedDateEl || !selectedWeekdayEl) return;
-        
-        selectedDateEl.textContent = toDisplayDate(selectedAttendanceDate);
-        selectedWeekdayEl.textContent = getWeekdayName(selectedAttendanceDate);
+        const selectedDateEl = document.getElementById("selectedDate");
+        const selectedWeekdayEl = document.getElementById("selectedWeekday");
+        const prevDayBtn = document.getElementById("prevDayBtn");
+        const nextDayBtn = document.getElementById("nextDayBtn");
+        const todayBtn = document.getElementById("todayBtn");
+
+        if (selectedDateEl && selectedWeekdayEl) {
+            selectedDateEl.textContent = toDisplayDate(selectedAttendanceDate);
+            selectedWeekdayEl.textContent = getWeekdayName(selectedAttendanceDate);
+        }
 
         if (prevDayBtn) {
             prevDayBtn.disabled = false;
@@ -372,7 +439,11 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     async function loadAttendance() {
-        if (!currentClassId || !attendanceTableBody) return;
+        if (!currentClassId) return;
+
+        const attendanceTableBody = document.getElementById("attendanceTableBody");
+        const studentCountEl = document.getElementById("studentCount");
+        const saveBtn = document.getElementById("attendanceSaveBtn");
 
         attendanceTableBody.innerHTML = `
             <tr>
@@ -386,8 +457,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if (saveBtn) saveBtn.disabled = true;
 
         const dateStr = toISODateLocal(selectedAttendanceDate);
-        
-        updateCurrentClassType();
         updateDateDisplay();
 
         const [students, attendanceMap] = await Promise.all([
@@ -398,7 +467,7 @@ document.addEventListener("DOMContentLoaded", () => {
         savedAttendance = { ...attendanceMap };
 
         let filteredStudents = students;
-        const searchTerm = searchInput?.value.trim().toLowerCase();
+        const searchTerm = document.getElementById("attendanceSearchInput")?.value.trim().toLowerCase();
         if (searchTerm) {
             filteredStudents = students.filter(s => 
                 s.full_name.toLowerCase().includes(searchTerm) ||
@@ -406,7 +475,7 @@ document.addEventListener("DOMContentLoaded", () => {
             );
         }
 
-        if (studentCountEl) studentCountEl.textContent = filteredStudents.length;
+        studentCountEl.textContent = filteredStudents.length;
 
         if (!filteredStudents.length) {
             attendanceTableBody.innerHTML = `
@@ -536,6 +605,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 badge.className = `badge attendance-badge ${getStatusBadgeClass(displayStatus)}`;
 
                 // Enable/disable save button
+                const saveBtn = document.getElementById("attendanceSaveBtn");
                 if (saveBtn) saveBtn.disabled = Object.keys(pendingChanges).length === 0;
             });
         });
@@ -586,8 +656,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // --- Calendar Functions ---
+    // Calendar rendering function
     function renderCalendar(date) {
+        const calendarContainer = document.getElementById("calendarContainer");
         if (!calendarContainer) return;
         calendarContainer.innerHTML = "";
 
@@ -719,7 +790,6 @@ document.addEventListener("DOMContentLoaded", () => {
         calendarContainer.style.display = "block";
     }
 
-    // --- Attendance Marking ---
     async function saveAttendance() {
         if (!currentClassId) return;
         
@@ -741,6 +811,7 @@ document.addEventListener("DOMContentLoaded", () => {
         let successCount = 0;
         let errorCount = 0;
 
+        const saveBtn = document.getElementById("attendanceSaveBtn");
         const originalText = saveBtn.innerHTML;
         saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Saving...';
         saveBtn.disabled = true;
@@ -804,354 +875,11 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // --- Summary Tab Functions ---
-    function shouldEnableDayForSummary(date, isWeekendClass) {
-        const day = date.getDay();
-        if (isWeekendClass) {
-            return day === 0 || day === 6;
-        } else {
-            return day >= 1 && day <= 4;
-        }
-    }
-
-    function getStatusBadgeClassForSummary(status) {
-        switch (status) {
-            case "Present": return "bg-success";
-            case "Absent": return "bg-danger";
-            case "Late": return "bg-warning";
-            case "Excused": return "bg-info";
-            default: return "bg-secondary";
-        }
-    }
-
-    function renderSummaryHeaders(year, month) {
-        if (!summaryTable) return;
-        const thead = summaryTable.querySelector("thead");
-        const headerRow = thead.querySelector("tr");
-
-        while (headerRow.children.length > 1) {
-            headerRow.removeChild(headerRow.lastChild);
-        }
-
-        const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-        for (let day = 1; day <= daysInMonth; day++) {
-            const th = document.createElement("th");
-            th.textContent = day;
-            th.style.width = "35px";
-            th.style.fontSize = "0.85rem";
-            th.style.padding = "5px 2px";
-
-            const date = new Date(year, month, day);
-            const dayOfWeek = date.getDay();
-
-            if (dayOfWeek === 0 || dayOfWeek === 6) {
-                th.style.backgroundColor = "#f8f9fa";
-            }
-
-            if (!shouldEnableDayForSummary(date, summaryIsWeekendClass)) {
-                th.style.opacity = "0.5";
-                th.style.backgroundColor = "#f5f5f5";
-                th.title = "No classes on this day";
-            }
-
-            headerRow.appendChild(th);
-        }
-    }
-
-    async function renderSummaryTable() {
-        if (!summaryTableBody || !monthYearDisplay) return;
-
-        const year = summaryCurrentMonth.getFullYear();
-        const month = summaryCurrentMonth.getMonth();
-        const classId = summaryClassSelect ? summaryClassSelect.value : null;
-
-        if (!classId) {
-            summaryTableBody.innerHTML = `
-                <tr>
-                    <td colspan="32" class="text-center text-muted py-4">
-                        Please select a class to view summary.
-                    </td>
-                </tr>`;
-            return;
-        }
-
-        summaryTableBody.innerHTML = `
-            <tr>
-                <td colspan="32" class="text-center text-muted py-4">
-                    <div class="spinner-border spinner-border-sm text-success me-2" role="status"></div>
-                    Loading attendance summary...
-                </td>
-            </tr>`;
-
-        const monthNames = ["January", "February", "March", "April", "May", "June",
-                           "July", "August", "September", "October", "November", "December"];
-        monthYearDisplay.textContent = `${monthNames[month]} ${year}`;
-
-        const selectedClass = allClasses.find(c => c.id == classId);
-        summaryIsWeekendClass = selectedClass ? isWeekendClass(selectedClass.class_name) : false;
-
-        renderSummaryHeaders(year, month);
-
-        const [students, attendanceData] = await Promise.all([
-            fetchStudentsForClass(classId),
-            fetchMonthlyAttendanceAdmin(year, month, classId)
-        ]);
-
-        if (!students.length) {
-            summaryTableBody.innerHTML = `
-                <tr>
-                    <td colspan="32" class="text-center text-muted py-4">
-                        No students found for this class.
-                    </td>
-                </tr>`;
-            updateSummaryStats({});
-            return;
-        }
-
-        summaryTableBody.innerHTML = "";
-        const daysInMonth = new Date(year, month + 1, 0).getDate();
-        let totalPresent = 0;
-        let totalAbsent = 0;
-        let totalDays = 0;
-
-        students.forEach(student => {
-            const row = document.createElement("tr");
-
-            const nameCell = document.createElement("td");
-            nameCell.textContent = student.full_name;
-            nameCell.style.fontWeight = "500";
-            row.appendChild(nameCell);
-
-            for (let day = 1; day <= daysInMonth; day++) {
-                const date = new Date(year, month, day);
-                const dateStr = date.toISOString().split('T')[0];
-                const cell = document.createElement("td");
-                cell.style.padding = "5px 2px";
-                cell.style.fontSize = "0.85rem";
-
-                if (shouldEnableDayForSummary(date, summaryIsWeekendClass)) {
-                    totalDays++;
-
-                    const studentAttendance = attendanceData[student.id] || {};
-                    const status = studentAttendance[dateStr] || "–";
-
-                    if (status !== "–") {
-                        const badge = document.createElement("span");
-                        badge.className = `badge ${getStatusBadgeClassForSummary(status)}`;
-                        badge.style.width = "20px";
-                        badge.style.height = "20px";
-                        badge.style.display = "inline-block";
-                        badge.title = `${status} - ${dateStr}`;
-                        cell.appendChild(badge);
-
-                        if (status === "Present") totalPresent++;
-                        if (status === "Absent") totalAbsent++;
-                    } else {
-                        cell.innerHTML = "–";
-                        cell.style.color = "#6c757d";
-                    }
-                } else {
-                    cell.innerHTML = "–";
-                    cell.style.color = "#dee2e6";
-                    cell.style.backgroundColor = "#f5f5f5";
-                    cell.title = "No classes on this day";
-                }
-
-                row.appendChild(cell);
-            }
-
-            summaryTableBody.appendChild(row);
-        });
-
-        updateSummaryStats({ totalPresent, totalAbsent, totalDays });
-    }
-
-    function updateSummaryStats(stats) {
-        const { totalPresent = 0, totalAbsent = 0, totalDays = 0 } = stats;
-
-        if (totalPresentEl) totalPresentEl.textContent = totalPresent;
-        if (totalAbsentEl) totalAbsentEl.textContent = totalAbsent;
-
-        if (totalDays > 0 && attendanceRateEl) {
-            const rate = Math.round((totalPresent / totalDays) * 100);
-            attendanceRateEl.textContent = `${rate}%`;
-        } else if (attendanceRateEl) {
-            attendanceRateEl.textContent = "0%";
-        }
-    }
-
-    function populateSummaryClassSelect() {
-        if (!summaryClassSelect) return;
-
-        summaryClassSelect.innerHTML = '<option value="">Select Class</option>';
-
-        allClasses.forEach(cls => {
-            const option = document.createElement('option');
-            option.value = cls.id;
-            option.textContent = `${cls.class_name} (${cls.year_group}) - ${cls.teacher_name || 'No Teacher'}`;
-            summaryClassSelect.appendChild(option);
-        });
-
-        // Prefer the class selected in entry tab
-        if (classSelect && classSelect.value) {
-            summaryClassSelect.value = classSelect.value;
-            summaryCurrentClassId = classSelect.value;
-        } else if (allClasses.length > 0 && !summaryCurrentClassId) {
-            // Default to first class if no selection in entry tab
-            summaryCurrentClassId = allClasses[0].id;
-            summaryClassSelect.value = summaryCurrentClassId;
-        }
-    }
-
-    function switchTab(tabName) {
-        if (tabName === "entry") {
-            entryTabBtn.classList.add("active");
-            entryTabBtn.classList.remove("btn-outline-success");
-            entryTabBtn.classList.add("btn-success-modern");
-
-            summaryTabBtn.classList.remove("active");
-            summaryTabBtn.classList.remove("btn-success-modern");
-            summaryTabBtn.classList.add("btn-outline-success");
-
-            attendanceEntrySection.style.display = "block";
-            attendanceSummarySection.style.display = "none";
-        } else {
-            summaryTabBtn.classList.add("active");
-            summaryTabBtn.classList.remove("btn-outline-success");
-            summaryTabBtn.classList.add("btn-success-modern");
-
-            entryTabBtn.classList.remove("active");
-            entryTabBtn.classList.remove("btn-success-modern");
-            entryTabBtn.classList.add("btn-outline-success");
-
-            attendanceEntrySection.style.display = "none";
-            attendanceSummarySection.style.display = "block";
-
-            if (summaryClassSelect && summaryClassSelect.options.length <= 1) {
-                populateSummaryClassSelect();
-            }
-
-            // Sync class selection from entry tab to summary tab
-            if (classSelect && classSelect.value && summaryClassSelect) {
-                summaryClassSelect.value = classSelect.value;
-                summaryCurrentClassId = classSelect.value;
-            }
-
-            renderSummaryTable();
-        }
-    }
-
-    // --- Event Listeners ---
-    function initializeEventListeners() {
-        // Class select change
-        classSelect?.addEventListener("change", function() {
-            const selectedOption = this.options[this.selectedIndex];
-            currentClassId = this.value;
-            currentTeacherName = selectedOption.getAttribute('data-teacher') || 'Unassigned';
-            currentTeacherId = selectedOption.getAttribute('data-teacher-id') || null;
-            
-            updateTeacherInfoDisplay();
-            
-            if (currentClassId) {
-                loadAttendance();
-            } else {
-                if (attendanceTableBody) {
-                    attendanceTableBody.innerHTML = `
-                        <tr>
-                            <td colspan="3" class="text-center text-muted py-4">
-                                Select a class to view attendance
-                            </td>
-                        </tr>`;
-                }
-                if (studentCountEl) studentCountEl.textContent = '0';
-            }
-        });
-
-        // Today button
-        todayBtn?.addEventListener("click", () => {
-            const today = new Date();
-            const dayStatus = getDayStatus(today);
-            if (!dayStatus.enabled) {
-                showToast(dayStatus.title, "warning");
-                return;
-            }
-            selectedAttendanceDate = today;
-            loadAttendance();
-            
-            if (isCalendarVisible) {
-                renderCalendar(selectedAttendanceDate);
-            }
-        });
-
-        // Calendar toggle
-        toggleCalendarBtn?.addEventListener("click", () => {
-            isCalendarVisible = !isCalendarVisible;
-            if (isCalendarVisible) {
-                renderCalendar(selectedAttendanceDate);
-                toggleCalendarBtn.innerHTML = '<i class="bi bi-calendar-week"></i> Hide Calendar';
-            } else {
-                if (calendarContainer) calendarContainer.style.display = "none";
-                toggleCalendarBtn.innerHTML = '<i class="bi bi-calendar-week"></i> Show Calendar';
-            }
-        });
-
-        // Day navigation
-        prevDayBtn?.addEventListener("click", () => navigateDay(-1));
-        nextDayBtn?.addEventListener("click", () => navigateDay(1));
-
-        // Search
-        searchInput?.addEventListener("input", loadAttendance);
-
-        // Refresh
-        refreshBtn?.addEventListener("click", () => {
-            if (searchInput) searchInput.value = "";
-            pendingChanges = {};
-            if (saveBtn) saveBtn.disabled = true;
-            loadAttendance();
-        });
-
-        // Save
-        saveBtn?.addEventListener("click", saveAttendance);
-
-        // Tab switching
-        if (entryTabBtn) {
-            entryTabBtn.addEventListener("click", () => switchTab("entry"));
-        }
-
-        if (summaryTabBtn) {
-            summaryTabBtn.addEventListener("click", () => switchTab("summary"));
-        }
-
-        if (prevMonthBtn) {
-            prevMonthBtn.addEventListener("click", () => {
-                summaryCurrentMonth.setMonth(summaryCurrentMonth.getMonth() - 1);
-                renderSummaryTable();
-            });
-        }
-
-        if (nextMonthBtn) {
-            nextMonthBtn.addEventListener("click", () => {
-                summaryCurrentMonth.setMonth(summaryCurrentMonth.getMonth() + 1);
-                renderSummaryTable();
-            });
-        }
-
-        if (summaryClassSelect) {
-            summaryClassSelect.addEventListener("change", () => {
-                summaryCurrentClassId = summaryClassSelect.value;
-                renderSummaryTable();
-            });
-        }
-
-        // Initial date display
-        updateDateDisplay();
-    }
-
     // Initialize
     async function init() {
         try {
-            await loadInitialData();
+            await fetchAllClasses();
+            renderUI();
         } catch (error) {
             console.error("Initialization error:", error);
             showToast("Failed to load attendance system", "danger");

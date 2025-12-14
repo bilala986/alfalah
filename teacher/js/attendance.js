@@ -1,5 +1,12 @@
-// teacher/js/attendance.js - COMPLETE VERSION WITH BOTH TABS
+// teacher/js/attendance.js - OPTIMIZED VERSION FOR MULTIPLE TEACHERS
 document.addEventListener("DOMContentLoaded", () => {
+    // === CACHE FOR PERFORMANCE ===
+    const cache = {
+        calendar: {}, // Cache calendar HTML by month
+        monthlyAttendance: {}, // Cache monthly attendance data
+        students: {} // Cache students by class
+    };
+
     // Elements
     const attendanceTableBody = document.getElementById("attendanceTableBody");
     const classSelect = document.getElementById("attendanceClassSelect");
@@ -53,29 +60,18 @@ document.addEventListener("DOMContentLoaded", () => {
     let summaryCurrentClassId = null;
     let summaryIsWeekendClass = false;
 
-    // --- Helper Functions ---
-    function pad(n) { return String(n).padStart(2, "0"); }
+    // === OPTIMIZED HELPER FUNCTIONS ===
+    const pad = n => String(n).padStart(2, "0");
 
-    function toISODateLocal(d) {
-        return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-    }
+    const toISODateLocal = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 
-    function toDisplayDate(d) {
+    const toDisplayDate = d => {
         const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
         const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-        
-        const dayOfWeek = dayNames[d.getDay()];
-        const day = d.getDate();
-        const month = monthNames[d.getMonth()];
-        const year = d.getFullYear();
-        
-        return `${day} ${month} ${year}`;
-    }
+        return `${d.getDate()} ${monthNames[d.getMonth()]} ${d.getFullYear()}`;
+    };
 
-    function getWeekdayName(d) {
-        const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-        return dayNames[d.getDay()];
-    }
+    const getWeekdayName = d => ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][d.getDay()];
 
     function showToast(msg, type = "success") {
         const div = document.createElement("div");
@@ -91,15 +87,15 @@ document.addEventListener("DOMContentLoaded", () => {
         setTimeout(() => div.remove(), 3200);
     }
 
-    function isFutureDate(date) {
+    const isFutureDate = date => {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         const compareDate = new Date(date);
         compareDate.setHours(0, 0, 0, 0);
         return compareDate > today;
-    }
+    };
 
-    function isWeekendClass(className) {
+    const isWeekendClass = className => {
         if (!className) return false;
         const lowerName = className.toLowerCase();
         return lowerName.includes('weekend') || 
@@ -108,17 +104,12 @@ document.addEventListener("DOMContentLoaded", () => {
                lowerName.includes('fri') ||
                lowerName.includes('sat') ||
                lowerName.includes('sun');
-    }
+    };
 
-    function shouldEnableDay(date) {
+    const shouldEnableDay = date => {
         const day = date.getDay();
-        
-        if (currentClassIsWeekend) {
-            return day === 0 || day === 6;
-        } else {
-            return day >= 1 && day <= 4;
-        }
-    }
+        return currentClassIsWeekend ? (day === 0 || day === 6) : (day >= 1 && day <= 4);
+    };
 
     function getDayStatus(date) {
         const day = date.getDay();
@@ -127,16 +118,14 @@ document.addEventListener("DOMContentLoaded", () => {
         if (currentClassIsWeekend) {
             if (day === 0 || day === 6) {
                 return { enabled: true, title: `${dayNames[day]} - Class day` };
-            } else {
-                return { enabled: false, title: `${dayNames[day]} - No weekend class` };
             }
-        } else {
-            if (day >= 1 && day <= 4) {
-                return { enabled: true, title: `${dayNames[day]} - Class day` };
-            } else {
-                return { enabled: false, title: `${dayNames[day]} - Weekend - No classes` };
-            }
+            return { enabled: false, title: `${dayNames[day]} - No weekend class` };
         }
+        
+        if (day >= 1 && day <= 4) {
+            return { enabled: true, title: `${dayNames[day]} - Class day` };
+        }
+        return { enabled: false, title: `${dayNames[day]} - Weekend - No classes` };
     }
 
     function navigateDay(direction) {
@@ -146,25 +135,30 @@ document.addEventListener("DOMContentLoaded", () => {
         loadAttendance();
 
         if (isCalendarVisible) {
+            // Clear and re-render calendar to update highlight
+            calendarContainer.innerHTML = '';
             renderCalendar(selectedAttendanceDate);
         }
     }
 
-    // --- API Functions ---
+    // === OPTIMIZED API FUNCTIONS ===
     async function fetchTeacherClasses() {
         try {
+            const cacheKey = 'teacher_classes';
+            if (cache[cacheKey]) return cache[cacheKey];
+            
             const res = await fetch(`../php/get_teacher_classes.php?bid=${getBrowserInstanceId()}`);
             const data = await res.json();
             
             if (data.success) {
                 allClasses = data.classes;
+                cache[cacheKey] = data.classes;
                 updateClassSelect();
                 populateSummaryClassSelect();
                 return data.classes;
-            } else {
-                showToast("Failed to load classes", "danger");
-                return [];
             }
+            showToast("Failed to load classes", "danger");
+            return [];
         } catch (err) {
             console.error("fetchTeacherClasses:", err);
             showToast("Network error loading classes", "danger");
@@ -174,21 +168,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
     async function fetchTeacherStudents(classId = null) {
         try {
-            let url = `../php/get_teacher_students.php?bid=${getBrowserInstanceId()}`;
-            if (classId) {
-                url += `&class_id=${classId}`;
+            const cacheKey = `students_${classId || 'all'}`;
+            if (cache[cacheKey]) {
+                allStudents = cache[cacheKey];
+                return cache[cacheKey];
             }
+            
+            let url = `../php/get_teacher_students.php?bid=${getBrowserInstanceId()}`;
+            if (classId) url += `&class_id=${classId}`;
             
             const res = await fetch(url);
             const data = await res.json();
             
             if (data.success) {
                 allStudents = data.students;
+                cache[cacheKey] = data.students;
                 return data.students;
-            } else {
-                showToast("Failed to load students", "danger");
-                return [];
             }
+            showToast("Failed to load students", "danger");
+            return [];
         } catch (err) {
             console.error("fetchTeacherStudents:", err);
             showToast("Network error loading students", "danger");
@@ -201,9 +199,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (!date) date = toISODateLocal(selectedAttendanceDate);
             
             let url = `../php/get_attendance.php?bid=${getBrowserInstanceId()}&date=${date}`;
-            if (classId) {
-                url += `&class_id=${classId}`;
-            }
+            if (classId) url += `&class_id=${classId}`;
             
             const res = await fetch(url);
             const data = await res.json();
@@ -218,17 +214,15 @@ document.addEventListener("DOMContentLoaded", () => {
                     }
                 });
                 return simpleMap;
-            } else {
-                showToast("Failed to load attendance", "warning");
-                return {};
             }
+            return {};
         } catch (err) {
             console.error("fetchAttendance:", err);
             return {};
         }
     }
 
-    // --- UI Functions ---
+    // === OPTIMIZED UI FUNCTIONS ===
     function getBrowserInstanceId() {
         const urlParams = new URLSearchParams(window.location.search);
         return urlParams.get('bid') || '';
@@ -260,11 +254,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         
         const selectedClass = allClasses.find(cls => cls.id == selectedClassId);
-        if (selectedClass) {
-            currentClassIsWeekend = isWeekendClass(selectedClass.class_name);
-        } else {
-            currentClassIsWeekend = false;
-        }
+        currentClassIsWeekend = selectedClass ? isWeekendClass(selectedClass.class_name) : false;
     }
 
     function updateDateDisplay() {
@@ -295,6 +285,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    // === OPTIMIZED ATTENDANCE LOADING ===
     async function loadAttendance() {
         if (!attendanceTableBody) return;
 
@@ -322,6 +313,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
         savedAttendance = { ...attendanceMap };
 
+        // Pre-compute current statuses for optimization
+        const currentStatusMap = {};
+        students.forEach(student => {
+            currentStatusMap[student.id] = getCurrentStatus(student.id);
+        });
+
         let filteredStudents = students;
         const searchTerm = searchInput?.value.trim().toLowerCase();
         if (searchTerm) {
@@ -333,10 +330,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const filterStatus = filterStatusSelect?.value;
         if (filterStatus) {
-            filteredStudents = filteredStudents.filter(s => {
-                const currentStatus = getCurrentStatus(s.id);
-                return currentStatus === filterStatus;
-            });
+            filteredStudents = filteredStudents.filter(s => 
+                currentStatusMap[s.id] === filterStatus
+            );
         }
 
         studentCountEl.textContent = filteredStudents.length;
@@ -358,12 +354,13 @@ document.addEventListener("DOMContentLoaded", () => {
         const frag = document.createDocumentFragment();
 
         filteredStudents.forEach((student) => {
-            const currentStatus = getCurrentStatus(student.id);
+            const currentStatus = currentStatusMap[student.id];
             
             const row = document.createElement("tr");
             row.dataset.id = student.id;
             row.dataset.classId = student.class_id;
 
+            // Name cell
             const nameCell = document.createElement("td");
             nameCell.textContent = student.full_name;
             if (student.admission_id) {
@@ -371,6 +368,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             row.appendChild(nameCell);
 
+            // Status cell
             const statusCell = document.createElement("td");
             const badge = document.createElement("span");
             badge.className = "badge attendance-badge " + getStatusBadgeClass(currentStatus);
@@ -378,18 +376,19 @@ document.addEventListener("DOMContentLoaded", () => {
             statusCell.appendChild(badge);
             row.appendChild(statusCell);
 
+            // Actions cell
             const actionsCell = document.createElement("td");
             const actionsDiv = document.createElement("div");
             actionsDiv.className = "d-flex gap-2 justify-content-center";
 
-            const statuses = [
+            const statusButtons = [
                 { value: "Present", class: "success", icon: "bi-check-circle" },
                 { value: "Absent", class: "danger", icon: "bi-x-circle" },
                 { value: "Late", class: "warning", icon: "bi-clock" },
                 { value: "Excused", class: "info", icon: "bi-clipboard-check" }
             ];
 
-            statuses.forEach(statusOption => {
+            statusButtons.forEach(statusOption => {
                 const btn = document.createElement("button");
                 btn.type = "button";
                 btn.className = `btn btn-sm btn-outline-${statusOption.class} btn-attendance-toggle`;
@@ -413,6 +412,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 actionsDiv.appendChild(btn);
             });
 
+            // Clear button
             const clearBtn = document.createElement("button");
             clearBtn.type = "button";
             clearBtn.className = `btn btn-sm btn-outline-secondary btn-clear-attendance`;
@@ -474,13 +474,17 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // --- Calendar Functions ---
+    // === OPTIMIZED CALENDAR - FIXED VERSION ===
     function renderCalendar(date) {
         if (!calendarContainer) return;
-        calendarContainer.innerHTML = "";
 
         const year = date.getFullYear();
         const month = date.getMonth();
+        const cacheKey = `${year}-${month}`;
+
+        // Always clear the container first
+        calendarContainer.innerHTML = '';
+
         const firstDay = new Date(year, month, 1).getDay();
         const lastDay = new Date(year, month + 1, 0).getDate();
 
@@ -535,12 +539,12 @@ document.addEventListener("DOMContentLoaded", () => {
             dayCell.style.padding = "3px";
             dayCell.style.fontSize = "0.85rem";
             dayCell.textContent = day;
-            
+
             const dayStatus = getDayStatus(new Date(year, month, index + 1));
             if (!dayStatus.enabled) {
                 dayCell.style.color = "#dc3545";
             }
-            
+
             weekdayRow.appendChild(dayCell);
         });
 
@@ -560,30 +564,31 @@ document.addEventListener("DOMContentLoaded", () => {
         for (let day = 1; day <= lastDay; day++) {
             const dayCell = document.createElement("button");
             const cellDate = new Date(year, month, day);
-            
+
             const dayStatus = getDayStatus(cellDate);
             const isEnabled = dayStatus.enabled;
-            
+
             dayCell.className = `btn ${isEnabled ? 'btn-outline-secondary' : 'btn-light'} day-cell`;
             dayCell.style.height = "35px";
             dayCell.style.padding = "0";
             dayCell.style.fontSize = "0.9rem";
             dayCell.textContent = day;
             dayCell.title = dayStatus.title;
-            
+
             if (!isEnabled) {
                 dayCell.style.color = "#dc3545";
                 dayCell.style.opacity = "0.6";
                 dayCell.style.cursor = "not-allowed";
                 dayCell.disabled = true;
             }
-            
+
             const today = new Date();
             if (cellDate.toDateString() === today.toDateString() && isEnabled) {
                 dayCell.classList.add("btn-success", "text-white");
                 dayCell.classList.remove("btn-outline-secondary", "btn-light");
             }
 
+            // HIGHLIGHT SELECTED DATE - FIXED
             if (cellDate.toDateString() === selectedAttendanceDate.toDateString()) {
                 if (isEnabled) {
                     dayCell.classList.add("selected-date-btn");
@@ -595,7 +600,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 dayCell.addEventListener("click", () => {
                     selectedAttendanceDate = cellDate;
                     loadAttendance();
-                    renderCalendar(date);
+                    renderCalendar(new Date(year, month, 1)); // Re-render to update highlight
                 });
             }
 
@@ -607,7 +612,7 @@ document.addEventListener("DOMContentLoaded", () => {
         calendarContainer.style.display = "block";
     }
 
-    // --- Attendance Marking ---
+    // === ATTENDANCE MARKING ===
     document.addEventListener("click", (e) => {
         const clearBtn = e.target.closest(".btn-clear-attendance");
         if (clearBtn) {
@@ -763,7 +768,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     }
                 } else {
                     errorCount++;
-                    console.error("Save error:", data);
                     if (data.requires_approval) {
                         showToast("Your account needs approval to modify attendance", "warning");
                         break;
@@ -804,96 +808,70 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // --- Event Listeners ---
-    if (prevDayBtn) {
-        prevDayBtn.addEventListener("click", () => navigateDay(-1));
-    }
-
-    if (nextDayBtn) {
-        nextDayBtn.addEventListener("click", () => navigateDay(1));
-    }
-
-    if (todayBtn) {
-        todayBtn.addEventListener("click", () => {
-            const today = new Date();
-            const dayStatus = getDayStatus(today);
-            if (!dayStatus.enabled) {
-                showToast(dayStatus.title, "warning");
-                return;
-            }
-            selectedAttendanceDate = today;
-            loadAttendance();
-            
-            if (isCalendarVisible) {
-                renderCalendar(selectedAttendanceDate);
-            }
-        });
-    }
-
-    if (toggleCalendarBtn) {
-        toggleCalendarBtn.addEventListener("click", () => {
-            isCalendarVisible = !isCalendarVisible;
-            if (isCalendarVisible) {
-                renderCalendar(selectedAttendanceDate);
-                toggleCalendarBtn.innerHTML = '<i class="bi bi-calendar-week"></i> Hide Calendar';
-            } else {
-                calendarContainer.style.display = "none";
-                toggleCalendarBtn.innerHTML = '<i class="bi bi-calendar-week"></i> Show Calendar';
-            }
-        });
-    }
-
-    if (classSelect) {
-        classSelect.addEventListener("change", () => {
-            updateCurrentClassType();
-            loadAttendance();
-        });
-    }
-
-    if (searchInput) {
-        searchInput.addEventListener("input", loadAttendance);
-    }
-
-    if (refreshBtn) {
-        refreshBtn.addEventListener("click", () => {
-            searchInput.value = "";
-            if (filterStatusSelect) filterStatusSelect.value = "";
-            pendingChanges = {};
-            if (saveBtn) saveBtn.disabled = true;
-            loadAttendance();
-        });
-    }
-
-    if (filterBtn) {
-        filterBtn.addEventListener("click", () => filterModal?.show());
-    }
-
-    if (applyFiltersBtn) {
-        applyFiltersBtn.addEventListener("click", () => {
-            loadAttendance();
-            filterModal?.hide();
-        });
-    }
-
-    if (clearFiltersBtn) {
-        clearFiltersBtn.addEventListener("click", () => {
-            if (filterStatusSelect) filterStatusSelect.value = "";
-            loadAttendance();
-            filterModal?.hide();
-        });
-    }
-
-    // --- Summary Tab Functions ---
-    function shouldEnableDayForSummary(date, isWeekendClass) {
-        const day = date.getDay();
-        if (isWeekendClass) {
-            return day === 0 || day === 6;
-        } else {
-            return day >= 1 && day <= 4;
+    // === EVENT LISTENERS ===
+    if (prevDayBtn) prevDayBtn.addEventListener("click", () => navigateDay(-1));
+    if (nextDayBtn) nextDayBtn.addEventListener("click", () => navigateDay(1));
+    
+    if (todayBtn) todayBtn.addEventListener("click", () => {
+        const today = new Date();
+        const dayStatus = getDayStatus(today);
+        if (!dayStatus.enabled) {
+            showToast(dayStatus.title, "warning");
+            return;
         }
-    }
+        selectedAttendanceDate = today;
+        loadAttendance();
 
-    function getStatusBadgeClassForSummary(status) {
+        if (isCalendarVisible) {
+            // Clear and re-render calendar
+            calendarContainer.innerHTML = '';
+            renderCalendar(selectedAttendanceDate);
+        }
+    });
+
+    if (toggleCalendarBtn) toggleCalendarBtn.addEventListener("click", () => {
+        isCalendarVisible = !isCalendarVisible;
+        if (isCalendarVisible) {
+            calendarContainer.innerHTML = '';
+            renderCalendar(selectedAttendanceDate);
+            toggleCalendarBtn.innerHTML = '<i class="bi bi-calendar-week"></i> Hide Calendar';
+        } else {
+            calendarContainer.style.display = "none";
+            toggleCalendarBtn.innerHTML = '<i class="bi bi-calendar-week"></i> Show Calendar';
+        }
+    });
+
+    if (classSelect) classSelect.addEventListener("change", () => {
+        updateCurrentClassType();
+        loadAttendance();
+    });
+
+    if (searchInput) searchInput.addEventListener("input", loadAttendance);
+    if (refreshBtn) refreshBtn.addEventListener("click", () => {
+        searchInput.value = "";
+        if (filterStatusSelect) filterStatusSelect.value = "";
+        pendingChanges = {};
+        if (saveBtn) saveBtn.disabled = true;
+        loadAttendance();
+    });
+    if (filterBtn) filterBtn.addEventListener("click", () => filterModal?.show());
+    if (applyFiltersBtn) applyFiltersBtn.addEventListener("click", () => {
+        loadAttendance();
+        filterModal?.hide();
+    });
+    if (clearFiltersBtn) clearFiltersBtn.addEventListener("click", () => {
+        if (filterStatusSelect) filterStatusSelect.value = "";
+        loadAttendance();
+        filterModal?.hide();
+    });
+
+    // === SUMMARY TAB FUNCTIONS ===
+    const shouldEnableDayForSummary = (date, isWeekendClass) => {
+        const day = date.getDay();
+        return isWeekendClass ? (day === 0 || day === 6) : (day >= 1 && day <= 4);
+    };
+
+    const getStatusBadgeClassForSummary = status => {
         switch (status) {
             case "Present": return "bg-success";
             case "Absent": return "bg-danger";
@@ -901,7 +879,7 @@ document.addEventListener("DOMContentLoaded", () => {
             case "Excused": return "bg-info";
             default: return "bg-secondary";
         }
-    }
+    };
 
     function renderSummaryHeaders(year, month) {
         if (!summaryTable) return;
@@ -940,24 +918,27 @@ document.addEventListener("DOMContentLoaded", () => {
 
     async function fetchMonthlyAttendance(year, month, classId) {
         try {
+            const cacheKey = `monthly_${year}-${month + 1}-${classId || 'all'}`;
+            if (cache.monthlyAttendance[cacheKey]) {
+                return cache.monthlyAttendance[cacheKey];
+            }
+            
             const firstDay = `${year}-${String(month + 1).padStart(2, '0')}-01`;
             const lastDay = new Date(year, month + 1, 0);
             const lastDayStr = lastDay.toISOString().split('T')[0];
 
             let url = `../php/get_monthly_attendance.php?bid=${getBrowserInstanceId()}&start_date=${firstDay}&end_date=${lastDayStr}`;
-            if (classId) {
-                url += `&class_id=${classId}`;
-            }
+            if (classId) url += `&class_id=${classId}`;
 
             const res = await fetch(url);
             const data = await res.json();
 
             if (data.success) {
+                cache.monthlyAttendance[cacheKey] = data.attendance;
                 return data.attendance;
-            } else {
-                console.error("Failed to load monthly attendance:", data.message);
-                return {};
             }
+            console.error("Failed to load monthly attendance:", data.message);
+            return {};
         } catch (err) {
             console.error("Error fetching monthly attendance:", err);
             return {};
@@ -1020,6 +1001,8 @@ document.addEventListener("DOMContentLoaded", () => {
         let totalAbsent = 0;
         let totalDays = 0;
 
+        const frag = document.createDocumentFragment();
+
         students.forEach(student => {
             const row = document.createElement("tr");
 
@@ -1066,9 +1049,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 row.appendChild(cell);
             }
 
-            summaryTableBody.appendChild(row);
+            frag.appendChild(row);
         });
 
+        summaryTableBody.appendChild(frag);
         updateSummaryStats({ totalPresent, totalAbsent, totalDays });
     }
 
@@ -1088,38 +1072,36 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function switchTab(tabName) {
         if (tabName === "entry") {
-            entryTabBtn.classList.add("active");
+            entryTabBtn.classList.add("active", "btn-success-modern");
             entryTabBtn.classList.remove("btn-outline-success");
-            entryTabBtn.classList.add("btn-success-modern");
-
-            summaryTabBtn.classList.remove("active");
-            summaryTabBtn.classList.remove("btn-success-modern");
+            summaryTabBtn.classList.remove("active", "btn-success-modern");
             summaryTabBtn.classList.add("btn-outline-success");
-
             attendanceEntrySection.style.display = "block";
             attendanceSummarySection.style.display = "none";
         } else {
-            summaryTabBtn.classList.add("active");
+            summaryTabBtn.classList.add("active", "btn-success-modern");
             summaryTabBtn.classList.remove("btn-outline-success");
-            summaryTabBtn.classList.add("btn-success-modern");
-
-            entryTabBtn.classList.remove("active");
-            entryTabBtn.classList.remove("btn-success-modern");
+            entryTabBtn.classList.remove("active", "btn-success-modern");
             entryTabBtn.classList.add("btn-outline-success");
-
             attendanceEntrySection.style.display = "none";
             attendanceSummarySection.style.display = "block";
 
             if (summaryClassSelect && summaryClassSelect.options.length <= 1) {
                 populateSummaryClassSelect();
             }
+
+            if (classSelect && classSelect.value && summaryClassSelect) {
+                summaryClassSelect.value = classSelect.value;
+                summaryCurrentClassId = classSelect.value;
+            }
+
             renderSummaryTable();
         }
     }
 
     function populateSummaryClassSelect() {
         if (!summaryClassSelect) return;
-        
+
         summaryClassSelect.innerHTML = '<option value="">Select Class</option>';
 
         allClasses.forEach(cls => {
@@ -1129,45 +1111,34 @@ document.addEventListener("DOMContentLoaded", () => {
             summaryClassSelect.appendChild(option);
         });
 
-        if (allClasses.length > 0 && !summaryCurrentClassId) {
+        if (classSelect && classSelect.value) {
+            summaryClassSelect.value = classSelect.value;
+            summaryCurrentClassId = classSelect.value;
+        } else if (allClasses.length > 0 && !summaryCurrentClassId) {
             summaryCurrentClassId = allClasses[0].id;
             summaryClassSelect.value = summaryCurrentClassId;
         }
     }
 
-    if (entryTabBtn) {
-        entryTabBtn.addEventListener("click", () => switchTab("entry"));
-    }
+    // === EVENT LISTENERS FOR SUMMARY TAB ===
+    if (entryTabBtn) entryTabBtn.addEventListener("click", () => switchTab("entry"));
+    if (summaryTabBtn) summaryTabBtn.addEventListener("click", () => switchTab("summary"));
+    if (prevMonthBtn) prevMonthBtn.addEventListener("click", () => {
+        summaryCurrentMonth.setMonth(summaryCurrentMonth.getMonth() - 1);
+        renderSummaryTable();
+    });
+    if (nextMonthBtn) nextMonthBtn.addEventListener("click", () => {
+        summaryCurrentMonth.setMonth(summaryCurrentMonth.getMonth() + 1);
+        renderSummaryTable();
+    });
+    if (summaryClassSelect) summaryClassSelect.addEventListener("change", () => {
+        summaryCurrentClassId = summaryClassSelect.value;
+        renderSummaryTable();
+    });
 
-    if (summaryTabBtn) {
-        summaryTabBtn.addEventListener("click", () => switchTab("summary"));
-    }
-
-    if (prevMonthBtn) {
-        prevMonthBtn.addEventListener("click", () => {
-            summaryCurrentMonth.setMonth(summaryCurrentMonth.getMonth() - 1);
-            renderSummaryTable();
-        });
-    }
-
-    if (nextMonthBtn) {
-        nextMonthBtn.addEventListener("click", () => {
-            summaryCurrentMonth.setMonth(summaryCurrentMonth.getMonth() + 1);
-            renderSummaryTable();
-        });
-    }
-
-    if (summaryClassSelect) {
-        summaryClassSelect.addEventListener("change", () => {
-            summaryCurrentClassId = summaryClassSelect.value;
-            renderSummaryTable();
-        });
-    }
-
-    // Initialize
+    // === INITIALIZE ===
     async function init() {
         selectedAttendanceDate = new Date();
-        
         await fetchTeacherClasses();
         
         if (classSelect && classSelect.value) {

@@ -1,0 +1,226 @@
+/* admin/css/attendance.css */
+.selected-date-btn {
+    background-color: #28a745 !important;
+    color: #fff !important;
+    border-color: #28a745 !important;
+}
+#calendarContainer button { min-width: 40px; min-height: 36px; }
+
+.attendance-badge {
+    font-size: 0.85rem;
+    padding: 0.25rem 0.5rem;
+}
+
+.attendance-table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+}
+
+.day-cell {
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.day-cell:hover:not(.disabled) {
+    background-color: #f8f9fa;
+}
+
+.day-cell.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.calendar-empty {
+    width: 42px;
+    height: 42px;
+}
+
+.date-navigation {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.date-navigation button {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.date-display {
+    font-size: 1.1rem;
+    font-weight: 600;
+    min-width: 120px;
+    text-align: center;
+}
+
+/* Mobile Optimized Controls */
+.mobile-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.search-container, .class-container {
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.button-row {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 5px;
+}
+
+.button-row .btn {
+    flex: 0 0 auto;
+}
+
+.date-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin: 15px 0 5px 0;
+}
+
+.today-row {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 15px;
+}
+
+.btn-success-modern {
+    background-color: #28a745;
+    color: white;
+    border-color: #28a745;
+}
+
+.btn-success-modern:hover {
+    background-color: #218838;
+    border-color: #1e7e34;
+    color: white;
+}
+
+.btn-success-modern.active {
+    background-color: #1e7e34;
+    border-color: #1c7430;
+}
+
+@media (max-width: 768px) {
+    .btn-attendance-toggle {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.8rem;
+    }
+    
+    .table-responsive {
+        font-size: 0.9rem;
+    }
+    
+    .date-navigation {
+        gap: 5px;
+    }
+    
+    .date-display {
+        min-width: 100px;
+        font-size: 1rem;
+    }
+    
+    .button-row .btn {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.8rem;
+    }
+    
+    .today-row .btn {
+        padding: 0.25rem 0.75rem;
+        font-size: 0.85rem;
+    }
+    
+    .date-navigation button {
+        width: 32px;
+        height: 32px;
+    }
+}
+
+@media (max-width: 576px) {
+    .date-display {
+        min-width: 80px;
+        font-size: 0.9rem;
+    }
+    
+    .date-navigation {
+        gap: 3px;
+    }
+    
+    .date-navigation button {
+        width: 28px;
+        height: 28px;
+    }
+    
+    .button-row {
+        gap: 5px;
+    }
+    
+    .button-row .btn {
+        padding: 0.2rem 0.4rem;
+        font-size: 0.75rem;
+    }
+}
+
+/* Teacher info styling */
+.teacher-info {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+.teacher-info .alert {
+    margin-bottom: 0;
+}
+
+/* Summary table styles */
+#summaryTable th {
+    font-size: 0.85rem;
+    padding: 5px 2px;
+    text-align: center;
+}
+
+#summaryTable td {
+    vertical-align: middle;
+    padding: 5px 2px;
+}
+
+.summary-day-cell {
+    min-width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Tab buttons */
+.btn-success-modern {
+    background-color: #28a745;
+    color: white;
+    border-color: #28a745;
+}
+
+.btn-success-modern:hover {
+    background-color: #218838;
+    border-color: #1e7e34;
+    color: white;
+}
+
+.btn-success-modern.active {
+    background-color: #1e7e34;
+    border-color: #1c7430;
+}
