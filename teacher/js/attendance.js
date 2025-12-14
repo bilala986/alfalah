@@ -59,6 +59,37 @@ document.addEventListener("DOMContentLoaded", () => {
     let summaryCurrentMonth = new Date();
     let summaryCurrentClassId = null;
     let summaryIsWeekendClass = false;
+    
+        // Pie chart elements
+    const studentDetailsSection = document.getElementById("studentDetailsSection");
+    const selectedStudentName = document.getElementById("selectedStudentName");
+    const closeStudentDetails = document.getElementById("closeStudentDetails");
+    const attendancePieChartCanvas = document.getElementById("attendancePieChart");
+    const pieChartCenterText = document.getElementById("pieChartCenterText");
+    const pieChartPercentage = document.getElementById("pieChartPercentage");
+    const totalClassDays = document.getElementById("totalClassDays");
+    
+    // Statistics elements
+    const presentDays = document.getElementById("presentDays");
+    const absentDays = document.getElementById("absentDays");
+    const lateDays = document.getElementById("lateDays");
+    const excusedDays = document.getElementById("excusedDays");
+    const noRecordDays = document.getElementById("noRecordDays");
+    const nonClassDays = document.getElementById("nonClassDays");
+    
+    const presentPercentage = document.getElementById("presentPercentage");
+    const absentPercentage = document.getElementById("absentPercentage");
+    const latePercentage = document.getElementById("latePercentage");
+    const excusedPercentage = document.getElementById("excusedPercentage");
+    const noRecordPercentage = document.getElementById("noRecordPercentage");
+    const nonClassPercentage = document.getElementById("nonClassPercentage");
+    
+    const attendanceSummaryRate = document.getElementById("attendanceSummaryRate");
+    const mostCommonStatus = document.getElementById("mostCommonStatus");
+    
+    let attendancePieChart = null;
+    let currentSelectedStudent = null;
+    let currentAttendanceData = null;
 
     // === OPTIMIZED HELPER FUNCTIONS ===
     const pad = n => String(n).padStart(2, "0");
@@ -1006,8 +1037,31 @@ document.addEventListener("DOMContentLoaded", () => {
         students.forEach(student => {
             const row = document.createElement("tr");
 
+            // Name cell - MADE CLICKABLE
             const nameCell = document.createElement("td");
-            nameCell.textContent = student.full_name;
+            const nameLink = document.createElement("a");
+            nameLink.href = "#";
+            nameLink.className = "student-name-link text-decoration-none text-dark";
+            nameLink.style.cursor = "pointer";
+            nameLink.dataset.studentId = student.id;
+            nameLink.textContent = student.full_name;
+            nameLink.title = `Click to view ${student.full_name}'s attendance breakdown`;
+
+            // Add hover effect
+            nameLink.addEventListener('mouseenter', () => {
+                nameLink.classList.add('text-success', 'fw-medium');
+            });
+            nameLink.addEventListener('mouseleave', () => {
+                nameLink.classList.remove('text-success', 'fw-medium');
+            });
+
+            // Add click handler
+            nameLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                showStudentDetails(student.id, student.full_name, attendanceData);
+            });
+
+            nameCell.appendChild(nameLink);
             nameCell.style.fontWeight = "500";
             row.appendChild(nameCell);
 
@@ -1070,6 +1124,158 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    // === PIE CHART FUNCTIONS ===
+    function showStudentDetails(studentId, studentName, attendanceData) {
+        currentSelectedStudent = studentId;
+        currentAttendanceData = attendanceData;
+        
+        // Update student name
+        selectedStudentName.textContent = studentName;
+        
+        // Calculate statistics
+        const year = summaryCurrentMonth.getFullYear();
+        const month = summaryCurrentMonth.getMonth();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        
+        let presentCount = 0;
+        let absentCount = 0;
+        let lateCount = 0;
+        let excusedCount = 0;
+        let noRecordCount = 0;
+        let nonClassCount = 0;
+        let totalEnabledDays = 0;
+        
+        const studentAttendance = attendanceData[studentId] || {};
+        
+        for (let day = 1; day <= daysInMonth; day++) {
+            const date = new Date(year, month, day);
+            const dateStr = date.toISOString().split('T')[0];
+            
+            if (shouldEnableDayForSummary(date, summaryIsWeekendClass)) {
+                totalEnabledDays++;
+                const status = studentAttendance[dateStr] || "–";
+                
+                switch (status) {
+                    case "Present": presentCount++; break;
+                    case "Absent": absentCount++; break;
+                    case "Late": lateCount++; break;
+                    case "Excused": excusedCount++; break;
+                    default: noRecordCount++; break;
+                }
+            } else {
+                nonClassCount++;
+            }
+        }
+        
+        // Update statistics
+        totalClassDays.textContent = totalEnabledDays;
+        presentDays.textContent = `${presentCount} day${presentCount !== 1 ? 's' : ''}`;
+        absentDays.textContent = `${absentCount} day${absentCount !== 1 ? 's' : ''}`;
+        lateDays.textContent = `${lateCount} day${lateCount !== 1 ? 's' : ''}`;
+        excusedDays.textContent = `${excusedCount} day${excusedCount !== 1 ? 's' : ''}`;
+        noRecordDays.textContent = `${noRecordCount} day${noRecordCount !== 1 ? 's' : ''}`;
+        nonClassDays.textContent = `${nonClassCount} day${nonClassCount !== 1 ? 's' : ''}`;
+        
+        // Calculate percentages
+        const totalDays = daysInMonth;
+        const presentPct = totalEnabledDays > 0 ? Math.round((presentCount / totalEnabledDays) * 100) : 0;
+        const absentPct = totalEnabledDays > 0 ? Math.round((absentCount / totalEnabledDays) * 100) : 0;
+        const latePct = totalEnabledDays > 0 ? Math.round((lateCount / totalEnabledDays) * 100) : 0;
+        const excusedPct = totalEnabledDays > 0 ? Math.round((excusedCount / totalEnabledDays) * 100) : 0;
+        const noRecordPct = totalEnabledDays > 0 ? Math.round((noRecordCount / totalEnabledDays) * 100) : 0;
+        const nonClassPct = Math.round((nonClassCount / totalDays) * 100);
+        
+        presentPercentage.textContent = `${presentPct}%`;
+        absentPercentage.textContent = `${absentPct}%`;
+        latePercentage.textContent = `${latePct}%`;
+        excusedPercentage.textContent = `${excusedPct}%`;
+        noRecordPercentage.textContent = `${noRecordPct}%`;
+        nonClassPercentage.textContent = `${nonClassPct}%`;
+        
+        // Update pie chart center text
+        pieChartPercentage.textContent = `${presentPct}%`;
+        
+        // Find most common status
+        const statusCounts = { Present: presentCount, Absent: absentCount, Late: lateCount, Excused: excusedCount, "No Record": noRecordCount };
+        let mostCommon = "No Record";
+        let highestCount = noRecordCount;
+        
+        Object.entries(statusCounts).forEach(([status, count]) => {
+            if (count > highestCount) {
+                highestCount = count;
+                mostCommon = status;
+            }
+        });
+        
+        mostCommonStatus.textContent = mostCommon;
+        attendanceSummaryRate.textContent = `${presentPct}%`;
+        
+        // Create or update pie chart
+        if (attendancePieChart) {
+            attendancePieChart.destroy();
+        }
+        
+        const ctx = attendancePieChartCanvas.getContext('2d');
+        attendancePieChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Present', 'Absent', 'Late', 'Excused', 'No Record'],
+                datasets: [{
+                    data: [presentCount, absentCount, lateCount, excusedCount, noRecordCount],
+                    backgroundColor: [
+                        '#28a745', // Green
+                        '#dc3545', // Red
+                        '#ffc107', // Yellow
+                        '#17a2b8', // Blue
+                        '#6c757d'  // Gray
+                    ],
+                    borderWidth: 1,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '65%',
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.raw || 0;
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+                                return `${label}: ${value} days (${percentage}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        
+        // Show the section
+        studentDetailsSection.style.display = 'block';
+        
+        // Scroll to the details section
+        setTimeout(() => {
+            studentDetailsSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }, 100);
+    }
+
+    function hideStudentDetails() {
+        studentDetailsSection.style.display = 'none';
+        currentSelectedStudent = null;
+        currentAttendanceData = null;
+        
+        if (attendancePieChart) {
+            attendancePieChart.destroy();
+            attendancePieChart = null;
+        }
+    }
+
     function switchTab(tabName) {
         if (tabName === "entry") {
             entryTabBtn.classList.add("active", "btn-success-modern");
@@ -1078,6 +1284,9 @@ document.addEventListener("DOMContentLoaded", () => {
             summaryTabBtn.classList.add("btn-outline-success");
             attendanceEntrySection.style.display = "block";
             attendanceSummarySection.style.display = "none";
+            
+            // Hide student details when switching away from summary
+            hideStudentDetails();
         } else {
             summaryTabBtn.classList.add("active", "btn-success-modern");
             summaryTabBtn.classList.remove("btn-outline-success");
@@ -1135,6 +1344,11 @@ document.addEventListener("DOMContentLoaded", () => {
         summaryCurrentClassId = summaryClassSelect.value;
         renderSummaryTable();
     });
+
+    // ADD THE CLOSE BUTTON EVENT LISTENER HERE:
+    if (closeStudentDetails) {
+        closeStudentDetails.addEventListener('click', hideStudentDetails);
+    }
 
     // === INITIALIZE ===
     async function init() {

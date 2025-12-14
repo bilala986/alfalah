@@ -26,6 +26,9 @@ if (isset($_GET['bid']) && $_GET['bid'] !== $browser_instance_id) {
           href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="../../admin/css/admin.css">
     
+    <!-- Chart.js for Pie Charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
     <!-- Custom Attendance CSS -->
     <style>
         .selected-date-btn {
@@ -222,6 +225,67 @@ if (isset($_GET['bid']) && $_GET['bid'] !== $browser_instance_id) {
             display: flex;
             align-items: center;
             justify-content: center;
+        }
+        
+                /* Pie Chart Responsive Styles */
+        .student-name-link {
+            transition: all 0.2s ease;
+        }
+        
+        .student-name-link:hover {
+            color: #28a745 !important;
+            text-decoration: underline !important;
+        }
+        
+        @media (max-width: 768px) {
+            #attendancePieChart {
+                width: 180px !important;
+                height: 180px !important;
+            }
+            
+            #pieChartCenterText {
+                font-size: 0.9rem;
+            }
+            
+            #pieChartPercentage {
+                font-size: 1.5rem !important;
+            }
+            
+            .card-body .row .col-6 {
+                margin-bottom: 0.5rem;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            #attendancePieChart {
+                width: 150px !important;
+                height: 150px !important;
+            }
+            
+            #pieChartPercentage {
+                font-size: 1.2rem !important;
+            }
+            
+            .card-body .row .col-6 {
+                flex: 0 0 100%;
+                max-width: 100%;
+            }
+        }
+        
+        /* For very small screens */
+        @media (max-width: 400px) {
+            #attendancePieChart {
+                width: 120px !important;
+                height: 120px !important;
+            }
+            
+            #pieChartCenterText {
+                font-size: 0.8rem;
+            }
+            
+            #pieChartPercentage {
+                font-size: 1rem !important;
+            }
         }
     </style>
 </head>
@@ -487,6 +551,134 @@ if (isset($_GET['bid']) && $_GET['bid'] !== $browser_instance_id) {
                             <div class="card-body text-center">
                                 <h6 class="card-subtitle mb-2 text-muted">Attendance Rate</h6>
                                 <h3 id="attendanceRate" class="text-primary">0%</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Student Details Section (Initially Hidden) -->
+            <div id="studentDetailsSection" class="mt-4" style="display: none;">
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="bi bi-person-circle me-2"></i>
+                            <span id="selectedStudentName"></span> - Attendance Breakdown
+                        </h5>
+                        <button type="button" class="btn btn-sm btn-light" id="closeStudentDetails">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <!-- Pie Chart Container -->
+                            <div class="col-md-5 col-lg-4 text-center mb-3 mb-md-0">
+                                <div class="position-relative" style="max-width: 250px; margin: 0 auto;">
+                                    <canvas id="attendancePieChart" width="200" height="200"></canvas>
+                                    <div id="pieChartCenterText" class="position-absolute top-50 start-50 translate-middle text-center">
+                                        <div class="fs-1 fw-bold" id="pieChartPercentage">0%</div>
+                                        <div class="text-muted small">Present</div>
+                                    </div>
+                                </div>
+                                <div class="mt-2 small text-muted">
+                                    Total Class Days: <span id="totalClassDays">0</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Statistics List -->
+                            <div class="col-md-7 col-lg-8">
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <div class="d-flex align-items-center p-2 border rounded">
+                                            <span class="rounded-circle me-2" 
+                                                  style="width: 15px; height: 15px; background-color: #28a745;"></span>
+                                            <div class="flex-grow-1">
+                                                <div class="fw-medium">Present</div>
+                                                <div class="text-muted small" id="presentDays">0 days</div>
+                                            </div>
+                                            <div class="fs-5 fw-bold text-success" id="presentPercentage">0%</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="d-flex align-items-center p-2 border rounded">
+                                            <span class="rounded-circle me-2" 
+                                                  style="width: 15px; height: 15px; background-color: #dc3545;"></span>
+                                            <div class="flex-grow-1">
+                                                <div class="fw-medium">Absent</div>
+                                                <div class="text-muted small" id="absentDays">0 days</div>
+                                            </div>
+                                            <div class="fs-5 fw-bold text-danger" id="absentPercentage">0%</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="d-flex align-items-center p-2 border rounded">
+                                            <span class="rounded-circle me-2" 
+                                                  style="width: 15px; height: 15px; background-color: #ffc107;"></span>
+                                            <div class="flex-grow-1">
+                                                <div class="fw-medium">Late</div>
+                                                <div class="text-muted small" id="lateDays">0 days</div>
+                                            </div>
+                                            <div class="fs-5 fw-bold text-warning" id="latePercentage">0%</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="d-flex align-items-center p-2 border rounded">
+                                            <span class="rounded-circle me-2" 
+                                                  style="width: 15px; height: 15px; background-color: #17a2b8;"></span>
+                                            <div class="flex-grow-1">
+                                                <div class="fw-medium">Excused</div>
+                                                <div class="text-muted small" id="excusedDays">0 days</div>
+                                            </div>
+                                            <div class="fs-5 fw-bold text-info" id="excusedPercentage">0%</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="d-flex align-items-center p-2 border rounded">
+                                            <span class="rounded-circle me-2" 
+                                                  style="width: 15px; height: 15px; background-color: #6c757d;"></span>
+                                            <div class="flex-grow-1">
+                                                <div class="fw-medium">No Record</div>
+                                                <div class="text-muted small" id="noRecordDays">0 days</div>
+                                            </div>
+                                            <div class="fs-5 fw-bold text-secondary" id="noRecordPercentage">0%</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="d-flex align-items-center p-2 border rounded bg-light">
+                                            <span class="rounded-circle me-2" 
+                                                  style="width: 15px; height: 15px; background-color: #adb5bd; border: 1px solid #6c757d;"></span>
+                                            <div class="flex-grow-1">
+                                                <div class="fw-medium">Non-Class Days</div>
+                                                <div class="text-muted small" id="nonClassDays">0 days</div>
+                                            </div>
+                                            <div class="fs-5 fw-bold text-muted" id="nonClassPercentage">0%</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                            
+                        <!-- Attendance Pattern Summary -->
+                        <div class="mt-3 pt-3 border-top">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <i class="bi bi-calendar-check me-2 text-success"></i>
+                                        <div>
+                                            <div class="fw-medium">Attendance Rate</div>
+                                            <div class="text-muted small" id="attendanceSummaryRate">0%</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <i class="bi bi-flag me-2 text-danger"></i>
+                                        <div>
+                                            <div class="fw-medium">Most Common Status</div>
+                                            <div class="text-muted small" id="mostCommonStatus">No Record</div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
