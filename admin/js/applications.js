@@ -1,1162 +1,1081 @@
-// admin/js/attendance.js - Admin Attendance Management (Complete with Summary) - FIXED VERSION
-document.addEventListener("DOMContentLoaded", () => {
-    // Elements - will be initialized after UI renders
-    let attendanceTableBody;
-    let classSelect;
-    let todayBtn;
-    let toggleCalendarBtn;
-    let selectedDateEl;
-    let selectedWeekdayEl;
-    let calendarContainer;
-    let studentCountEl;
-    let entryTabBtn;
-    let summaryTabBtn;
-    let attendanceEntrySection;
-    let attendanceSummarySection;
-    let prevMonthBtn;
-    let nextMonthBtn;
-    let monthYearDisplay;
-    let summaryClassSelect;
-    let summaryTable;
-    let summaryTableBody;
-    let totalPresentEl;
-    let totalAbsentEl;
-    let attendanceRateEl;
-    let teacherInfo;
-    let currentTeacherNameEl;
-    let prevDayBtn;
-    let nextDayBtn;
-    let searchInput;
-    let refreshBtn;
-    let saveBtn;
+// admin/js/applications.js
+document.addEventListener('DOMContentLoaded', function() {
+    // Toast notification function
+    function showToast(message, type = 'success') {
+        const toastEl = document.getElementById('liveToast');
+        const toastBody = toastEl.querySelector('.toast-body');
 
-    // Global variables
-    let allClasses = [];
-    let allStudents = [];
-    let selectedAttendanceDate = new Date();
-    let currentClassId = null;
-    let currentClassName = '';
-    let currentTeacherName = '';
-    let currentTeacherId = null;
-    let currentClassIsWeekend = false;
-    let pendingChanges = {};
-    let savedAttendance = {};
-    let isCalendarVisible = false;
+        // Set toast type and message
+        toastEl.className = `toast align-items-center ${type === 'success' ? 'bg-success' : 'bg-danger'}`;
+        toastBody.textContent = message;
+
+        // Show toast
+        const toast = new bootstrap.Toast(toastEl);
+        toast.show();
+    }
+
+    // Elements
+    const searchInput = document.getElementById('searchInput');
+    const refreshBtn = document.getElementById('refreshBtn');
+    const filterBtn = document.getElementById('filterBtn');
+    const applicationsTableBody = document.getElementById('applicationsTableBody');
+    const visibleCount = document.getElementById('visibleCount');
+    const totalCount = document.getElementById('totalCount');
     
-    let summaryCurrentMonth = new Date();
-    let summaryCurrentClassId = null;
-    let summaryIsWeekendClass = false;
+    // Search options elements
+    const searchStudent = document.getElementById('searchStudent');
+    const searchParent = document.getElementById('searchParent');
+    const searchEmail = document.getElementById('searchEmail');
+    
+    // Modal elements
+    const filterModal = new bootstrap.Modal(document.getElementById('filterModal'));
+    const yearGroupSelect = document.getElementById('yearGroupSelect');
+    const programSelect = document.getElementById('programSelect');
+    const statusSelect = document.getElementById('statusSelect');
+    const accountStatusSelect = document.getElementById('accountStatusSelect');
+    const applyFilterBtn = document.getElementById('applyFilterBtn');
+    const clearFilterBtn = document.getElementById('clearFilterBtn');
+    
+    const approveModal = new bootstrap.Modal(document.getElementById('approveModal'));
+    const rejectModal = new bootstrap.Modal(document.getElementById('rejectModal'));
+    const approveStudentName = document.getElementById('approveStudentName');
+    const rejectStudentName = document.getElementById('rejectStudentName');
+    const confirmApprove = document.getElementById('confirmApprove');
+    const confirmReject = document.getElementById('confirmReject');
+    
+    // Age filter elements
+    const minAgeInput = document.getElementById('minAge');
+    const maxAgeInput = document.getElementById('maxAge');
 
-    // --- Helper Functions ---
-    function pad(n) { return String(n).padStart(2, "0"); }
+    // Current filter state
+    let currentActionApplicationId = null;
+    let currentYearFilter = 'all';
+    let currentProgramFilter = 'all';
+    let currentMinAge = null;
+    let currentMaxAge = null;
+    let currentStatusFilter = 'pending_and_rejection';
+    let currentAccountStatusFilter = 'all';
 
-    function toISODateLocal(d) {
-        return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-    }
+    // Get all rows
+    let rows = applicationsTableBody.querySelectorAll('tr[data-student]');
 
-    function toDisplayDate(d) {
-        const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-        
-        const dayOfWeek = dayNames[d.getDay()];
-        const day = d.getDate();
-        const month = monthNames[d.getMonth()];
-        const year = d.getFullYear();
-        
-        return `${day} ${month} ${year}`;
-    }
+    // Enhanced search function with search options and age filtering
+    function searchApplications(searchTerm) {
+        let visibleRows = 0;
 
-    function getWeekdayName(d) {
-        const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-        return dayNames[d.getDay()];
-    }
+        // Get search options
+        const searchInStudent = searchStudent ? searchStudent.checked : true;
+        const searchInParent = searchParent ? searchParent.checked : true;
+        const searchInEmail = searchEmail ? searchEmail.checked : false;
 
-    function showToast(msg, type = "success") {
-        const div = document.createElement("div");
-        div.className = "position-fixed bottom-0 end-0 p-3";
-        div.innerHTML = `
-            <div class="toast align-items-center text-bg-${type} border-0 show" role="alert">
-                <div class="d-flex">
-                    <div class="toast-body">${msg}</div>
-                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-                </div>
-            </div>`;
-        document.body.appendChild(div);
-        setTimeout(() => div.remove(), 3200);
-    }
+        rows.forEach(row => {
+            const studentName = row.getAttribute('data-student');
+            const parentName = row.getAttribute('data-parent');
+            const program = row.getAttribute('data-program');
+            const applicationId = row.getAttribute('data-application-id');
+            const age = parseInt(row.getAttribute('data-age')) || 0; // Get age from data attribute
 
-    function isFutureDate(date) {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const compareDate = new Date(date);
-        compareDate.setHours(0, 0, 0, 0);
-        return compareDate > today;
-    }
+            // Get additional data from the row cells
+            const studentCell = row.cells[0];
+            const parentCell = row.cells[3];
 
-    function isWeekendClass(className) {
-        if (!className) return false;
-        const lowerName = className.toLowerCase();
-        return lowerName.includes('weekend') || 
-               lowerName.includes('saturday') || 
-               lowerName.includes('sunday') ||
-               lowerName.includes('fri') ||
-               lowerName.includes('sat') ||
-               lowerName.includes('sun');
-    }
+            const studentFullText = studentCell.textContent.toLowerCase();
+            const parentFullText = parentCell.textContent.toLowerCase();
 
-    function shouldEnableDay(date) {
-        const day = date.getDay();
-        
-        if (currentClassIsWeekend) {
-            return day === 0 || day === 6;
-        } else {
-            return day >= 1 && day <= 4;
-        }
-    }
+            // Determine what to search based on selected options
+            let matchesSearch = false;
 
-    function getDayStatus(date) {
-        const day = date.getDay();
-        const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-        
-        if (currentClassIsWeekend) {
-            if (day === 0 || day === 6) {
-                return { enabled: true, title: `${dayNames[day]} - Class day` };
+            if (searchTerm === '') {
+                // If no search term, show all rows (but still apply filters)
+                matchesSearch = true;
             } else {
-                return { enabled: false, title: `${dayNames[day]} - No weekend class` };
+                // Search based on selected options ONLY
+                if (searchInStudent && studentName.includes(searchTerm)) {
+                    matchesSearch = true;
+                }
+                if (!matchesSearch && searchInParent && parentName.includes(searchTerm)) {
+                    matchesSearch = true;
+                }
+                if (!matchesSearch && searchInEmail && parentFullText.includes(searchTerm)) {
+                    matchesSearch = true;
+                }
             }
-        } else {
-            if (day >= 1 && day <= 4) {
-                return { enabled: true, title: `${dayNames[day]} - Class day` };
-            } else {
-                return { enabled: false, title: `${dayNames[day]} - Weekend - No classes` };
-            }
-        }
-    }
 
-    function navigateDay(direction) {
-        const newDate = new Date(selectedAttendanceDate);
-        newDate.setDate(newDate.getDate() + direction);
-        selectedAttendanceDate = newDate;
-        loadAttendance();
+            // Apply age filter
+            const matchesAge = (currentMinAge === null || age >= currentMinAge) && 
+                              (currentMaxAge === null || age <= currentMaxAge);
 
-        if (isCalendarVisible) {
-            renderCalendar(selectedAttendanceDate);
-        }
-    }
+            // Apply both search and filter
+            const matchesYear = currentYearFilter === 'all' || program === currentYearFilter || row.querySelector('.mobile-hide:nth-child(3)')?.textContent.includes(currentYearFilter);
+            const matchesProgram = currentProgramFilter === 'all' || program === currentProgramFilter || row.querySelector('.mobile-hide:nth-child(2)')?.textContent.includes(currentProgramFilter);
 
-    // --- API Functions ---
-    async function fetchAllClasses() {
-        try {
-            const res = await fetch(`../php/get_classes_for_admin.php?bid=${browserInstanceId}`);
-            const data = await res.json();
-            
-            if (data.success) {
-                allClasses = data.classes;
-                return data.classes;
-            } else {
-                showToast("Failed to load classes", "danger");
-                return [];
-            }
-        } catch (err) {
-            console.error("fetchAllClasses:", err);
-            showToast("Network error loading classes", "danger");
-            return [];
-        }
-    }
+            if (matchesSearch && matchesYear && matchesProgram && matchesAge) {
+                row.style.display = '';
+                visibleRows++;
 
-    async function fetchStudentsForClass(classId) {
-        try {
-            const res = await fetch(`../php/get_students_for_class.php?bid=${browserInstanceId}&class_id=${classId}`);
-            const data = await res.json();
-            
-            if (data.success) {
-                allStudents = data.students;
-                return data.students;
-            } else {
-                showToast("Failed to load students", "danger");
-                return [];
-            }
-        } catch (err) {
-            console.error("fetchStudentsForClass:", err);
-            showToast("Network error loading students", "danger");
-            return [];
-        }
-    }
-
-    async function fetchAttendance(classId, date = null) {
-        try {
-            if (!date) date = toISODateLocal(selectedAttendanceDate);
-            
-            const res = await fetch(`../php/get_attendance_admin.php?bid=${browserInstanceId}&class_id=${classId}&date=${date}`);
-            const data = await res.json();
-            
-            if (data.success) {
-                const simpleMap = {};
-                Object.entries(data.attendance).forEach(([studentId, attendanceData]) => {
-                    if (typeof attendanceData === 'string') {
-                        simpleMap[studentId] = attendanceData;
-                    } else if (attendanceData && attendanceData.status) {
-                        simpleMap[studentId] = attendanceData.status;
+                // Hide details row
+                const detailsRow = row.nextElementSibling;
+                if (detailsRow && detailsRow.classList.contains('application-details-row')) {
+                    detailsRow.style.display = 'none';
+                    const detailsDiv = detailsRow.querySelector('.application-details');
+                    if (detailsDiv) {
+                        detailsDiv.classList.remove('show');
                     }
+                }
+            } else {
+                row.style.display = 'none';
+
+                // Also hide the details row
+                const detailsRow = row.nextElementSibling;
+                if (detailsRow && detailsRow.classList.contains('application-details-row')) {
+                    detailsRow.style.display = 'none';
+                    const detailsDiv = detailsRow.querySelector('.application-details');
+                    if (detailsDiv) {
+                        detailsDiv.classList.remove('show');
+                    }
+                }
+            }
+        });
+
+        // Update visible count
+        visibleCount.textContent = visibleRows;
+    }
+
+    function filterTable() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const rows = applicationsTableBody.querySelectorAll('tr[data-student]');
+        let visibleRows = 0;
+
+        // Get search options
+        const searchInStudent = searchStudent ? searchStudent.checked : true;
+        const searchInParent = searchParent ? searchParent.checked : true;
+        const searchInEmail = searchEmail ? searchEmail.checked : false;
+
+        rows.forEach(row => {
+            const studentName = row.getAttribute('data-student');
+            const parentName = row.getAttribute('data-parent');
+            const program = row.getAttribute('data-program');
+            const yearGroup = row.getAttribute('data-year-group');
+            const age = parseInt(row.getAttribute('data-age')) || 0;
+            const status = row.getAttribute('data-status');
+            const accountStatus = row.getAttribute('data-account-status');
+
+            // Get additional data from the row cells for email search
+            const parentCell = row.cells[3];
+            const parentFullText = parentCell.textContent.toLowerCase();
+
+            // Determine what to search based on selected options
+            let matchesSearch = false;
+
+            if (searchTerm === '') {
+                matchesSearch = true;
+            } else {
+                if (searchInStudent && studentName.includes(searchTerm)) {
+                    matchesSearch = true;
+                }
+                if (!matchesSearch && searchInParent && parentName.includes(searchTerm)) {
+                    matchesSearch = true;
+                }
+                if (!matchesSearch && searchInEmail && parentFullText.includes(searchTerm)) {
+                    matchesSearch = true;
+                }
+            }
+
+            // Apply filters - UPDATED WITH YEAR GROUP
+            const statusFilter = currentStatusFilter === 'all' || 
+                                (currentStatusFilter === 'pending_and_rejection' && 
+                                 (status === 'pending' || status === 'pending_rejection')) ||
+                                status === currentStatusFilter;
+
+            const accountStatusFilter = currentAccountStatusFilter === 'all' || accountStatus === currentAccountStatusFilter;
+            const programFilter = currentProgramFilter === 'all' || program === currentProgramFilter.toLowerCase();
+            const yearGroupFilter = currentYearFilter === 'all' || (yearGroup && yearGroup.trim() === currentYearFilter.toLowerCase().trim());
+            const ageFilter = (currentMinAge === null || age >= currentMinAge) && 
+                             (currentMaxAge === null || age <= currentMaxAge);
+
+            const shouldShow = matchesSearch && statusFilter && accountStatusFilter && programFilter && yearGroupFilter && ageFilter;
+            row.style.display = shouldShow ? '' : 'none';
+
+            if (shouldShow) {
+                visibleRows++;
+                // Hide details row logic...
+            } else {
+                // Hide details row logic...
+            }
+        });
+
+        visibleCount.textContent = visibleRows;
+
+        // Update filter button appearance
+        const isAnyFilterActive = currentProgramFilter !== 'all' || 
+                                 currentYearFilter !== 'all' ||  // Add this
+                                 currentMinAge !== null || 
+                                 currentMaxAge !== null ||
+                                 currentStatusFilter !== 'all' ||
+                                 currentAccountStatusFilter !== 'all';
+
+        if (isAnyFilterActive) {
+            filterBtn.classList.remove('btn-outline-primary');
+            filterBtn.classList.add('btn-success');
+        } else {
+            filterBtn.classList.remove('btn-success');
+            filterBtn.classList.add('btn-outline-primary');
+        }
+    }
+
+    // Dynamic table update function with status support - UPDATED WITH DOCUMENT FRAGMENT
+    function updateTable(applications) {
+        applicationsTableBody.innerHTML = '';
+
+        // Update total count element
+        if (totalCount) {
+            totalCount.textContent = applications.length;
+        }
+
+        if (applications.length === 0) {
+            applicationsTableBody.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-4">No admission applications found.</td></tr>';
+            visibleCount.textContent = '0';
+            rows = [];
+            return;
+        }
+
+        // Create document fragment for efficient DOM manipulation
+        var frag = document.createDocumentFragment();
+
+        applications.forEach(app => {
+            const status = app.status || 'pending';
+            const row = document.createElement('tr');
+            row.setAttribute('data-student', app.student_first_name.toLowerCase() + ' ' + app.student_last_name.toLowerCase());
+            row.setAttribute('data-parent', app.parent1_first_name.toLowerCase() + ' ' + app.parent1_last_name.toLowerCase());
+            row.setAttribute('data-program', app.interested_program.toLowerCase());
+            row.setAttribute('data-year-group', (app.year_group || '').toLowerCase()); // ADD THIS LINE
+            row.setAttribute('data-age', app.student_age || '0');
+            row.setAttribute('data-application-id', app.id);
+            row.setAttribute('data-status', status);
+            row.setAttribute('data-account-status', app.account_status || 'not_applicable');
+            row.setAttribute('data-deletion-time', app.scheduled_for_deletion_at || '');
+
+            // Format submitted date
+            let submittedDate = 'N/A';
+            if (app.submitted_at) {
+                const date = new Date(app.submitted_at);
+                submittedDate = date.toLocaleString('en-GB', {
+                    timeZone: 'Europe/London',
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric',
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    hour12: true
                 });
-                return simpleMap;
-            } else {
-                showToast("Failed to load attendance", "warning");
-                return {};
             }
-        } catch (err) {
-            console.error("fetchAttendance:", err);
-            return {};
-        }
+
+            // Determine button states and classes
+            const isApproved = status === 'approved';
+            const isPendingRejection = status === 'pending_rejection';
+
+            const approveBtnClass = isApproved ? 'btn-approved' : 'btn-outline-success';
+            const approveBtnText = isApproved ? 'Approved' : 'Approve';
+
+            // Status badge HTML
+            const statusText = status.replace('_', ' ');
+            const badgeClass = `status-badge status-badge-${status.replace('_', '-')}`;
+
+            let statusHtml = `<span class="${badgeClass}" id="status-badge-${app.id}">${statusText}`;
+            if (isPendingRejection && app.scheduled_for_deletion_at) {
+                statusHtml += ` <span class="countdown-timer" id="countdown-${app.id}"></span>`;
+            }
+            statusHtml += `</span>`;
+
+            // Build actions buttons - UNDO BUTTON REPLACES REJECT BUTTON
+            let actionsHtml = '';
+            if (isPendingRejection) {
+                // Show undo button instead of reject button
+                actionsHtml = `
+                    <div class="btn-group btn-group-sm">
+                        <button type="button" class="btn btn-outline-primary view-btn" data-application-id="${app.id}">
+                            <i class="bi bi-eye"></i> View
+                        </button>
+                        <button type="button" class="btn ${approveBtnClass} approve-btn" data-application-id="${app.id}" data-student-name="${escapeHtml(app.student_first_name + ' ' + app.student_last_name)}" ${isApproved ? 'disabled' : ''}>
+                            <i class="bi bi-check-lg"></i> ${approveBtnText}
+                        </button>
+                        <button type="button" class="btn btn-warning undo-rejection-btn" data-application-id="${app.id}" data-student-name="${escapeHtml(app.student_first_name + ' ' + app.student_last_name)}">
+                            <i class="bi bi-arrow-counterclockwise"></i> Undo
+                        </button>
+                    </div>
+                `;
+            } else {
+                // Show normal buttons (including reject) - UPDATED TO DISABLE REJECT FOR APPROVED
+                actionsHtml = `
+                    <div class="btn-group btn-group-sm">
+                        <button type="button" class="btn btn-outline-primary view-btn" data-application-id="${app.id}">
+                            <i class="bi bi-eye"></i> View
+                        </button>
+                        <button type="button" class="btn ${approveBtnClass} approve-btn" data-application-id="${app.id}" data-student-name="${escapeHtml(app.student_first_name + ' ' + app.student_last_name)}" ${isApproved ? 'disabled' : ''}>
+                            <i class="bi bi-check-lg"></i> ${approveBtnText}
+                        </button>
+                        <button type="button" class="btn btn-outline-danger reject-btn" data-application-id="${app.id}" data-student-name="${escapeHtml(app.student_first_name + ' ' + app.student_last_name)}">
+                            <i class="bi bi-x-lg"></i> ${isApproved ? 'Reject' : 'Reject'}
+                        </button>
+                    </div>
+                `;
+            }
+
+            row.innerHTML = `
+                <td class="fw-semibold">
+                    ${escapeHtml(app.student_first_name + ' ' + app.student_last_name)}
+                    <br>
+                    <small class="text-muted">Age: ${app.student_age || 'N/A'}</small>
+                </td>
+                <td class="mobile-hide">${escapeHtml(app.interested_program)}</td>
+                <td class="mobile-hide">
+                    ${escapeHtml(app.year_group)}
+                    ${app.year_group_other ? '<br><small class="text-muted">(' + escapeHtml(app.year_group_other) + ')</small>' : ''}
+                </td>
+                <td>
+                    ${escapeHtml(app.parent1_first_name + ' ' + app.parent1_last_name)}
+                    <br>
+                    <small class="text-muted">${escapeHtml(app.parent1_email)}</small>
+                </td>
+                <td>${statusHtml}</td>
+                <td class="mobile-hide">
+                    ${status === 'approved' ? 
+                        (app.account_status === 'created' ? 
+                            '<span class="badge bg-success">Account Created</span>' : 
+                            '<span class="badge bg-warning">No Account Yet</span>'
+                        ) : 
+                        '<span class="text-muted">-</span>'
+                    }
+                </td>
+                <td>${actionsHtml}</td>
+            `;
+
+            frag.append(row);
+
+            // Create details row
+            const detailsRow = document.createElement('tr');
+            detailsRow.className = 'application-details-row';
+            detailsRow.style.display = 'none';
+            detailsRow.innerHTML = `
+                <td colspan="7">
+                    <div class="application-details" id="details-${app.id}">
+                        <div class="text-center text-muted py-3">
+                            <i class="bi bi-hourglass-split"></i> Click "View" to load details
+                        </div>
+                    </div>
+                </td>
+            `;
+            frag.append(detailsRow);
+        });
+        
+        // Append all rows at once using the document fragment
+        document.getElementById('applicationsTableBody').append(frag);
+
+        // Reattach event listeners
+        attachEventListeners();
+
+        // Update rows reference
+        rows = applicationsTableBody.querySelectorAll('tr[data-student]');
+
+        // Start countdown timers
+        startCountdownTimers();
+
+        // Apply current filters
+        filterTable();
+    }
+    
+    // Countdown timer function
+    function startCountdownTimers() {
+        rows.forEach(row => {
+            const status = row.getAttribute('data-status');
+            const deletionTime = row.getAttribute('data-deletion-time');
+            const applicationId = row.getAttribute('data-application-id');
+
+            if (status === 'pending_rejection' && deletionTime) {
+                updateCountdownTimer(applicationId, deletionTime);
+
+                // Update every minute
+                setInterval(() => {
+                    updateCountdownTimer(applicationId, deletionTime);
+                }, 60000);
+            }
+        });
     }
 
-    async function fetchMonthlyAttendanceAdmin(year, month, classId) {
-        try {
-            const firstDay = `${year}-${String(month + 1).padStart(2, '0')}-01`;
-            const lastDay = new Date(year, month + 1, 0);
-            const lastDayStr = lastDay.toISOString().split('T')[0];
+    function updateCountdownTimer(applicationId, deletionTime) {
+        const countdownElement = document.getElementById(`countdown-${applicationId}`);
 
-            if (!classId) {
-                return {};
-            }
+        if (!countdownElement) return;
 
-            const url = `../php/get_monthly_attendance_admin.php?bid=${browserInstanceId}&start_date=${firstDay}&end_date=${lastDayStr}&class_id=${classId}`;
-            const res = await fetch(url);
-            const data = await res.json();
+        const now = new Date();
+        const deletionDate = new Date(deletionTime);
 
-            if (data.success) {
-                return data.attendance;
-            } else {
-                console.error("Failed to load monthly attendance:", data.message);
-                return {};
-            }
-        } catch (err) {
-            console.error("Error fetching monthly attendance:", err);
-            return {};
+        // Treat both times as UTC to avoid timezone confusion
+        const nowUTC = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 
+                               now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds());
+        const deletionUTC = deletionDate.getTime();
+
+        const timeLeft = deletionUTC - nowUTC;
+
+        if (timeLeft <= 0) {
+            countdownElement.textContent = '(0h 0m)';
+            // Auto-refresh the table to remove expired applications
+            refreshTableData(false);
+            return;
         }
+
+        const hoursLeft = Math.floor(timeLeft / (1000 * 60 * 60));
+        const minutesLeft = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+
+        countdownElement.textContent = `(${hoursLeft}h ${minutesLeft}m)`;
     }
 
-    // Replace the entire renderUI() function with:
-    async function loadInitialData() {
-        try {
-            allClasses = await fetchAllClasses();
-            if (allClasses.length === 0) {
-                showToast("No classes found", "warning");
+    // Undo rejection functionality
+    function handleUndoRejectionClick() {
+        const applicationId = this.getAttribute('data-application-id');
+        const studentName = this.getAttribute('data-student-name');
+
+        const button = this;
+        button.disabled = true;
+        button.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
+
+        fetch('php/undo_rejection.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `application_id=${applicationId}`
+        })
+        .then(response => {
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                return response.text().then(text => {
+                    throw new Error('Server returned non-JSON response');
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.requires_login) {
+                // Session expired, redirect to login
+                showToast('Session expired. Redirecting to login...', 'error');
+                setTimeout(() => {
+                    window.location.href = `login.php?bid=${browserInstanceId}`;
+                }, 2000);
                 return;
             }
 
-            // Initialize DOM elements
-            initializeDOMElements();
-            initializeEventListeners();
-
-            // Populate class selects
-            updateClassSelect();
-            populateSummaryClassSelect();
-
-            // Initialize date display
-            updateDateDisplay();
-
-        } catch (error) {
-            console.error("Initialization error:", error);
-            showToast("Failed to load attendance system", "danger");
-        }
-    }
-
-
-    function initializeDOMElements() {
-        // Get references to all DOM elements
-        attendanceTableBody = document.getElementById("attendanceTableBody");
-        classSelect = document.getElementById("attendanceClassSelect");
-        todayBtn = document.getElementById("todayBtn");
-        toggleCalendarBtn = document.getElementById("toggleCalendarBtn");
-        selectedDateEl = document.getElementById("selectedDate");
-        selectedWeekdayEl = document.getElementById("selectedWeekday");
-        calendarContainer = document.getElementById("calendarContainer");
-        studentCountEl = document.getElementById("studentCount");
-        entryTabBtn = document.getElementById("entryTabBtn");
-        summaryTabBtn = document.getElementById("summaryTabBtn");
-        attendanceEntrySection = document.getElementById("attendanceEntrySection");
-        attendanceSummarySection = document.getElementById("attendanceSummarySection");
-        prevMonthBtn = document.getElementById("prevMonthBtn");
-        nextMonthBtn = document.getElementById("nextMonthBtn");
-        monthYearDisplay = document.getElementById("monthYearDisplay");
-        summaryClassSelect = document.getElementById("summaryClassSelect");
-        summaryTable = document.getElementById("summaryTable");
-        summaryTableBody = document.getElementById("summaryTableBody");
-        totalPresentEl = document.getElementById("totalPresent");
-        totalAbsentEl = document.getElementById("totalAbsent");
-        attendanceRateEl = document.getElementById("attendanceRate");
-        teacherInfo = document.getElementById("teacherInfo");
-        currentTeacherNameEl = document.getElementById("currentTeacherName");
-        prevDayBtn = document.getElementById("prevDayBtn");
-        nextDayBtn = document.getElementById("nextDayBtn");
-        searchInput = document.getElementById("attendanceSearchInput");
-        refreshBtn = document.getElementById("attendanceRefreshBtn");
-        saveBtn = document.getElementById("attendanceSaveBtn");
-    }
-
-    function updateClassSelect() {
-        if (!classSelect || !allClasses.length) return;
-        
-        classSelect.innerHTML = '<option value="">Select Class</option>';
-        
-        allClasses.forEach(cls => {
-            const option = document.createElement('option');
-            option.value = cls.id;
-            option.textContent = `${cls.class_name} (${cls.year_group}) - ${cls.teacher_name || 'No Teacher'} - ${cls.student_count || 0} students`;
-            option.setAttribute('data-teacher', cls.teacher_name || 'Unassigned');
-            option.setAttribute('data-teacher-id', cls.teacher_id || '');
-            classSelect.appendChild(option);
-        });
-        
-        if (allClasses.length > 0) {
-            classSelect.value = allClasses[0].id;
-            currentClassId = allClasses[0].id;
-            currentTeacherName = allClasses[0].teacher_name || 'Unassigned';
-            currentTeacherId = allClasses[0].teacher_id || null;
-            updateTeacherInfoDisplay();
-        }
-    }
-
-    function updateTeacherInfoDisplay() {
-        if (teacherInfo && currentTeacherNameEl) {
-            if (currentTeacherId) {
-                currentTeacherNameEl.textContent = currentTeacherName;
-                teacherInfo.style.display = 'block';
+            if (data.success) {
+                showToast(`Rejection undone for ${studentName}. Application is now pending again.`, 'success');
+                refreshTableData(false);
             } else {
-                teacherInfo.style.display = 'none';
+                showToast('Error: ' + data.message, 'error');
+                button.disabled = false;
+                button.innerHTML = '<i class="bi bi-arrow-counterclockwise"></i> Undo';
             }
-        }
-    }
-
-    function updateCurrentClassType() {
-        if (!currentClassId) {
-            currentClassIsWeekend = false;
-            return;
-        }
-        
-        const selectedClass = allClasses.find(cls => cls.id == currentClassId);
-        if (selectedClass) {
-            currentClassIsWeekend = isWeekendClass(selectedClass.class_name);
-        } else {
-            currentClassIsWeekend = false;
-        }
-    }
-
-    function updateDateDisplay() {
-        if (!selectedDateEl || !selectedWeekdayEl) return;
-        
-        selectedDateEl.textContent = toDisplayDate(selectedAttendanceDate);
-        selectedWeekdayEl.textContent = getWeekdayName(selectedAttendanceDate);
-
-        if (prevDayBtn) {
-            prevDayBtn.disabled = false;
-            prevDayBtn.title = "Previous day";
-        }
-
-        if (nextDayBtn) {
-            const tomorrow = new Date(selectedAttendanceDate);
-            tomorrow.setDate(tomorrow.getDate() + 1);
-            const isTomorrowFuture = isFutureDate(tomorrow);
-            nextDayBtn.disabled = isTomorrowFuture;
-            nextDayBtn.title = isTomorrowFuture ? "Cannot go to future dates" : "Next day";
-        }
-
-        if (todayBtn) {
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            const isTodayOrPast = selectedAttendanceDate <= today;
-            todayBtn.disabled = !isTodayOrPast;
-            todayBtn.title = !isTodayOrPast ? "Already viewing today or future" : "Go to today";
-        }
-    }
-
-    async function loadAttendance() {
-        if (!currentClassId || !attendanceTableBody) return;
-
-        attendanceTableBody.innerHTML = `
-            <tr>
-                <td colspan="3" class="text-center text-muted py-4">
-                    <div class="spinner-border spinner-border-sm text-success me-2" role="status"></div>
-                    Loading attendance data...
-                </td>
-            </tr>`;
-
-        pendingChanges = {};
-        if (saveBtn) saveBtn.disabled = true;
-
-        const dateStr = toISODateLocal(selectedAttendanceDate);
-        
-        updateCurrentClassType();
-        updateDateDisplay();
-
-        const [students, attendanceMap] = await Promise.all([
-            fetchStudentsForClass(currentClassId),
-            fetchAttendance(currentClassId, dateStr)
-        ]);
-
-        savedAttendance = { ...attendanceMap };
-
-        let filteredStudents = students;
-        const searchTerm = searchInput?.value.trim().toLowerCase();
-        if (searchTerm) {
-            filteredStudents = students.filter(s => 
-                s.full_name.toLowerCase().includes(searchTerm) ||
-                (s.admission_id && s.admission_id.toString().includes(searchTerm))
-            );
-        }
-
-        if (studentCountEl) studentCountEl.textContent = filteredStudents.length;
-
-        if (!filteredStudents.length) {
-            attendanceTableBody.innerHTML = `
-                <tr>
-                    <td colspan="3" class="text-center text-muted py-4">
-                        No students found for this class.
-                    </td>
-                </tr>`;
-            return;
-        }
-
-        const isFuture = isFutureDate(selectedAttendanceDate);
-        const dayStatus = getDayStatus(selectedAttendanceDate);
-        const isDateEnabled = dayStatus.enabled;
-
-        const frag = document.createDocumentFragment();
-
-        filteredStudents.forEach((student) => {
-            const currentStatus = getCurrentStatus(student.id);
-            
-            const row = document.createElement("tr");
-            row.dataset.id = student.id;
-
-            const nameCell = document.createElement("td");
-            nameCell.textContent = student.full_name;
-            if (student.admission_id) {
-                nameCell.title = `Admission ID: ${student.admission_id}`;
-            }
-            row.appendChild(nameCell);
-
-            const statusCell = document.createElement("td");
-            const badge = document.createElement("span");
-            badge.className = "badge attendance-badge " + getStatusBadgeClass(currentStatus);
-            badge.textContent = currentStatus;
-            statusCell.appendChild(badge);
-            row.appendChild(statusCell);
-
-            const actionsCell = document.createElement("td");
-            const actionsDiv = document.createElement("div");
-            actionsDiv.className = "d-flex gap-2 justify-content-center";
-
-            const statuses = [
-                { value: "Present", class: "success", icon: "bi-check-circle" },
-                { value: "Absent", class: "danger", icon: "bi-x-circle" },
-                { value: "Late", class: "warning", icon: "bi-clock" },
-                { value: "Excused", class: "info", icon: "bi-clipboard-check" }
-            ];
-
-            statuses.forEach(statusOption => {
-                const btn = document.createElement("button");
-                btn.type = "button";
-                btn.className = `btn btn-sm btn-outline-${statusOption.class} btn-attendance-toggle`;
-                btn.dataset.status = statusOption.value;
-                btn.title = `Mark as ${statusOption.value}`;
-                
-                if (isFuture || !isDateEnabled) {
-                    btn.disabled = true;
-                    btn.classList.add("opacity-50");
-                }
-                
-                const icon = document.createElement("i");
-                icon.className = `bi ${statusOption.icon}`;
-                btn.appendChild(icon);
-                
-                if (pendingChanges[student.id] === statusOption.value) {
-                    btn.classList.add(`btn-${statusOption.class}`);
-                    btn.classList.remove(`btn-outline-${statusOption.class}`);
-                }
-                
-                actionsDiv.appendChild(btn);
-            });
-
-            actionsCell.appendChild(actionsDiv);
-            row.appendChild(actionsCell);
-
-            frag.appendChild(row);
+        })
+        .catch(error => {
+            console.error('Undo rejection error:', error);
+            showToast('Error undoing rejection', 'error');
+            button.disabled = false;
+            button.innerHTML = '<i class="bi bi-arrow-counterclockwise"></i> Undo';
         });
-
-        attendanceTableBody.innerHTML = "";
-        attendanceTableBody.appendChild(frag);
-        
-        // Add event listeners for attendance buttons
-        document.querySelectorAll(".btn-attendance-toggle").forEach(btn => {
-            btn.addEventListener("click", function() {
-                if (isFutureDate(selectedAttendanceDate)) {
-                    showToast("Cannot modify attendance for future dates", "warning");
-                    return;
-                }
-                
-                const dayStatus = getDayStatus(selectedAttendanceDate);
-                if (!dayStatus.enabled) {
-                    showToast(dayStatus.title, "warning");
-                    return;
-                }
-
-                const row = this.closest("tr");
-                const studentId = row.dataset.id;
-                const newStatus = this.dataset.status;
-
-                const currentPendingStatus = pendingChanges[studentId];
-                
-                if (currentPendingStatus === newStatus) {
-                    delete pendingChanges[studentId];
-                } else {
-                    pendingChanges[studentId] = newStatus;
-                }
-
-                // Update button styles
-                const allButtons = row.querySelectorAll(".btn-attendance-toggle");
-                allButtons.forEach(btn => {
-                    const btnStatus = btn.dataset.status;
-                    const colorClass = getColorClass(btnStatus);
-                    
-                    btn.classList.remove(`btn-${colorClass}`);
-                    btn.classList.add(`btn-outline-${colorClass}`);
-                    
-                    if (pendingChanges[studentId] === btnStatus) {
-                        btn.classList.remove(`btn-outline-${colorClass}`);
-                        btn.classList.add(`btn-${colorClass}`);
-                    }
-                });
-
-                // Update badge
-                const badge = row.querySelector(".badge");
-                const displayStatus = getCurrentStatus(studentId);
-                badge.textContent = displayStatus;
-                badge.className = `badge attendance-badge ${getStatusBadgeClass(displayStatus)}`;
-
-                // Enable/disable save button
-                if (saveBtn) saveBtn.disabled = Object.keys(pendingChanges).length === 0;
-            });
-        });
-        
-        if (saveBtn) {
-            saveBtn.disabled = Object.keys(pendingChanges).length === 0 || isFuture || !isDateEnabled;
-            if (isFuture) {
-                saveBtn.title = "Cannot save attendance for future dates";
-                saveBtn.classList.add("opacity-50");
-            } else if (!isDateEnabled) {
-                saveBtn.title = dayStatus.title;
-                saveBtn.classList.add("opacity-50");
-            } else {
-                saveBtn.title = "";
-                saveBtn.classList.remove("opacity-50");
-            }
-        }
     }
 
-    function getCurrentStatus(studentId) {
-        if (pendingChanges[studentId]) {
-            return pendingChanges[studentId];
-        }
-        if (savedAttendance[studentId]) {
-            return savedAttendance[studentId];
-        }
-        return "–";
+    // Helper function to escape HTML
+    function escapeHtml(unsafe) {
+        return unsafe
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
     }
 
-    function getStatusBadgeClass(status) {
-        switch (status) {
-            case "Present": return "text-bg-success";
-            case "Absent": return "text-bg-danger";
-            case "Late": return "text-bg-warning";
-            case "Excused": return "text-bg-info";
-            case "–": return "text-bg-secondary";
-            default: return "text-bg-secondary";
-        }
-    }
-
-    function getColorClass(status) {
-        switch (status) {
-            case "Present": return "success";
-            case "Absent": return "danger";
-            case "Late": return "warning";
-            case "Excused": return "info";
-            default: return "secondary";
-        }
-    }
-
-    // --- Calendar Functions ---
-    function renderCalendar(date) {
-        if (!calendarContainer) return;
-        calendarContainer.innerHTML = "";
-
-        const year = date.getFullYear();
-        const month = date.getMonth();
-        const firstDay = new Date(year, month, 1).getDay();
-        const lastDay = new Date(year, month + 1, 0).getDate();
-
-        const monthNames = [
-            "January", "February", "March", "April", "May", "June",
-            "July", "August", "September", "October", "November", "December"
-        ];
-
-        const calendarWrapper = document.createElement("div");
-        calendarWrapper.style.maxWidth = "400px";
-        calendarWrapper.style.margin = "0 auto";
-        calendarWrapper.style.border = "1px solid #dee2e6";
-        calendarWrapper.style.borderRadius = "8px";
-        calendarWrapper.style.padding = "15px";
-        calendarWrapper.style.backgroundColor = "white";
-        calendarWrapper.style.boxShadow = "0 2px 8px rgba(0,0,0,0.1)";
-
-        const header = document.createElement("div");
-        header.className = "d-flex justify-content-between align-items-center mb-3";
-
-        const prevBtn = document.createElement("button");
-        prevBtn.className = "btn btn-outline-secondary btn-sm";
-        prevBtn.innerHTML = '<i class="bi bi-chevron-left"></i>';
-        prevBtn.addEventListener("click", () => {
-            renderCalendar(new Date(year, month - 1, 1));
-        });
-
-        const nextBtn = document.createElement("button");
-        nextBtn.className = "btn btn-outline-secondary btn-sm";
-        nextBtn.innerHTML = '<i class="bi bi-chevron-right"></i>';
-        nextBtn.addEventListener("click", () => {
-            renderCalendar(new Date(year, month + 1, 1));
-        });
-
-        const monthLabel = document.createElement("span");
-        monthLabel.className = "fw-bold";
-        monthLabel.textContent = `${monthNames[month]} ${year}`;
-
-        header.appendChild(prevBtn);
-        header.appendChild(monthLabel);
-        header.appendChild(nextBtn);
-        calendarWrapper.appendChild(header);
-
-        const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-        const weekdayRow = document.createElement("div");
-        weekdayRow.className = "d-flex mb-2";
-
-        weekdays.forEach((day, index) => {
-            const dayCell = document.createElement("div");
-            dayCell.className = "text-center fw-bold";
-            dayCell.style.width = "14.28%";
-            dayCell.style.padding = "3px";
-            dayCell.style.fontSize = "0.85rem";
-            dayCell.textContent = day;
-            
-            const dayStatus = getDayStatus(new Date(year, month, index + 1));
-            if (!dayStatus.enabled) {
-                dayCell.style.color = "#dc3545";
-            }
-            
-            weekdayRow.appendChild(dayCell);
-        });
-
-        calendarWrapper.appendChild(weekdayRow);
-
-        const grid = document.createElement("div");
-        grid.style.display = "grid";
-        grid.style.gridTemplateColumns = "repeat(7, 1fr)";
-        grid.style.gap = "2px";
-
-        for (let i = 0; i < firstDay; i++) {
-            const empty = document.createElement("div");
-            empty.style.height = "35px";
-            grid.appendChild(empty);
-        }
-
-        for (let day = 1; day <= lastDay; day++) {
-            const dayCell = document.createElement("button");
-            const cellDate = new Date(year, month, day);
-            
-            const dayStatus = getDayStatus(cellDate);
-            const isEnabled = dayStatus.enabled;
-            
-            dayCell.className = `btn ${isEnabled ? 'btn-outline-secondary' : 'btn-light'} day-cell`;
-            dayCell.style.height = "35px";
-            dayCell.style.padding = "0";
-            dayCell.style.fontSize = "0.9rem";
-            dayCell.textContent = day;
-            dayCell.title = dayStatus.title;
-            
-            if (!isEnabled) {
-                dayCell.style.color = "#dc3545";
-                dayCell.style.opacity = "0.6";
-                dayCell.style.cursor = "not-allowed";
-                dayCell.disabled = true;
-            }
-            
-            const today = new Date();
-            if (cellDate.toDateString() === today.toDateString() && isEnabled) {
-                dayCell.classList.add("btn-success", "text-white");
-                dayCell.classList.remove("btn-outline-secondary", "btn-light");
-            }
-
-            if (cellDate.toDateString() === selectedAttendanceDate.toDateString()) {
-                if (isEnabled) {
-                    dayCell.classList.add("selected-date-btn");
-                    dayCell.classList.remove("btn-outline-secondary", "btn-light");
-                }
-            }
-
-            if (isEnabled) {
-                dayCell.addEventListener("click", () => {
-                    selectedAttendanceDate = cellDate;
-                    loadAttendance();
-                    renderCalendar(date);
-                });
-            }
-
-            grid.appendChild(dayCell);
-        }
-
-        calendarWrapper.appendChild(grid);
-        calendarContainer.appendChild(calendarWrapper);
-        calendarContainer.style.display = "block";
-    }
-
-    // --- Attendance Marking ---
-    async function saveAttendance() {
-        if (!currentClassId) return;
+    // Enhanced refresh table data with better loading state
+    function refreshTableData(shouldShowToast = false) {
         
-        if (isFutureDate(selectedAttendanceDate)) {
-            showToast("Cannot save attendance for future dates", "warning");
-            return;
-        }
+        // Show loading state on refresh button
+        const refreshBtn = document.getElementById('refreshBtn');
+        refreshBtn.classList.add('loading');
+        refreshBtn.disabled = true;
         
-        const dayStatus = getDayStatus(selectedAttendanceDate);
-        if (!dayStatus.enabled) {
-            showToast(dayStatus.title, "warning");
-            return;
-        }
-        
-        const changes = Object.entries(pendingChanges);
-        if (!changes.length) return;
-
-        const dateStr = toISODateLocal(selectedAttendanceDate);
-        let successCount = 0;
-        let errorCount = 0;
-
-        const originalText = saveBtn.innerHTML;
-        saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Saving...';
-        saveBtn.disabled = true;
-
-        for (const [studentId, status] of changes) {
-            try {
-                const formData = new FormData();
-                formData.append("student_id", studentId);
-                formData.append("class_id", currentClassId);
-                formData.append("teacher_id", currentTeacherId || '');
-                formData.append("status", status);
-                formData.append("date", dateStr);
-
-                const res = await fetch(`../php/mark_attendance_admin.php?bid=${browserInstanceId}`, {
-                    method: "POST",
-                    body: formData
-                });
-
-                const data = await res.json();
-                
+        fetch(`php/get_applications.php?bid=${browserInstanceId}`)
+            .then(response => response.json())
+            .then(data => {
                 if (data.success) {
-                    successCount++;
-                    savedAttendance[studentId] = status;
-                } else {
-                    errorCount++;
-                    console.error("Save error:", data);
-                }
-            } catch (err) {
-                console.error("Error saving attendance:", err);
-                errorCount++;
-            }
-        }
-
-        pendingChanges = {};
-        
-        saveBtn.innerHTML = originalText;
-        saveBtn.disabled = true;
-        
-        // Update UI
-        document.querySelectorAll(".btn-attendance-toggle").forEach(btn => {
-            const btnStatus = btn.dataset.status;
-            const colorClass = getColorClass(btnStatus);
-            btn.classList.remove(`btn-${colorClass}`);
-            btn.classList.add(`btn-outline-${colorClass}`);
-        });
-
-        document.querySelectorAll("tr[data-id]").forEach(row => {
-            const studentId = row.dataset.id;
-            const badge = row.querySelector(".badge");
-            const currentStatus = getCurrentStatus(studentId);
-            badge.textContent = currentStatus;
-            badge.className = `badge attendance-badge ${getStatusBadgeClass(currentStatus)}`;
-        });
-
-        if (successCount > 0) {
-            showToast(`Successfully saved ${successCount} attendance record(s)`, "success");
-        }
-        
-        if (errorCount > 0) {
-            showToast(`Failed to save ${errorCount} record(s)`, "danger");
-        }
-    }
-
-    // --- Summary Tab Functions ---
-    function shouldEnableDayForSummary(date, isWeekendClass) {
-        const day = date.getDay();
-        if (isWeekendClass) {
-            return day === 0 || day === 6;
-        } else {
-            return day >= 1 && day <= 4;
-        }
-    }
-
-    function getStatusBadgeClassForSummary(status) {
-        switch (status) {
-            case "Present": return "bg-success";
-            case "Absent": return "bg-danger";
-            case "Late": return "bg-warning";
-            case "Excused": return "bg-info";
-            default: return "bg-secondary";
-        }
-    }
-
-    function renderSummaryHeaders(year, month) {
-        if (!summaryTable) return;
-        const thead = summaryTable.querySelector("thead");
-        const headerRow = thead.querySelector("tr");
-
-        while (headerRow.children.length > 1) {
-            headerRow.removeChild(headerRow.lastChild);
-        }
-
-        const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-        for (let day = 1; day <= daysInMonth; day++) {
-            const th = document.createElement("th");
-            th.textContent = day;
-            th.style.width = "35px";
-            th.style.fontSize = "0.85rem";
-            th.style.padding = "5px 2px";
-
-            const date = new Date(year, month, day);
-            const dayOfWeek = date.getDay();
-
-            if (dayOfWeek === 0 || dayOfWeek === 6) {
-                th.style.backgroundColor = "#f8f9fa";
-            }
-
-            if (!shouldEnableDayForSummary(date, summaryIsWeekendClass)) {
-                th.style.opacity = "0.5";
-                th.style.backgroundColor = "#f5f5f5";
-                th.title = "No classes on this day";
-            }
-
-            headerRow.appendChild(th);
-        }
-    }
-
-    async function renderSummaryTable() {
-        if (!summaryTableBody || !monthYearDisplay) return;
-
-        const year = summaryCurrentMonth.getFullYear();
-        const month = summaryCurrentMonth.getMonth();
-        const classId = summaryClassSelect ? summaryClassSelect.value : null;
-
-        if (!classId) {
-            summaryTableBody.innerHTML = `
-                <tr>
-                    <td colspan="32" class="text-center text-muted py-4">
-                        Please select a class to view summary.
-                    </td>
-                </tr>`;
-            return;
-        }
-
-        summaryTableBody.innerHTML = `
-            <tr>
-                <td colspan="32" class="text-center text-muted py-4">
-                    <div class="spinner-border spinner-border-sm text-success me-2" role="status"></div>
-                    Loading attendance summary...
-                </td>
-            </tr>`;
-
-        const monthNames = ["January", "February", "March", "April", "May", "June",
-                           "July", "August", "September", "October", "November", "December"];
-        monthYearDisplay.textContent = `${monthNames[month]} ${year}`;
-
-        const selectedClass = allClasses.find(c => c.id == classId);
-        summaryIsWeekendClass = selectedClass ? isWeekendClass(selectedClass.class_name) : false;
-
-        renderSummaryHeaders(year, month);
-
-        const [students, attendanceData] = await Promise.all([
-            fetchStudentsForClass(classId),
-            fetchMonthlyAttendanceAdmin(year, month, classId)
-        ]);
-
-        if (!students.length) {
-            summaryTableBody.innerHTML = `
-                <tr>
-                    <td colspan="32" class="text-center text-muted py-4">
-                        No students found for this class.
-                    </td>
-                </tr>`;
-            updateSummaryStats({});
-            return;
-        }
-
-        summaryTableBody.innerHTML = "";
-        const daysInMonth = new Date(year, month + 1, 0).getDate();
-        let totalPresent = 0;
-        let totalAbsent = 0;
-        let totalDays = 0;
-
-        students.forEach(student => {
-            const row = document.createElement("tr");
-
-            const nameCell = document.createElement("td");
-            nameCell.textContent = student.full_name;
-            nameCell.style.fontWeight = "500";
-            row.appendChild(nameCell);
-
-            for (let day = 1; day <= daysInMonth; day++) {
-                const date = new Date(year, month, day);
-                const dateStr = date.toISOString().split('T')[0];
-                const cell = document.createElement("td");
-                cell.style.padding = "5px 2px";
-                cell.style.fontSize = "0.85rem";
-
-                if (shouldEnableDayForSummary(date, summaryIsWeekendClass)) {
-                    totalDays++;
-
-                    const studentAttendance = attendanceData[student.id] || {};
-                    const status = studentAttendance[dateStr] || "–";
-
-                    if (status !== "–") {
-                        const badge = document.createElement("span");
-                        badge.className = `badge ${getStatusBadgeClassForSummary(status)}`;
-                        badge.style.width = "20px";
-                        badge.style.height = "20px";
-                        badge.style.display = "inline-block";
-                        badge.title = `${status} - ${dateStr}`;
-                        cell.appendChild(badge);
-
-                        if (status === "Present") totalPresent++;
-                        if (status === "Absent") totalAbsent++;
-                    } else {
-                        cell.innerHTML = "–";
-                        cell.style.color = "#6c757d";
+                    updateTable(data.applications);
+                    if (shouldShowToast) {
+                        showToast('Applications refreshed successfully!', 'success');
                     }
                 } else {
-                    cell.innerHTML = "–";
-                    cell.style.color = "#dee2e6";
-                    cell.style.backgroundColor = "#f5f5f5";
-                    cell.title = "No classes on this day";
+                    if (shouldShowToast) {
+                        showToast('Error refreshing applications', 'error');
+                    }
                 }
+            })
+            .catch(error => {
+                console.error('Error refreshing applications:', error);
+                if (shouldShowToast) {
+                    showToast('Error refreshing applications', 'error');
+                }
+            })
+            .finally(() => {
+                // Remove loading state
+                refreshBtn.classList.remove('loading');
+                refreshBtn.disabled = false;
+            });
+    }
 
-                row.appendChild(cell);
+    // Enhanced view application details with dynamic content loading
+    function handleViewClick() {
+        const applicationId = this.getAttribute('data-application-id');
+        const detailsRow = this.closest('tr').nextElementSibling;
+        const detailsDiv = document.getElementById(`details-${applicationId}`);
+        const isOpening = detailsRow.style.display === 'none';
+
+        // Close all other open details first
+        document.querySelectorAll('.application-details-row').forEach(row => {
+            if (row !== detailsRow) {
+                const otherDiv = row.querySelector('.application-details');
+                if (otherDiv) {
+                    otherDiv.classList.remove('show');
+                    setTimeout(() => {
+                        row.style.display = 'none';
+                    }, 300);
+                }
             }
-
-            summaryTableBody.appendChild(row);
         });
 
-        updateSummaryStats({ totalPresent, totalAbsent, totalDays });
-    }
-
-    function updateSummaryStats(stats) {
-        const { totalPresent = 0, totalAbsent = 0, totalDays = 0 } = stats;
-
-        if (totalPresentEl) totalPresentEl.textContent = totalPresent;
-        if (totalAbsentEl) totalAbsentEl.textContent = totalAbsent;
-
-        if (totalDays > 0 && attendanceRateEl) {
-            const rate = Math.round((totalPresent / totalDays) * 100);
-            attendanceRateEl.textContent = `${rate}%`;
-        } else if (attendanceRateEl) {
-            attendanceRateEl.textContent = "0%";
-        }
-    }
-
-    function populateSummaryClassSelect() {
-        if (!summaryClassSelect) return;
-
-        summaryClassSelect.innerHTML = '<option value="">Select Class</option>';
-
-        allClasses.forEach(cls => {
-            const option = document.createElement('option');
-            option.value = cls.id;
-            option.textContent = `${cls.class_name} (${cls.year_group}) - ${cls.teacher_name || 'No Teacher'}`;
-            summaryClassSelect.appendChild(option);
+        // Remove active state from all view buttons
+        document.querySelectorAll('.view-btn').forEach(btn => {
+            btn.classList.remove('active');
+            btn.classList.remove('btn-primary');
+            btn.classList.add('btn-outline-primary');
         });
 
-        // Prefer the class selected in entry tab
-        if (classSelect && classSelect.value) {
-            summaryClassSelect.value = classSelect.value;
-            summaryCurrentClassId = classSelect.value;
-        } else if (allClasses.length > 0 && !summaryCurrentClassId) {
-            // Default to first class if no selection in entry tab
-            summaryCurrentClassId = allClasses[0].id;
-            summaryClassSelect.value = summaryCurrentClassId;
-        }
-    }
+        if (isOpening) {
+            // Load details content dynamically
+            loadApplicationDetails(applicationId, detailsDiv);
 
-    function switchTab(tabName) {
-        if (tabName === "entry") {
-            entryTabBtn.classList.add("active");
-            entryTabBtn.classList.remove("btn-outline-success");
-            entryTabBtn.classList.add("btn-success-modern");
+            // Open this one
+            detailsRow.style.display = 'table-row';
+            setTimeout(() => {
+                detailsDiv.classList.add('show');
+            }, 10);
 
-            summaryTabBtn.classList.remove("active");
-            summaryTabBtn.classList.remove("btn-success-modern");
-            summaryTabBtn.classList.add("btn-outline-success");
-
-            attendanceEntrySection.style.display = "block";
-            attendanceSummarySection.style.display = "none";
+            // Add active state to this button
+            this.classList.remove('btn-outline-primary');
+            this.classList.add('btn-primary', 'active');
         } else {
-            summaryTabBtn.classList.add("active");
-            summaryTabBtn.classList.remove("btn-outline-success");
-            summaryTabBtn.classList.add("btn-success-modern");
+            // Close this one
+            detailsDiv.classList.remove('show');
+            setTimeout(() => {
+                detailsRow.style.display = 'none';
+            }, 300);
 
-            entryTabBtn.classList.remove("active");
-            entryTabBtn.classList.remove("btn-success-modern");
-            entryTabBtn.classList.add("btn-outline-success");
-
-            attendanceEntrySection.style.display = "none";
-            attendanceSummarySection.style.display = "block";
-
-            if (summaryClassSelect && summaryClassSelect.options.length <= 1) {
-                populateSummaryClassSelect();
-            }
-
-            // Sync class selection from entry tab to summary tab
-            if (classSelect && classSelect.value && summaryClassSelect) {
-                summaryClassSelect.value = classSelect.value;
-                summaryCurrentClassId = classSelect.value;
-            }
-
-            renderSummaryTable();
+            // Remove active state
+            this.classList.remove('btn-primary', 'active');
+            this.classList.add('btn-outline-primary');
         }
     }
 
-    // --- Event Listeners ---
-    function initializeEventListeners() {
-        // Class select change
-        classSelect?.addEventListener("change", function() {
-            const selectedOption = this.options[this.selectedIndex];
-            currentClassId = this.value;
-            currentTeacherName = selectedOption.getAttribute('data-teacher') || 'Unassigned';
-            currentTeacherId = selectedOption.getAttribute('data-teacher-id') || null;
-            
-            updateTeacherInfoDisplay();
-            
-            if (currentClassId) {
-                loadAttendance();
-            } else {
-                if (attendanceTableBody) {
-                    attendanceTableBody.innerHTML = `
-                        <tr>
-                            <td colspan="3" class="text-center text-muted py-4">
-                                Select a class to view attendance
-                            </td>
-                        </tr>`;
-                }
-                if (studentCountEl) studentCountEl.textContent = '0';
-            }
-        });
+    // Function to load application details
+    function loadApplicationDetails(applicationId, detailsDiv) {
+        // Show loading state
+        detailsDiv.innerHTML = '<div class="text-center text-muted py-3"><i class="bi bi-hourglass-split"></i> Loading details...</div>';
 
-        // Today button
-        todayBtn?.addEventListener("click", () => {
-            const today = new Date();
-            const dayStatus = getDayStatus(today);
-            if (!dayStatus.enabled) {
-                showToast(dayStatus.title, "warning");
+        fetch(`php/get_application_details.php?id=${applicationId}&bid=${browserInstanceId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    detailsDiv.innerHTML = generateDetailsHTML(data.application);
+                } else {
+                    detailsDiv.innerHTML = '<div class="text-center text-danger py-3"><i class="bi bi-exclamation-triangle"></i> Error loading details</div>';
+                }
+            })
+            .catch(error => {
+                console.error('Error loading application details:', error);
+                detailsDiv.innerHTML = '<div class="text-center text-danger py-3"><i class="bi bi-exclamation-triangle"></i> Error loading details</div>';
+            });
+    }
+
+    // Function to generate detailed HTML from application data
+    function generateDetailsHTML(app) {
+        // Helper function to check if medical info should be shown
+        const hasMedicalInfo = (app.illness === 'Yes' && app.illness_details) || 
+                              (app.special_needs === 'Yes' && app.special_needs_details) || 
+                              (app.allergies === 'Yes' && app.allergies_details);
+
+        return `
+            <!-- Student & Program Header -->
+            <div class="detail-section">
+                <div class="row compact-layout">
+                    <div class="col-md-8">
+                        <h5 class="detail-label">
+                            <i class="bi bi-person-badge"></i>
+                            Student Information - ${escapeHtml(app.student_first_name + ' ' + app.student_last_name)}
+                        </h5>
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <strong>Full Name</strong>
+                                <span>${escapeHtml(app.student_first_name + ' ' + app.student_last_name)}</span>
+                            </div>
+                            <div class="detail-item">
+                                <strong>Age</strong>
+                                <span>${app.student_age || 'N/A'}</span>
+                            </div>
+                            <div class="detail-item">
+                                <strong>Gender</strong>
+                                <span>${escapeHtml(app.student_gender || 'N/A')}</span>
+                            </div>
+                            <div class="detail-item">
+                                <strong>Date of Birth</strong>
+                                <span>${app.student_dob ? escapeHtml(app.student_dob) : 'N/A'}</span>
+                            </div>
+                            <div class="detail-item">
+                                <strong>Current School</strong>
+                                <span>${escapeHtml(app.student_school || 'N/A')}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="parent-card">
+                            <h6><i class="bi bi-info-circle"></i> Program Details</h6>
+                            <div class="contact-info">
+                                <div class="contact-item">
+                                    <i class="bi bi-book"></i>
+                                    <span><strong>Program:</strong> ${escapeHtml(app.interested_program || 'N/A')}</span>
+                                </div>
+                                <div class="contact-item">
+                                    <i class="bi bi-mortarboard"></i>
+                                    <span><strong>Year Group:</strong> ${escapeHtml(app.year_group || 'N/A')}</span>
+                                </div>
+                                ${app.year_group_other ? `
+                                <div class="contact-item">
+                                    <i class="bi bi-pencil"></i>
+                                    <span><strong>Other:</strong> ${escapeHtml(app.year_group_other)}</span>
+                                </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Parent Information -->
+            <div class="detail-section">
+                <h6 class="detail-label"><i class="bi bi-people"></i> Parent/Guardian Information</h6>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="parent-card">
+                            <h6><i class="bi bi-person-check"></i> Primary Parent</h6>
+                            <div class="contact-info">
+                                <div class="contact-item">
+                                    <i class="bi bi-person"></i>
+                                    <span>${escapeHtml(app.parent1_first_name + ' ' + app.parent1_last_name)}</span>
+                                </div>
+                                <div class="contact-item">
+                                    <i class="bi bi-diagram-3"></i>
+                                    <span>${escapeHtml(app.parent1_relationship || 'N/A')}</span>
+                                    ${app.parent1_relationship_other ? `
+                                    <br><small class="text-muted">(${escapeHtml(app.parent1_relationship_other)})</small>
+                                    ` : ''}
+                                </div>
+                                <div class="contact-item">
+                                    <i class="bi bi-phone"></i>
+                                    <span>${escapeHtml(app.parent1_mobile || 'N/A')}</span>
+                                </div>
+                                <div class="contact-item">
+                                    <i class="bi bi-envelope"></i>
+                                    <span>${escapeHtml(app.parent1_email || 'N/A')}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    ${app.parent2_first_name ? `
+                    <div class="col-md-6">
+                        <div class="parent-card">
+                            <h6><i class="bi bi-person-plus"></i> Additional Parent</h6>
+                            <div class="contact-info">
+                                <div class="contact-item">
+                                    <i class="bi bi-person"></i>
+                                    <span>${escapeHtml(app.parent2_first_name + ' ' + app.parent2_last_name)}</span>
+                                </div>
+                                <div class="contact-item">
+                                    <i class="bi bi-diagram-3"></i>
+                                    <span>${escapeHtml(app.parent2_relationship || 'N/A')}</span>
+                                    ${app.parent2_relationship_other ? `
+                                    <br><small class="text-muted">(${escapeHtml(app.parent2_relationship_other)})</small>
+                                    ` : ''}
+                                </div>
+                                ${app.parent2_mobile ? `
+                                <div class="contact-item">
+                                    <i class="bi bi-phone"></i>
+                                    <span>${escapeHtml(app.parent2_mobile)}</span>
+                                </div>
+                                ` : ''}
+                                ${app.parent2_email ? `
+                                <div class="contact-item">
+                                    <i class="bi bi-envelope"></i>
+                                    <span>${escapeHtml(app.parent2_email)}</span>
+                                </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+                    ` : ''}
+                </div>
+                <div class="mt-3">
+                    <div class="parent-card emergency-contact-card">
+                        <h6><i class="bi bi-exclamation-triangle"></i> Emergency Contact</h6>
+                        <div class="contact-item">
+                            <i class="bi bi-telephone-forward"></i>
+                            <span class="fw-bold">${escapeHtml(app.emergency_contact || 'N/A')}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Address -->
+            <div class="detail-section">
+                <h6 class="detail-label"><i class="bi bi-geo-alt"></i> Address</h6>
+                <div class="parent-card">
+                    <div class="contact-info">
+                        <div class="contact-item">
+                            <i class="bi bi-house"></i>
+                            <span>${escapeHtml(app.address || 'N/A')}</span>
+                        </div>
+                        <div class="contact-item">
+                            <i class="bi bi-building"></i>
+                            <span>${escapeHtml(app.city || 'N/A')}${app.county ? ', ' + escapeHtml(app.county) : ''}</span>
+                        </div>
+                        <div class="contact-item">
+                            <i class="bi bi-mailbox"></i>
+                            <span>${escapeHtml(app.postal_code || 'N/A')}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Medical & Additional Info -->
+            ${hasMedicalInfo ? `
+            <div class="detail-section">
+                <h6 class="detail-label"><i class="bi bi-heart-pulse"></i> Health Information</h6>
+                <div class="row">
+                    ${app.illness === 'Yes' && app.illness_details ? `
+                    <div class="col-md-4">
+                        <div class="parent-card medical-info">
+                            <h6><i class="bi bi-heart-pulse"></i> Medical Conditions</h6>
+                            <p class="mb-0 small">${escapeHtml(app.illness_details)}</p>
+                        </div>
+                    </div>
+                    ` : ''}
+
+                    ${app.special_needs === 'Yes' && app.special_needs_details ? `
+                    <div class="col-md-4">
+                        <div class="parent-card special-needs-info">
+                            <h6><i class="bi bi-person-badge"></i> Special Needs</h6>
+                            <p class="mb-0 small">${escapeHtml(app.special_needs_details)}</p>
+                        </div>
+                    </div>
+                    ` : ''}
+
+                    ${app.allergies === 'Yes' && app.allergies_details ? `
+                    <div class="col-md-4">
+                        <div class="parent-card allergy-info">
+                            <h6><i class="bi bi-exclamation-triangle"></i> Allergies</h6>
+                            <p class="mb-0 small">${escapeHtml(app.allergies_details)}</p>
+                        </div>
+                    </div>
+                    ` : ''}
+                </div>
+            </div>
+            ` : ''}
+
+            <!-- Permissions -->
+            <div class="detail-section">
+                <h6 class="detail-label"><i class="bi bi-shield-check"></i> Permissions & Information</h6>
+                <div class="permissions-grid">
+                    <div class="permission-item">
+                        <i class="bi bi-water"></i>
+                        <span>Swimming: ${escapeHtml(app.knows_swimming || 'N/A')}</span>
+                    </div>
+                    <div class="permission-item">
+                        <i class="bi bi-car-front"></i>
+                        <span>Travel Sickness: ${escapeHtml(app.travel_sickness || 'N/A')}</span>
+                    </div>
+                    <div class="permission-item">
+                        <i class="bi bi-geo-alt"></i>
+                        <span>Travel Permission: ${escapeHtml(app.travel_permission || 'N/A')}</span>
+                    </div>
+                    <div class="permission-item">
+                        <i class="bi bi-camera"></i>
+                        <span>Photo Permission: ${escapeHtml(app.photo_permission || 'N/A')}</span>
+                    </div>
+                    <div class="permission-item">
+                        <i class="bi bi-bus-front"></i>
+                        <span>Transport: ${escapeHtml(app.transport_mode || 'N/A')}</span>
+                    </div>
+                    <div class="permission-item">
+                        <i class="bi bi-house-door"></i>
+                        <span>Home Alone: ${escapeHtml(app.go_home_alone || 'N/A')}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Islamic Education -->
+            ${app.attended_islamic_education === 'Yes' ? `
+            <div class="detail-section">
+                <h6 class="detail-label"><i class="bi bi-book-half"></i> Islamic Education History</h6>
+                <div class="parent-card">
+                    <div class="contact-info">
+                        ${app.islamic_years ? `
+                        <div class="contact-item">
+                            <i class="bi bi-calendar"></i>
+                            <span><strong>Years Attended:</strong> ${escapeHtml(app.islamic_years)}</span>
+                        </div>
+                        ` : ''}
+                        ${app.islamic_education_details ? `
+                        <div class="contact-item">
+                            <i class="bi bi-journal-text"></i>
+                            <span><strong>Details:</strong> ${escapeHtml(app.islamic_education_details)}</span>
+                        </div>
+                        ` : ''}
+                    </div>
+                </div>
+            </div>
+            ` : ''}
+
+            <!-- Submission Date -->
+            <div class="text-center mt-3">
+                <small class="text-muted">Application submitted on: ${app.submitted_at ? new Date(app.submitted_at).toLocaleString() : 'N/A'}</small>
+            </div>
+        `;
+    }
+
+    // Approve application
+    function handleApproveClick() {
+        const applicationId = this.getAttribute('data-application-id');
+        const studentName = this.getAttribute('data-student-name');
+        
+        approveStudentName.textContent = studentName;
+        currentActionApplicationId = applicationId;
+        
+        approveModal.show();
+    }
+
+    // Reject application
+    function handleRejectClick() {
+        const applicationId = this.getAttribute('data-application-id');
+        const studentName = this.getAttribute('data-student-name');
+        
+        rejectStudentName.textContent = studentName;
+        currentActionApplicationId = applicationId;
+        
+        rejectModal.show();
+    }
+
+    // Search functionality
+    searchInput.addEventListener('input', function() {
+        filterTable(); // This should call filterTable, not searchApplications
+    });
+
+    // Search option change listeners
+    if (searchStudent) {
+        searchStudent.addEventListener('change', function() {
+            filterTable(); // This should call filterTable, not searchApplications
+        });
+    }
+
+    if (searchParent) {
+        searchParent.addEventListener('change', function() {
+            filterTable(); // This should call filterTable, not searchApplications
+        });
+    }
+
+    if (searchEmail) {
+        searchEmail.addEventListener('change', function() {
+            filterTable(); // This should call filterTable, not searchApplications
+        });
+    }
+    
+    // Refresh functionality
+    refreshBtn.addEventListener('click', function() {
+        const refreshIcon = this.querySelector('i');
+        refreshIcon.classList.add('refresh-spin');
+        refreshTableData(true);
+        setTimeout(() => refreshIcon.classList.remove('refresh-spin'), 600);
+    });
+    
+    // Filter modal functionality
+    filterBtn.addEventListener('click', function() {
+        yearGroupSelect.value = currentYearFilter; // Add this line
+        programSelect.value = currentProgramFilter;
+        statusSelect.value = currentStatusFilter;
+        accountStatusSelect.value = currentAccountStatusFilter;
+        minAgeInput.value = currentMinAge !== null ? currentMinAge : '';
+        maxAgeInput.value = currentMaxAge !== null ? currentMaxAge : '';
+        filterModal.show();
+    });
+
+    applyFilterBtn.addEventListener('click', function() {
+        currentYearFilter = yearGroupSelect.value; // Add this line
+        currentProgramFilter = programSelect.value;
+        currentStatusFilter = statusSelect.value;
+        currentAccountStatusFilter = accountStatusSelect.value;
+        currentMinAge = minAgeInput.value ? parseInt(minAgeInput.value) : null;
+        currentMaxAge = maxAgeInput.value ? parseInt(maxAgeInput.value) : null;
+        filterTable();
+        filterModal.hide();
+    });
+
+    clearFilterBtn.addEventListener('click', function() {
+        currentYearFilter = 'all'; // Add this line
+        currentProgramFilter = 'all';
+        currentStatusFilter = 'all';
+        currentAccountStatusFilter = 'all';
+        currentMinAge = null;
+        currentMaxAge = null;
+
+        yearGroupSelect.value = 'all'; // Add this line
+        programSelect.value = 'all';
+        statusSelect.value = 'all';
+        accountStatusSelect.value = 'all';
+        minAgeInput.value = '';
+        maxAgeInput.value = '';
+
+        filterTable();
+        filterModal.hide();
+    });
+    
+    // Approve functionality
+    confirmApprove.addEventListener('click', function() {
+        const button = this;
+        button.disabled = true;
+        button.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Approving...';
+
+        fetch('php/approve_application.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `application_id=${currentActionApplicationId}`
+        })
+        .then(response => {
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                return response.text().then(text => {
+                    throw new Error('Server returned non-JSON response');
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.requires_login) {
+                // Session expired, redirect to login
+                showToast('Session expired. Redirecting to login...', 'error');
+                setTimeout(() => {
+                    window.location.href = `login.php?bid=${browserInstanceId}`;
+                }, 2000);
                 return;
             }
-            selectedAttendanceDate = today;
-            loadAttendance();
-            
-            if (isCalendarVisible) {
-                renderCalendar(selectedAttendanceDate);
-            }
-        });
 
-        // Calendar toggle
-        toggleCalendarBtn?.addEventListener("click", () => {
-            isCalendarVisible = !isCalendarVisible;
-            if (isCalendarVisible) {
-                renderCalendar(selectedAttendanceDate);
-                toggleCalendarBtn.innerHTML = '<i class="bi bi-calendar-week"></i> Hide Calendar';
+            if (data.success) {
+                approveModal.hide();
+                showToast('Application approved successfully!', 'success');
+                refreshTableData(false);
             } else {
-                if (calendarContainer) calendarContainer.style.display = "none";
-                toggleCalendarBtn.innerHTML = '<i class="bi bi-calendar-week"></i> Show Calendar';
+                showToast('Error: ' + data.message, 'error');
             }
+        })
+        .catch(error => {
+            console.error('Approve error:', error);
+            showToast('Error approving application', 'error');
+        })
+        .finally(() => {
+            button.disabled = false;
+            button.innerHTML = 'Approve';
+            currentActionApplicationId = null;
+        });
+    });
+
+    // Reject functionality
+    confirmReject.addEventListener('click', function() {
+        const button = this;
+        button.disabled = true;
+        button.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Rejecting...';
+
+        fetch('php/reject_application.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `application_id=${currentActionApplicationId}`
+        })
+        .then(response => {
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                return response.text().then(text => {
+                    throw new Error('Server returned non-JSON response');
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.requires_login) {
+                // Session expired, redirect to login
+                showToast('Session expired. Redirecting to login...', 'error');
+                setTimeout(() => {
+                    window.location.href = `login.php?bid=${browserInstanceId}`;
+                }, 2000);
+                return;
+            }
+
+            if (data.success) {
+                rejectModal.hide();
+                showToast('Application rejected successfully!', 'success');
+                refreshTableData(false);
+            } else {
+                showToast('Error: ' + data.message, 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Reject error:', error);
+            showToast('Error rejecting application', 'error');
+        })
+        .finally(() => {
+            button.disabled = false;
+            button.innerHTML = 'Reject';
+            currentActionApplicationId = null;
+        });
+    });
+
+    // Attach event listeners
+    function attachEventListeners() {
+        // View buttons
+        document.querySelectorAll('.view-btn').forEach(button => {
+            button.addEventListener('click', handleViewClick);
         });
 
-        // Day navigation
-        prevDayBtn?.addEventListener("click", () => navigateDay(-1));
-        nextDayBtn?.addEventListener("click", () => navigateDay(1));
-
-        // Search
-        searchInput?.addEventListener("input", loadAttendance);
-
-        // Refresh
-        refreshBtn?.addEventListener("click", () => {
-            if (searchInput) searchInput.value = "";
-            pendingChanges = {};
-            if (saveBtn) saveBtn.disabled = true;
-            loadAttendance();
+        // Approve buttons
+        document.querySelectorAll('.approve-btn').forEach(button => {
+            button.addEventListener('click', handleApproveClick);
         });
 
-        // Save
-        saveBtn?.addEventListener("click", saveAttendance);
+        // Reject buttons
+        document.querySelectorAll('.reject-btn').forEach(button => {
+            button.addEventListener('click', handleRejectClick);
+        });
 
-        // Tab switching
-        if (entryTabBtn) {
-            entryTabBtn.addEventListener("click", () => switchTab("entry"));
-        }
-
-        if (summaryTabBtn) {
-            summaryTabBtn.addEventListener("click", () => switchTab("summary"));
-        }
-
-        if (prevMonthBtn) {
-            prevMonthBtn.addEventListener("click", () => {
-                summaryCurrentMonth.setMonth(summaryCurrentMonth.getMonth() - 1);
-                renderSummaryTable();
-            });
-        }
-
-        if (nextMonthBtn) {
-            nextMonthBtn.addEventListener("click", () => {
-                summaryCurrentMonth.setMonth(summaryCurrentMonth.getMonth() + 1);
-                renderSummaryTable();
-            });
-        }
-
-        if (summaryClassSelect) {
-            summaryClassSelect.addEventListener("change", () => {
-                summaryCurrentClassId = summaryClassSelect.value;
-                renderSummaryTable();
-            });
-        }
-
-        // Initial date display
-        updateDateDisplay();
+        // Undo rejection buttons
+        document.querySelectorAll('.undo-rejection-btn').forEach(button => {
+            button.addEventListener('click', handleUndoRejectionClick);
+        });
     }
 
     // Initialize
-    async function init() {
-        try {
-            await loadInitialData();
-        } catch (error) {
-            console.error("Initialization error:", error);
-            showToast("Failed to load attendance system", "danger");
-        }
-    }
-
-    init();
+    attachEventListeners();
+    startCountdownTimers(); // Add this line
+    filterTable();
 });
