@@ -1,0 +1,300 @@
+/* admin/css/admin-attendance.css */
+.selected-date-btn {
+    background-color: #28a745 !important;
+    color: #fff !important;
+    border-color: #28a745 !important;
+}
+#calendarContainer button { min-width: 40px; min-height: 36px; }
+
+.attendance-badge {
+    font-size: 0.85rem;
+    padding: 0.25rem 0.5rem;
+}
+
+.attendance-table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+}
+
+.day-cell {
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.day-cell:hover:not(.disabled) {
+    background-color: #f8f9fa;
+}
+
+.day-cell.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.calendar-empty {
+    width: 42px;
+    height: 42px;
+}
+
+.date-navigation {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.date-navigation button {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.date-display {
+    font-size: 1.1rem;
+    font-weight: 600;
+    min-width: 120px;
+    text-align: center;
+}
+
+/* Mobile Optimized Controls */
+.mobile-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.search-container, .class-container {
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.button-row {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 5px;
+}
+
+.button-row .btn {
+    flex: 0 0 auto;
+}
+
+.date-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin: 15px 0 5px 0;
+}
+
+.today-row {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 15px;
+}
+
+.btn-success-modern {
+    background-color: #28a745;
+    color: white;
+    border-color: #28a745;
+}
+
+.btn-success-modern:hover {
+    background-color: #218838;
+    border-color: #1e7e34;
+    color: white;
+}
+
+.btn-success-modern.active {
+    background-color: #1e7e34;
+    border-color: #1c7430;
+}
+
+@media (max-width: 768px) {
+    .btn-attendance-toggle {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.8rem;
+    }
+    
+    .table-responsive {
+        font-size: 0.9rem;
+    }
+    
+    .date-navigation {
+        gap: 5px;
+    }
+    
+    .date-display {
+        min-width: 100px;
+        font-size: 1rem;
+    }
+    
+    .button-row .btn {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.8rem;
+    }
+    
+    .today-row .btn {
+        padding: 0.25rem 0.75rem;
+        font-size: 0.85rem;
+    }
+    
+    .date-navigation button {
+        width: 32px;
+        height: 32px;
+    }
+}
+
+@media (max-width: 576px) {
+    .date-display {
+        min-width: 80px;
+        font-size: 0.9rem;
+    }
+    
+    .date-navigation {
+        gap: 3px;
+    }
+    
+    .date-navigation button {
+        width: 28px;
+        height: 28px;
+    }
+    
+    .button-row {
+        gap: 5px;
+    }
+    
+    .button-row .btn {
+        padding: 0.2rem 0.4rem;
+        font-size: 0.75rem;
+    }
+}
+
+/* Summary table styles */
+#summaryTable th {
+    font-size: 0.85rem;
+    padding: 5px 2px;
+    text-align: center;
+}
+
+#summaryTable td {
+    vertical-align: middle;
+    padding: 5px 2px;
+}
+
+.summary-day-cell {
+    min-width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Pie Chart Responsive Styles */
+.student-name-link {
+    transition: all 0.2s ease;
+}
+
+.student-name-link:hover {
+    color: #28a745 !important;
+    text-decoration: underline !important;
+}
+
+@media (max-width: 768px) {
+    #attendancePieChart {
+        width: 180px !important;
+        height: 180px !important;
+    }
+    
+    #pieChartCenterText {
+        font-size: 0.9rem;
+    }
+    
+    #pieChartPercentage {
+        font-size: 1.5rem !important;
+    }
+    
+    .card-body .row .col-6 {
+        margin-bottom: 0.5rem;
+    }
+}
+
+@media (max-width: 576px) {
+    #attendancePieChart {
+        width: 150px !important;
+        height: 150px !important;
+    }
+    
+    #pieChartPercentage {
+        font-size: 1.2rem !important;
+    }
+    
+    .card-body .row .col-6 {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+}
+
+/* For very small screens */
+@media (max-width: 400px) {
+    #attendancePieChart {
+        width: 120px !important;
+        height: 120px !important;
+    }
+    
+    #pieChartCenterText {
+        font-size: 0.8rem;
+    }
+    
+    #pieChartPercentage {
+        font-size: 1rem !important;
+    }
+}
+
+/* Teacher info styling */
+.teacher-info {
+    font-size: 0.85rem;
+    color: #6c757d;
+    margin-top: -5px;
+    margin-bottom: 10px;
+}
+
+.teacher-info i {
+    margin-right: 5px;
+}
+
+/* Class selector styling */
+.class-selector-container {
+    max-width: 500px;
+    margin: 0 auto 20px auto;
+}
+
+.class-selector-container .form-select {
+    font-size: 1rem;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    border: 2px solid #dee2e6;
+    transition: border-color 0.2s;
+}
+
+.class-selector-container .form-select:focus {
+    border-color: #28a745;
+    box-shadow: 0 0 0 0.25rem rgba(40, 167, 69, 0.25);
+}
+
+/* Admin-specific badge */
+.badge-admin {
+    background-color: #6610f2 !important;
+    color: white !important;
+}
+
+/* Card header styling */
+.card-header-admin {
+    background-color: #28a745 !important;
+    color: white !important;
+}
