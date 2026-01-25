@@ -164,6 +164,12 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                 background-color: #dc3545 !important;
                 color: white;
             }
+            
+            .alert-sm {
+                padding: 0.5rem 1rem;
+                font-size: 0.875rem;
+                margin-bottom: 1rem;
+            }
         </style>
     </head>
 
@@ -652,17 +658,45 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
             </div>
         </div>
 
-        <!-- Approve Confirmation Modal -->
+        <!-- Enhanced Approve Confirmation Modal with Class Assignment -->
         <div class="modal fade" id="approveModal" tabindex="-1" aria-labelledby="approveModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="approveModalLabel">Confirm Approval</h5>
+                        <h5 class="modal-title" id="approveModalLabel">Approve Application</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
                         <p>Are you sure you want to approve the application for <strong id="approveStudentName"></strong>?</p>
                         <p class="text-muted">This will mark the application as approved and notify the parents.</p>
+
+                        <!-- Optional Class Assignment Section -->
+                        <div class="mt-4 pt-3 border-top">
+                            <h6 class="mb-3"><i class="bi bi-mortarboard"></i> Optional: Assign to Class</h6>
+
+                            <div class="alert alert-info alert-sm mb-3">
+                                <i class="bi bi-info-circle me-1"></i>
+                                <small>Assigning to a class will automatically set the teacher. You can leave this empty.</small>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="assignClass" class="form-label small fw-bold">Select Class (Optional)</label>
+                                <select class="form-select" id="assignClass" name="class_id">
+                                    <option value="">No class assignment</option>
+                                    <!-- Classes will be populated by JavaScript -->
+                                </select>
+                                <small class="text-muted">Choose a class to assign the student</small>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="assignTeacher" class="form-label small fw-bold">Teacher (Auto-filled from Class)</label>
+                                <select class="form-select" id="assignTeacher" name="teacher_id" disabled>
+                                    <option value="">No teacher assigned</option>
+                                    <!-- Teacher will be auto-filled when class is selected -->
+                                </select>
+                                <input type="hidden" id="assignTeacherHidden" name="teacher_id">
+                            </div>
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>

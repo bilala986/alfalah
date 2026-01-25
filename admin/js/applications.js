@@ -13,6 +13,41 @@ document.addEventListener('DOMContentLoaded', function() {
         const toast = new bootstrap.Toast(toastEl);
         toast.show();
     }
+    
+    // Add this function after the toast function (around line 30-40)
+    function populateClassDropdown() {
+        if (assignClassSelect) {
+            assignClassSelect.innerHTML = '<option value="">No class assignment</option>';
+
+            fetch(`php/get_all_classes.php?bid=${browserInstanceId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.classes) {
+                        data.classes.forEach(cls => {
+                            const option = document.createElement('option');
+                            option.value = cls.id;
+
+                            // Show class name with teacher (if available)
+                            let displayText = cls.class_name;
+                            if (cls.year_group) {
+                                displayText += ` (${cls.year_group})`;
+                            }
+                            if (cls.teacher_name) {
+                                displayText += ` - ${cls.teacher_name}`;
+                            }
+
+                            option.textContent = displayText;
+                            assignClassSelect.appendChild(option);
+                        });
+                    } else {
+                        console.error('Failed to load classes:', data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading classes:', error);
+                });
+        }
+    }
 
     // Elements
     const searchInput = document.getElementById('searchInput');
@@ -58,6 +93,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Get all rows
     let rows = applicationsTableBody.querySelectorAll('tr[data-student]');
+    
+    const assignClassSelect = document.getElementById('assignClass');
+    const assignTeacherSelect = document.getElementById('assignTeacher');
+    const assignTeacherHidden = document.getElementById('assignTeacherHidden');
 
     // Enhanced search function with search options and age filtering
     function searchApplications(searchTerm) {
@@ -854,15 +893,57 @@ document.addEventListener('DOMContentLoaded', function() {
         `;
     }
 
-    // Approve application
+    // Update the handleApproveClick function (around line 400-410)
     function handleApproveClick() {
         const applicationId = this.getAttribute('data-application-id');
         const studentName = this.getAttribute('data-student-name');
-        
+
         approveStudentName.textContent = studentName;
         currentActionApplicationId = applicationId;
-        
+
+        // Reset form and populate classes when modal opens
+        assignClassSelect.value = '';
+        assignTeacherSelect.value = '';
+        assignTeacherHidden.value = '';
+        populateClassDropdown();
+
         approveModal.show();
+    }
+        
+    // Update the class change event listener
+    if (assignClassSelect) {
+        assignClassSelect.addEventListener('change', function() {
+            const classId = this.value;
+            console.log('Class selected:', classId);
+
+            if (classId) {
+                // Fetch teacher for this class
+                console.log('Fetching teacher for class ID:', classId);
+                fetch(`php/get_class_teacher.php?class_id=${classId}&bid=${browserInstanceId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Teacher response:', data);
+                        if (data.success && data.teacher_id) {
+                            assignTeacherSelect.value = data.teacher_id;
+                            assignTeacherHidden.value = data.teacher_id;
+                            console.log('Teacher set to:', data.teacher_id);
+                        } else {
+                            assignTeacherSelect.value = '';
+                            assignTeacherHidden.value = '';
+                            console.log('No teacher found for this class');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching class teacher:', error);
+                        assignTeacherSelect.value = '';
+                        assignTeacherHidden.value = '';
+                    });
+            } else {
+                assignTeacherSelect.value = '';
+                assignTeacherHidden.value = '';
+                console.log('No class selected');
+            }
+        });
     }
 
     // Reject application
@@ -949,29 +1030,42 @@ document.addEventListener('DOMContentLoaded', function() {
         filterModal.hide();
     });
     
-    // Approve functionality
+    // Update the confirmApprove event listener
     confirmApprove.addEventListener('click', function() {
         const button = this;
         button.disabled = true;
         button.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Approving...';
+
+        // Get selected class and teacher - ensure empty string for no selection
+        const classId = assignClassSelect.value || '';
+        const teacherId = assignTeacherHidden.value || '';
+
+        console.log('Approving application:', {
+            application_id: currentActionApplicationId,
+            class_id: classId,
+            teacher_id: teacherId
+        });
 
         fetch('php/approve_application.php', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
             },
-            body: `application_id=${currentActionApplicationId}`
+            body: `application_id=${currentActionApplicationId}&class_id=${classId}&teacher_id=${teacherId}`
         })
         .then(response => {
             const contentType = response.headers.get('content-type');
             if (!contentType || !contentType.includes('application/json')) {
                 return response.text().then(text => {
+                    console.error('Non-JSON response:', text);
                     throw new Error('Server returned non-JSON response');
                 });
             }
             return response.json();
         })
         .then(data => {
+            console.log('Approval response:', data);
+
             if (data.requires_login) {
                 // Session expired, redirect to login
                 showToast('Session expired. Redirecting to login...', 'error');
@@ -983,7 +1077,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (data.success) {
                 approveModal.hide();
-                showToast('Application approved successfully!', 'success');
+                showToast(data.message, 'success');
                 refreshTableData(false);
             } else {
                 showToast('Error: ' + data.message, 'error');
@@ -991,7 +1085,7 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .catch(error => {
             console.error('Approve error:', error);
-            showToast('Error approving application', 'error');
+            showToast('Error approving application: ' + error.message, 'error');
         })
         .finally(() => {
             button.disabled = false;
