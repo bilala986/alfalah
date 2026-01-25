@@ -72,6 +72,19 @@ document.addEventListener('DOMContentLoaded', function() {
     const clearFilterBtn = document.getElementById('clearFilterBtn');
     
     const approveModal = new bootstrap.Modal(document.getElementById('approveModal'));
+
+    // Reset modal form when it's closed
+    approveModal._element.addEventListener('hidden.bs.modal', function () {
+        // Reset form when modal is closed
+        assignClassSelect.value = '';
+        assignTeacherHidden.value = '';
+        const teacherDisplayText = document.getElementById('teacherDisplayText');
+        if (teacherDisplayText) {
+            teacherDisplayText.textContent = 'No teacher assigned';
+            teacherDisplayText.className = 'text-muted';
+        }
+    });
+
     const rejectModal = new bootstrap.Modal(document.getElementById('rejectModal'));
     const approveStudentName = document.getElementById('approveStudentName');
     const rejectStudentName = document.getElementById('rejectStudentName');
@@ -893,7 +906,6 @@ document.addEventListener('DOMContentLoaded', function() {
         `;
     }
 
-    // Update the handleApproveClick function (around line 400-410)
     function handleApproveClick() {
         const applicationId = this.getAttribute('data-application-id');
         const studentName = this.getAttribute('data-student-name');
@@ -903,8 +915,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Reset form and populate classes when modal opens
         assignClassSelect.value = '';
-        assignTeacherSelect.value = '';
         assignTeacherHidden.value = '';
+
+        // Reset teacher display
+        const teacherDisplayText = document.getElementById('teacherDisplayText');
+        if (teacherDisplayText) {
+            teacherDisplayText.textContent = 'No teacher assigned';
+            teacherDisplayText.className = 'text-muted';
+        }
+
         populateClassDropdown();
 
         approveModal.show();
@@ -914,6 +933,8 @@ document.addEventListener('DOMContentLoaded', function() {
     if (assignClassSelect) {
         assignClassSelect.addEventListener('change', function() {
             const classId = this.value;
+            const teacherDisplayText = document.getElementById('teacherDisplayText');
+
             console.log('Class selected:', classId);
 
             if (classId) {
@@ -924,22 +945,40 @@ document.addEventListener('DOMContentLoaded', function() {
                     .then(data => {
                         console.log('Teacher response:', data);
                         if (data.success && data.teacher_id) {
-                            assignTeacherSelect.value = data.teacher_id;
+                            // Instead of setting dropdown value, show the teacher name
+                            // We need to get the teacher name from the class dropdown option text
+                            const selectedOption = assignClassSelect.options[assignClassSelect.selectedIndex];
+                            const optionText = selectedOption.textContent;
+
+                            // Extract teacher name from option text (it's after the dash)
+                            const dashIndex = optionText.lastIndexOf(' - ');
+                            if (dashIndex !== -1) {
+                                const teacherName = optionText.substring(dashIndex + 3);
+                                teacherDisplayText.textContent = teacherName;
+                                teacherDisplayText.className = 'fw-semibold text-success';
+                            } else {
+                                teacherDisplayText.textContent = 'Teacher ID: ' + data.teacher_id;
+                                teacherDisplayText.className = 'fw-semibold';
+                            }
+
                             assignTeacherHidden.value = data.teacher_id;
-                            console.log('Teacher set to:', data.teacher_id);
+                            console.log('Teacher set to:', data.teacher_id, 'Name displayed');
                         } else {
-                            assignTeacherSelect.value = '';
+                            teacherDisplayText.textContent = 'No teacher assigned to this class';
+                            teacherDisplayText.className = 'text-warning';
                             assignTeacherHidden.value = '';
                             console.log('No teacher found for this class');
                         }
                     })
                     .catch(error => {
                         console.error('Error fetching class teacher:', error);
-                        assignTeacherSelect.value = '';
+                        teacherDisplayText.textContent = 'Error loading teacher';
+                        teacherDisplayText.className = 'text-danger';
                         assignTeacherHidden.value = '';
                     });
             } else {
-                assignTeacherSelect.value = '';
+                teacherDisplayText.textContent = 'No teacher assigned';
+                teacherDisplayText.className = 'text-muted';
                 assignTeacherHidden.value = '';
                 console.log('No class selected');
             }

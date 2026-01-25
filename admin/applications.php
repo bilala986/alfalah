@@ -690,11 +690,11 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
 
                             <div class="mb-3">
                                 <label for="assignTeacher" class="form-label small fw-bold">Teacher (Auto-filled from Class)</label>
-                                <select class="form-select" id="assignTeacher" name="teacher_id" disabled>
-                                    <option value="">No teacher assigned</option>
-                                    <!-- Teacher will be auto-filled when class is selected -->
-                                </select>
+                                <div class="form-control" id="assignTeacherDisplay" style="min-height: 38px; background-color: #f8f9fa;">
+                                    <span class="text-muted" id="teacherDisplayText">No teacher assigned</span>
+                                </div>
                                 <input type="hidden" id="assignTeacherHidden" name="teacher_id">
+                                <small class="text-muted">Teacher will be automatically assigned based on the selected class</small>
                             </div>
                         </div>
                     </div>
