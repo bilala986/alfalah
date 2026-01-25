@@ -1,0 +1,239 @@
+/* ===== MEDIA PAGE STYLES ===== */
+
+/* Media Hero Section */
+.media-hero-section {
+    position: relative;
+    min-height: 50vh;
+    background: linear-gradient(135deg, #198754 0%, #28a745 50%, #38b27c 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    padding: 6rem 0 4rem;
+}
+
+.media-hero-section .hero-content {
+    position: relative;
+    z-index: 3;
+    text-align: center;
+    color: white;
+}
+
+.media-hero-section .hero-title {
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.media-hero-section .hero-subtitle {
+    font-size: 1.3rem;
+    margin-bottom: 0;
+    opacity: 0.95;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Hero Background Shapes */
+.media-hero-section .hero-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+.media-hero-section .hero-shape-1 {
+    position: absolute;
+    top: 20%;
+    right: 10%;
+    width: 120px;
+    height: 120px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    animation: float 6s ease-in-out infinite;
+}
+
+.media-hero-section .hero-shape-2 {
+    position: absolute;
+    bottom: 30%;
+    left: 8%;
+    width: 80px;
+    height: 80px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+    animation: float 8s ease-in-out infinite reverse;
+}
+
+.media-hero-section .hero-shape-3 {
+    position: absolute;
+    top: 60%;
+    left: 60%;
+    width: 100px;
+    height: 100px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 40% 60% 60% 40% / 40% 40% 60% 60%;
+    animation: rotate 15s linear infinite;
+}
+
+/* In Progress Section */
+.media-in-progress-section {
+    background: #f8f9fa;
+}
+
+.media-in-progress-card {
+    background: #ffffff;
+    padding: 4rem;
+    border-radius: 1.5rem;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(25, 135, 84, 0.1);
+}
+
+.media-in-progress-icon {
+    width: 100px;
+    height: 100px;
+    background: linear-gradient(135deg, #198754, #28a745);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+}
+
+.media-in-progress-icon i {
+    color: #ffffff;
+    font-size: 3rem;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.media-in-progress-card h2 {
+    font-size: 2.5rem;
+}
+
+.media-in-progress-card .lead {
+    font-size: 1.2rem;
+    line-height: 1.6;
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-20px);
+    }
+}
+
+@keyframes rotate {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+
+@media (max-width: 768px) {
+    .media-hero-section {
+        min-height: 40vh;
+        padding: 5rem 0 3rem;
+    }
+    
+    .media-hero-section .hero-title {
+        font-size: 2.2rem;
+    }
+    
+    .media-hero-section .hero-subtitle {
+        font-size: 1.1rem;
+    }
+    
+    .media-in-progress-card {
+        padding: 2.5rem;
+    }
+    
+    .media-in-progress-card h2 {
+        font-size: 2rem;
+    }
+    
+    .media-in-progress-icon {
+        width: 80px;
+        height: 80px;
+    }
+    
+    .media-in-progress-icon i {
+        font-size: 2.5rem;
+    }
+    
+    .media-hero-section .hero-shape-1 {
+        width: 80px;
+        height: 80px;
+        right: 5%;
+    }
+    
+    .media-hero-section .hero-shape-2 {
+        width: 60px;
+        height: 60px;
+        left: 5%;
+    }
+    
+    .media-hero-section .hero-shape-3 {
+        width: 70px;
+        height: 70px;
+    }
+}
+
+@media (max-width: 480px) {
+    .media-hero-section {
+        min-height: 35vh;
+        padding: 4rem 0 2rem;
+    }
+    
+    .media-hero-section .hero-title {
+        font-size: 1.8rem;
+    }
+    
+    .media-hero-section .hero-subtitle {
+        font-size: 1rem;
+    }
+    
+    .media-in-progress-card {
+        padding: 2rem;
+    }
+    
+    .media-in-progress-card h2 {
+        font-size: 1.5rem;
+    }
+    
+    .media-in-progress-card .lead {
+        font-size: 1.1rem;
+    }
+    
+    .media-in-progress-icon {
+        width: 70px;
+        height: 70px;
+    }
+    
+    .media-in-progress-icon i {
+        font-size: 2rem;
+    }
+    
+    .media-hero-section .hero-shape-1,
+    .media-hero-section .hero-shape-2,
+    .media-hero-section .hero-shape-3 {
+        display: none;
+    }
+}

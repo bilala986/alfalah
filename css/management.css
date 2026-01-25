@@ -1,0 +1,224 @@
+/* ===== MANAGEMENT PAGE STYLES ===== */
+
+/* Style for active dropdown item */
+.navbar-custom .dropdown-item.active {
+    background-color: #003900 !important;
+    color: white !important;
+}
+
+/* Add underline to "Our Madrassah" when About is active */
+.navbar-custom .dropdown.show .dropdown-toggle::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    width: 80%;
+    height: 2px;
+    background-color: #003900;
+    transform: translateX(-50%);
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        width: 0;
+    }
+    to {
+        width: 80%;
+    }
+}
+
+
+/* Management Hero Section */
+.management-hero-section {
+    position: relative;
+    min-height: 50vh;
+    background: linear-gradient(135deg, #198754 0%, #28a745 50%, #38b27c 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    padding: 6rem 0 4rem;
+}
+
+.management-hero-section .hero-content {
+    position: relative;
+    z-index: 3;
+    text-align: center;
+    color: white;
+}
+
+.management-hero-section .hero-title {
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.management-hero-section .hero-subtitle {
+    font-size: 1.3rem;
+    margin-bottom: 0;
+    opacity: 0.95;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Hero Background Shapes */
+.management-hero-section .hero-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+.management-hero-section .hero-shape-1 {
+    position: absolute;
+    top: 20%;
+    right: 10%;
+    width: 120px;
+    height: 120px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    animation: float 6s ease-in-out infinite;
+}
+
+.management-hero-section .hero-shape-2 {
+    position: absolute;
+    bottom: 30%;
+    left: 8%;
+    width: 80px;
+    height: 80px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+    animation: float 8s ease-in-out infinite reverse;
+}
+
+.management-hero-section .hero-shape-3 {
+    position: absolute;
+    top: 60%;
+    left: 60%;
+    width: 100px;
+    height: 100px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 40% 60% 60% 40% / 40% 40% 60% 60%;
+    animation: rotate 15s linear infinite;
+}
+
+/* Management Cards */
+.management-section {
+    background: #f8f9fa;
+}
+
+.management-card {
+    background: #ffffff;
+    border-radius: 1rem;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(25, 135, 84, 0.1);
+    transition: all 0.3s ease;
+    height: 100%;
+}
+
+.management-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+.management-image {
+    height: 250px;
+    overflow: hidden;
+}
+
+.management-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.management-card:hover .management-image img {
+    transform: scale(1.05);
+}
+
+.management-content {
+    padding: 1.5rem;
+    text-align: center;
+}
+
+.management-content h4 {
+    margin-bottom: 0.5rem;
+    font-size: 1.1rem;
+}
+
+.management-role {
+    color: #6c757d;
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-bottom: 0;
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+
+@media (max-width: 768px) {
+    .management-hero-section {
+        min-height: 40vh;
+        padding: 5rem 0 3rem;
+    }
+    
+    .management-hero-section .hero-title {
+        font-size: 2.2rem;
+    }
+    
+    .management-hero-section .hero-subtitle {
+        font-size: 1.1rem;
+    }
+    
+    .management-image {
+        height: 200px;
+    }
+    
+    .management-hero-section .hero-shape-1 {
+        width: 80px;
+        height: 80px;
+        right: 5%;
+    }
+    
+    .management-hero-section .hero-shape-2 {
+        width: 60px;
+        height: 60px;
+        left: 5%;
+    }
+    
+    .management-hero-section .hero-shape-3 {
+        width: 70px;
+        height: 70px;
+    }
+}
+
+@media (max-width: 480px) {
+    .management-hero-section {
+        min-height: 35vh;
+        padding: 4rem 0 2rem;
+    }
+    
+    .management-hero-section .hero-title {
+        font-size: 1.8rem;
+    }
+    
+    .management-hero-section .hero-subtitle {
+        font-size: 1rem;
+    }
+    
+    .management-image {
+        height: 180px;
+    }
+    
+    .management-hero-section .hero-shape-1,
+    .management-hero-section .hero-shape-2,
+    .management-hero-section .hero-shape-3 {
+        display: none;
+    }
+}

@@ -1,3 +1,17 @@
+# Enable rewrite engine
+RewriteEngine On
+RewriteBase /alfalah/
+
+# Remove .html extension from URLs
+# If the request is for an existing .html file, rewrite to the clean URL
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}\.html -f
+RewriteRule ^(.*)$ $1.html [L]
+
+# Redirect .html URLs to clean URLs (optional, for SEO)
+RewriteCond %{THE_REQUEST} \s/alfalah/([^\s]+)\.html [NC]
+RewriteRule ^ %1 [R=301,L]
+
 # Prevent access to sensitive files
 <Files "*.php">
     Order Allow,Deny
@@ -20,3 +34,7 @@ Header always set Referrer-Policy "strict-origin-when-cross-origin"
     Order allow,deny
     Deny from all
 </Files>
+
+# Custom error pages (optional)
+ErrorDocument 404 /alfalah/index.html
+ErrorDocument 403 /alfalah/index.html

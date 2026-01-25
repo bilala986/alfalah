@@ -22,9 +22,42 @@ function initProgramTabs() {
     });
 }
 
+// Add this function to handle active states in dropdowns
+function initDropdownActiveStates() {
+    const currentPath = window.location.pathname;
+    const currentPage = currentPath.split('/').pop();
+    
+    // Remove active class from all nav links first
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.classList.remove('active', 'fw-bold');
+    });
+    
+    // Remove active class from all dropdown items
+    document.querySelectorAll('.dropdown-item').forEach(item => {
+        item.classList.remove('active');
+    });
+    
+    // Add active class to current page
+    const currentLink = document.querySelector(`.nav-link[href="${currentPage}"], .nav-link[href="./${currentPage}"]`);
+    if (currentLink) {
+        currentLink.classList.add('active', 'fw-bold');
+        
+        // If it's a dropdown item, also activate the parent dropdown
+        if (currentLink.classList.contains('dropdown-item')) {
+            const dropdownToggle = currentLink.closest('.dropdown').querySelector('.dropdown-toggle');
+            if (dropdownToggle) {
+                dropdownToggle.classList.add('active', 'fw-bold');
+            }
+        }
+    }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     // Initialize program tabs
     initProgramTabs();
+    
+    // Initialize dropdown active states
+    initDropdownActiveStates();
     
     const rows = document.querySelectorAll('.mission-row');
     const bar = document.getElementById('mission-bar');

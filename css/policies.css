@@ -1,0 +1,342 @@
+/* ===== POLICIES PAGE STYLES ===== */
+
+/* Style for active dropdown item */
+.navbar-custom .dropdown-item.active {
+    background-color: #003900 !important;
+    color: white !important;
+}
+
+/* Add underline to "Our Madrassah" when About is active */
+.navbar-custom .dropdown.show .dropdown-toggle::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    width: 80%;
+    height: 2px;
+    background-color: #003900;
+    transform: translateX(-50%);
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        width: 0;
+    }
+    to {
+        width: 80%;
+    }
+}
+
+
+/* Policies Hero Section */
+.policies-hero-section {
+    position: relative;
+    min-height: 50vh;
+    background: linear-gradient(135deg, #198754 0%, #28a745 50%, #38b27c 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    padding: 6rem 0 4rem;
+}
+
+.policies-hero-section .hero-content {
+    position: relative;
+    z-index: 3;
+    text-align: center;
+    color: white;
+}
+
+.policies-hero-section .hero-title {
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.policies-hero-section .hero-subtitle {
+    font-size: 1.3rem;
+    margin-bottom: 0;
+    opacity: 0.95;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Hero Background Shapes */
+.policies-hero-section .hero-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+.policies-hero-section .hero-shape-1 {
+    position: absolute;
+    top: 20%;
+    right: 10%;
+    width: 120px;
+    height: 120px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    animation: float 6s ease-in-out infinite;
+}
+
+.policies-hero-section .hero-shape-2 {
+    position: absolute;
+    bottom: 30%;
+    left: 8%;
+    width: 80px;
+    height: 80px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+    animation: float 8s ease-in-out infinite reverse;
+}
+
+.policies-hero-section .hero-shape-3 {
+    position: absolute;
+    top: 60%;
+    left: 60%;
+    width: 100px;
+    height: 100px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 40% 60% 60% 40% / 40% 40% 60% 60%;
+    animation: rotate 15s linear infinite;
+}
+
+/* Policies Navigation */
+.policies-nav {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem;
+    padding: 1rem 0;
+}
+
+.policy-nav-link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    background: #ffffff;
+    border-radius: 0.75rem;
+    text-decoration: none;
+    color: #198754;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+    min-width: 120px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.policy-nav-link:hover {
+    transform: translateY(-5px);
+    border-color: #198754;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    color: #198754;
+}
+
+.policy-nav-link.active {
+    background: #198754;
+    color: #ffffff;
+    border-color: #198754;
+}
+
+.policy-nav-link i {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.policy-nav-link span {
+    text-align: center;
+    line-height: 1.2;
+}
+
+/* Policies Content */
+.policies-content-section {
+    background: #f8f9fa;
+}
+
+.policy-section {
+    margin-bottom: 4rem;
+}
+
+.mt-6 {
+    margin-top: 4rem !important;
+}
+
+.policy-card {
+    background: #ffffff;
+    padding: 2.5rem;
+    border-radius: 1rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(25, 135, 84, 0.1);
+}
+
+.policy-card h3, .policy-card h4 {
+    color: #2d3748;
+}
+
+.policy-card h3 {
+    font-size: 1.5rem;
+    border-bottom: 2px solid #198754;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.policy-card h4 {
+    font-size: 1.2rem;
+    margin-top: 2rem;
+    padding-left: 1rem;
+    border-left: 3px solid #198754;
+}
+
+.policy-card p {
+    color: #4a5568;
+    line-height: 1.7;
+    margin-bottom: 1rem;
+}
+
+.policy-card ul, .policy-card ol {
+    color: #4a5568;
+    padding-left: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.policy-card li {
+    margin-bottom: 0.5rem;
+    line-height: 1.6;
+}
+
+.policy-card address {
+    border-left: 4px solid #198754;
+    padding-left: 1rem;
+    margin: 1.5rem 0;
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-20px);
+    }
+}
+
+@keyframes rotate {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+
+@media (max-width: 768px) {
+    .policies-hero-section {
+        min-height: 40vh;
+        padding: 5rem 0 3rem;
+    }
+    
+    .policies-hero-section .hero-title {
+        font-size: 2.2rem;
+    }
+    
+    .policies-hero-section .hero-subtitle {
+        font-size: 1.1rem;
+    }
+    
+    .policies-nav {
+        gap: 0.5rem;
+    }
+    
+    .policy-nav-link {
+        padding: 0.75rem 1rem;
+        min-width: 100px;
+        font-size: 0.8rem;
+    }
+    
+    .policy-nav-link i {
+        font-size: 1.2rem;
+    }
+    
+    .policy-card {
+        padding: 1.5rem;
+    }
+    
+    .policy-card h3 {
+        font-size: 1.3rem;
+    }
+    
+    .policy-card h4 {
+        font-size: 1.1rem;
+    }
+    
+    .policies-hero-section .hero-shape-1 {
+        width: 80px;
+        height: 80px;
+        right: 5%;
+    }
+    
+    .policies-hero-section .hero-shape-2 {
+        width: 60px;
+        height: 60px;
+        left: 5%;
+    }
+    
+    .policies-hero-section .hero-shape-3 {
+        width: 70px;
+        height: 70px;
+    }
+}
+
+@media (max-width: 480px) {
+    .policies-hero-section {
+        min-height: 35vh;
+        padding: 4rem 0 2rem;
+    }
+    
+    .policies-hero-section .hero-title {
+        font-size: 1.8rem;
+    }
+    
+    .policies-hero-section .hero-subtitle {
+        font-size: 1rem;
+    }
+    
+    .policies-nav {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .policy-nav-link {
+        width: 100%;
+        max-width: 250px;
+        flex-direction: row;
+        justify-content: flex-start;
+        text-align: left;
+    }
+    
+    .policy-nav-link i {
+        margin-bottom: 0;
+        margin-right: 1rem;
+        font-size: 1.5rem;
+    }
+    
+    .policy-card {
+        padding: 1.25rem;
+    }
+    
+    .policies-hero-section .hero-shape-1,
+    .policies-hero-section .hero-shape-2,
+    .policies-hero-section .hero-shape-3 {
+        display: none;
+    }
+}

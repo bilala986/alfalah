@@ -48,7 +48,10 @@
                                 Our Madrassah <i class="bi bi-chevron-down dropdown-arrow"></i>
                             </a>
                             <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="#">About Us</a></li>
+                                <li><a class="dropdown-item active" href="about.html">About Us</a></li>
+                                <li><a class="dropdown-item" href="management.html">Management</a></li>
+                                <li><a class="dropdown-item" href="teachers.html">Teachers</a></li>
+                                <li><a class="dropdown-item" href="policies.html">Policies</a></li>
                                 <li><a class="dropdown-item" href="#">Calendar</a></li>
                                 <li><a class="dropdown-item" href="#">Curriculum</a></li>
                             </ul>
@@ -57,10 +60,12 @@
                             <a class="nav-link" href="#">Newsletters</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="donations.html">Donations</a>
+                            <a class="nav-link" href="media.html">Media</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="donations.html">Contact Us</a>
+                            <a class="nav-link" href="donations.html">Donations</a></li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="contact.html">Contact Us</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link active fw-bold" href="admissions.php">Admissions</a>
@@ -594,9 +599,108 @@
             </div>
         </section>
 
-        <!-- FOOTER -->
-        <footer class="py-3 text-center text-white" style="background-color:#006d32;">
-            <p class="mb-0">© 2025 Al Falah Educational Centre</p>
+        <!-- Footer -->
+        <footer class="footer-section bg-dark text-light pt-5">
+            <div class="container">
+                <div class="row g-4">
+                    <!-- Brand Column -->
+                    <div class="col-lg-4 col-md-6">
+                        <div class="footer-brand mb-4">
+                            <img src="img/logo.png" alt="Al Falah Logo" height="50" class="mb-3">
+                            <h5 class="text-success fw-bold">Al Falah Educational Centre</h5>
+                            <p class="text-light opacity-75 mt-3">
+                                Dedicated to nurturing faith, knowledge, and character through Qur'an, Hifdh, and Islamic education.
+                            </p>
+                            <div class="social-links mt-4">
+                                <a href="#" class="social-link me-3">
+                                    <i class="bi bi-facebook"></i>
+                                </a>
+                                <a href="#" class="social-link me-3">
+                                    <i class="bi bi-twitter"></i>
+                                </a>
+                                <a href="#" class="social-link me-3">
+                                    <i class="bi bi-instagram"></i>
+                                </a>
+                                <a href="#" class="social-link">
+                                    <i class="bi bi-youtube"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Links -->
+                    <div class="col-lg-2 col-md-6">
+                        <h6 class="text-success fw-bold mb-3">Quick Links</h6>
+                        <ul class="list-unstyled">
+                            <li class="mb-2"><a href="index.html" class="footer-link">Home</a></li>
+                            <li class="mb-2"><a href="about.html" class="footer-link">About Us</a></li>
+                            <li class="mb-2"><a href="admissions.php" class="footer-link">Admissions</a></li>
+                            <li class="mb-2"><a href="#" class="footer-link">Calendar</a></li>
+                            <li class="mb-2"><a href="contact.html" class="footer-link">Contact</a></li>
+                            <li class="mb-2"><a href="admin/" class="footer-link">Admin</a></li>
+                        </ul>
+                    </div>
+
+                    <!-- Programs -->
+                    <div class="col-lg-3 col-md-6">
+                        <h6 class="text-success fw-bold mb-3">Our Programs</h6>
+                        <ul class="list-unstyled">
+                            <li class="mb-2"><a href="#" class="footer-link">Qur'an Classes</a></li>
+                            <li class="mb-2"><a href="#" class="footer-link">Hifdh Program</a></li>
+                            <li class="mb-2"><a href="#" class="footer-link">Islamic Studies</a></li>
+                            <li class="mb-2"><a href="#" class="footer-link">Weekend Madrasah</a></li>
+                            <li class="mb-2"><a href="#" class="footer-link">Adult Education</a></li>
+                        </ul>
+                    </div>
+
+                    <!-- Contact Info -->
+                    <div class="col-lg-3 col-md-6">
+                        <h6 class="text-success fw-bold mb-3">Contact Info</h6>
+                        <div class="contact-info">
+                            <div class="d-flex align-items-start mb-3">
+                                <i class="bi bi-geo-alt-fill text-success me-3 mt-1"></i>
+                                <div>
+                                    <p class="mb-0 text-light opacity-75">2 Whitefriars Avenue,</p>
+                                    <p class="mb-0 text-light opacity-75">Harrow, Middlesex, HA3 5RN</p>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="bi bi-telephone-fill text-success me-3"></i>
+                                <span class="text-light opacity-75">(+44) 208 427 3113</span>
+                            </div>
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="bi bi-envelope-fill text-success me-3"></i>
+                                <span class="text-light opacity-75">info@slmcc.co.uk</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-clock-fill text-success me-3"></i>
+                                <div>
+                                    <p class="mb-0 text-light opacity-75">Mon-Thu: 5:30pm – 7:30pm</p>
+                                    <p class="mb-0 text-light opacity-75">Sat-Sun: 9:00am – 1:00pm</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Divider -->
+                <div class="border-top border-secondary my-4"></div>
+
+                <!-- Bottom Bar -->
+                <div class="row align-items-center py-3">
+                    <div class="col-md-6">
+                        <p class="mb-0 text-light opacity-75">
+                            © 2025 Al Falah Educational Centre. All rights reserved.
+                        </p>
+                    </div>
+                    <div class="col-md-6 text-md-end">
+                        <div class="footer-links">
+                            <a href="#" class="footer-link me-3">Privacy Policy</a>
+                            <a href="#" class="footer-link">Terms of Service</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </footer>
 
         <script src="bootstrap/js/bootstrap.bundle.min.js"></script>
