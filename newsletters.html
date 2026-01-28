@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Newsletters - Al Falah Educational Centre</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="img/favicon-32x32.png">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@400..700&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap CSS -->
+    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" />
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/newsletters.css" />
+</head>
+<body class="bg-white">
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-custom fixed-top">
+        <div class="container">
+            <!-- Brand Logo -->
+            <a class="navbar-brand d-flex align-items-center" href="index">
+                <img src="img/logo.png" alt="Al Falah Logo" height="50" class="me-2">
+            </a>
+
+            <!-- Toggler -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <!-- Nav Links -->
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index">Home</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Our Madrassah <i class="bi bi-chevron-down dropdown-arrow"></i>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="about">About Us</a></li>
+                            <li><a class="dropdown-item" href="management">Management</a></li>
+                            <li><a class="dropdown-item" href="teachers">Teachers</a></li>
+                            <li><a class="dropdown-item" href="policies">Policies</a></li>
+                            <li><a class="dropdown-item" href="calendar">Calendar</a></li>
+                            <li><a class="dropdown-item" href="curriculum">Curriculum</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="newsletters">Newsletters</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="media">Media</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="donations">Donations</a></li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="contact">Contact Us</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="admissions.php">Admissions</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section - Updated to match curriculum style -->
+    <section class="newsletters-hero-section d-flex align-items-center">
+        <div class="container position-relative z-2">
+            <div class="row justify-content-center text-center">
+                <div class="col-lg-8">
+                    <div class="hero-content">
+                        <h1 class="display-4 fw-bold text-success">
+                            Al Falah Newsletters
+                        </h1>
+                        <p class="lead text-dark mb-4">
+                            Stay connected with monthly updates, Islamic insights, and community news
+                        </p>
+                        <div class="newsletter-stats">
+                            <div class="stat-item">
+                                <span class="stat-number">12+</span>
+                                <span class="stat-label">Issues Per Year</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-number">1000+</span>
+                                <span class="stat-label">Subscribers</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-number">4</span>
+                                <span class="stat-label">Content Categories</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Decorative Elements -->
+        <div class="hero-decoration">
+            <i class="bi bi-journal-text decoration-1"></i>
+            <i class="bi bi-newspaper decoration-2"></i>
+            <i class="bi bi-envelope decoration-3"></i>
+        </div>
+    </section>
+
+    <!-- Featured Newsletter -->
+    <section class="featured-newsletter py-6">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6 mb-4 mb-lg-0">
+                    <div class="featured-content">
+                        <div class="badge bg-success mb-3">Latest Issue</div>
+                        <h2 class="fw-bold text-success mb-3">Ramadan 2025 Special Edition</h2>
+                        <p class="text-muted fs-5 mb-4">
+                            Our comprehensive Ramadan guide including daily duas, spiritual reflections, community iftar schedules, and Qur'an study plans for the blessed month.
+                        </p>
+                        <div class="featured-stats">
+                            <div class="stat">
+                                <i class="bi bi-calendar-check text-success"></i>
+                                <span>30 Days Spiritual Guide</span>
+                            </div>
+                            <div class="stat">
+                                <i class="bi bi-book text-success"></i>
+                                <span>Complete Dua Collection</span>
+                            </div>
+                            <div class="stat">
+                                <i class="bi bi-people text-success"></i>
+                                <span>Community Events Schedule</span>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <a href="#" class="btn btn-success btn-lg">
+                                <i class="bi bi-download me-2"></i>Download PDF
+                            </a>
+                            <a href="#" class="btn btn-outline-success btn-lg ms-3">
+                                <i class="bi bi-eye me-2"></i>Read Online
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="featured-image">
+                        <div class="magazine-cover">
+                            <div class="magazine-title">
+                                <span class="issue-month">Ramadan</span>
+                                <span class="issue-year">1446/2025</span>
+                            </div>
+                            <div class="magazine-content">
+                                <h3>Al Falah</h3>
+                                <h4>Newsletter</h4>
+                                <div class="cover-features">
+                                    <p>• Spiritual Reflections</p>
+                                    <p>• Daily Dua Guide</p>
+                                    <p>• Community Iftar Times</p>
+                                    <p>• Qur'an Study Plan</p>
+                                </div>
+                            </div>
+                            <div class="magazine-footer">
+                                <span>Special Ramadan Edition</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Newsletter Archive -->
+    <section id="newsletters" class="newsletter-archive py-6 bg-light">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="text-success fw-bold mb-3">Newsletter Archive</h2>
+                <p class="text-muted fs-5">Browse through our collection of past newsletters</p>
+                
+                <!-- Year Filter -->
+                <div class="year-filter mb-4">
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-outline-success active" data-year="all">All</button>
+                        <button type="button" class="btn btn-outline-success" data-year="2026">2026</button>
+                        <button type="button" class="btn btn-outline-success" data-year="2025">2025</button>
+                        <button type="button" class="btn btn-outline-success" data-year="2024">2024</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4" id="newsletter-grid">
+                <!-- Newsletter cards will be loaded here -->
+            </div>
+
+            <!-- Loading Indicator -->
+            <div class="text-center mt-5" id="loading-indicator">
+                <div class="spinner-border text-success" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2 text-muted">Loading newsletters...</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Newsletter Categories -->
+    <section class="newsletter-categories py-6">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="text-success fw-bold mb-3">What You'll Find in Our Newsletters</h2>
+                <p class="text-muted fs-5">Our newsletters cover a wide range of topics to benefit the entire community</p>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-md-3">
+                    <div class="category-card">
+                        <div class="category-icon bg-success">
+                            <i class="bi bi-moon-stars"></i>
+                        </div>
+                        <h4 class="fw-bold text-success mt-3">Islamic Insights</h4>
+                        <p class="text-muted">Monthly reflections, Quranic verses explanation, and hadith studies.</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="category-card">
+                        <div class="category-icon bg-success">
+                            <i class="bi bi-calendar-event"></i>
+                        </div>
+                        <h4 class="fw-bold text-success mt-3">Event Updates</h4>
+                        <p class="text-muted">Upcoming classes, community events, and special programs.</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="category-card">
+                        <div class="category-icon bg-success">
+                            <i class="bi bi-mortarboard"></i>
+                        </div>
+                        <h4 class="fw-bold text-success mt-3">Student Achievements</h4>
+                        <p class="text-muted">Celebrating our students' progress and accomplishments.</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="category-card">
+                        <div class="category-icon bg-success">
+                            <i class="bi bi-heart"></i>
+                        </div>
+                        <h4 class="fw-bold text-success mt-3">Community News</h4>
+                        <p class="text-muted">Updates from our community and opportunities to get involved.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Subscription Section -->
+    <section class="subscription-section py-6 bg-light">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-8 text-center">
+                    <div class="subscription-card bg-white rounded-4 shadow-sm p-5">
+                        <h2 class="text-success fw-bold mb-3">Never Miss an Update</h2>
+                        <p class="text-muted mb-4">
+                            Subscribe to receive our monthly newsletter directly in your inbox. Stay informed about Islamic insights, community events, and educational resources.
+                        </p>
+                        
+                        <form id="subscriptionForm" class="subscription-form">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <input type="text" class="form-control form-control-lg" placeholder="Your Name" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <input type="email" class="form-control form-control-lg" placeholder="Email Address" required>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="parentCheck">
+                                        <label class="form-check-label" for="parentCheck">
+                                            I am a parent/guardian of a student
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <button type="submit" class="btn btn-success btn-lg w-100">
+                                        <i class="bi bi-envelope-check me-2"></i>Subscribe Now
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                        
+                        <div class="mt-4">
+                            <small class="text-muted">
+                                <i class="bi bi-shield-check text-success me-1"></i>
+                                We respect your privacy. Unsubscribe at any time.
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer-section bg-dark text-light pt-5">
+        <div class="container">
+            <div class="row g-4">
+                <!-- Brand Column -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="footer-brand mb-4">
+                        <img src="img/logo.png" alt="Al Falah Logo" height="50" class="mb-3">
+                        <h5 class="text-success fw-bold">Al Falah Educational Centre</h5>
+                        <p class="text-light opacity-75 mt-3">
+                            Dedicated to nurturing faith, knowledge, and character through Qur'an, Hifdh, and Islamic education.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Quick Links -->
+                <div class="col-lg-2 col-md-6">
+                    <h6 class="text-success fw-bold mb-3">Quick Links</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="index" class="footer-link">Home</a></li>
+                        <li class="mb-2"><a href="about" class="footer-link">About Us</a></li>
+                        <li class="mb-2"><a href="newsletters" class="footer-link">Newsletters</a></li>
+                        <li class="mb-2"><a href="calendar" class="footer-link">Calendar</a></li>
+                        <li class="mb-2"><a href="contact" class="footer-link">Contact</a></li>
+                    </ul>
+                </div>
+
+                <!-- Contact Info -->
+                <div class="col-lg-3 col-md-6">
+                    <h6 class="text-success fw-bold mb-3">Contact Info</h6>
+                    <div class="contact-info">
+                        <div class="d-flex align-items-start mb-3">
+                            <i class="bi bi-geo-alt-fill text-success me-3 mt-1"></i>
+                            <div>
+                                <p class="mb-0 text-light opacity-75">2 Whitefriars Avenue,</p>
+                                <p class="mb-0 text-light opacity-75">Harrow, Middlesex, HA3 5RN</p>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="bi bi-telephone-fill text-success me-3"></i>
+                            <span class="text-light opacity-75">(+44) 208 427 3113</span>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-clock-fill text-success me-3"></i>
+                            <div>
+                                <p class="mb-0 text-light opacity-75">Mon-Thu: 5:30pm – 7:30pm</p>
+                                <p class="mb-0 text-light opacity-75">Sat-Sun: 9:00am – 1:00pm</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Divider -->
+            <div class="border-top border-secondary my-4"></div>
+
+            <!-- Bottom Bar -->
+            <div class="row align-items-center py-3">
+                <div class="col-md-6">
+                    <p class="mb-0 text-light opacity-75">
+                        © 2025 Al Falah Educational Centre. All rights reserved.
+                    </p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <div class="footer-links">
+                        <a href="#" class="footer-link me-3">Privacy Policy</a>
+                        <a href="#" class="footer-link">Terms of Service</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Subscribe Modal -->
+    <div class="modal fade" id="subscribeModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title text-success fw-bold">Subscribe to Our Newsletter</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Get the latest updates, Islamic insights, and community news directly in your inbox.</p>
+                    <form id="modalSubscriptionForm">
+                        <div class="mb-3">
+                            <input type="email" class="form-control" placeholder="Enter your email" required>
+                        </div>
+                        <button type="submit" class="btn btn-success w-100">Subscribe</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="js/script.js"></script>
+    <script src="js/newsletters.js"></script>
+</body>
+</html>
