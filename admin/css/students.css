@@ -199,3 +199,80 @@
             .permission-item i {
                 color: #6c757d;
             }
+
+/* Bulk selection styles */
+.selection-mode-active {
+    background-color: #f0f8ff;
+}
+
+.selection-column {
+    width: 40px;
+    text-align: center;
+}
+
+#selectAllCheckbox {
+    margin: 0;
+}
+
+.student-checkbox {
+    margin: 0;
+}
+
+/* Bulk actions button group */
+#bulkActionsGroup .dropdown-toggle::after {
+    margin-left: 0.5rem;
+}
+
+/* Selected students list */
+.selected-students-list li {
+    padding: 0.25rem 0;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.selected-students-list li:last-child {
+    border-bottom: none;
+}
+
+/* Highlight selected rows */
+tr.selected-row {
+    background-color: #e7f1ff !important;
+}
+
+tr.selected-row:hover {
+    background-color: #d0e3ff !important;
+}
+
+/* Selection status */
+#selectionStatus {
+    color: #0d6efd;
+    font-weight: 500;
+}
+
+/* Bulk assign modal */
+#bulkAssignModal .alert {
+    margin-bottom: 1.5rem;
+}
+
+/* Responsive adjustments for bulk actions */
+@media (max-width: 768px) {
+    #bulkActionsGroup {
+        margin-top: 10px;
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .selection-column {
+        width: 35px;
+    }
+}
+
+/* Animation for selection mode */
+@keyframes highlightSelection {
+    0% { background-color: #ffffff; }
+    50% { background-color: #e7f1ff; }
+    100% { background-color: #ffffff; }
+}
+
+.selection-mode-active {
+    animation: highlightSelection 1s ease;
+}

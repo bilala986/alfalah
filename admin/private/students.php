@@ -60,6 +60,11 @@ ORDER BY s.student_first_name, s.student_last_name");
 $stmt->execute();
 $students = $stmt->fetchAll();
 
+// Fetch classes for bulk assignment dropdown
+$classStmt = $pdo->prepare("SELECT id, class_name FROM classes WHERE status = 'active' ORDER BY class_name");
+$classStmt->execute();
+$classes = $classStmt->fetchAll();
+
 $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
 ?>
 
@@ -137,9 +142,39 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                                 </div>
                             </div>
 
-                            <!-- Refresh and Filter buttons on the right -->
+                            <!-- Action buttons on the right -->
                             <div class="col-md-6 text-end">
                                 <div class="btn-group">
+                                    <!-- Bulk selection toggle button -->
+                                    <button id="selectStudentsBtn" class="btn btn-outline-primary" title="Select Students for Bulk Action">
+                                        <i class="bi bi-check-square"></i> Select Students
+                                    </button>
+                                    
+                                    <!-- Bulk actions dropdown (hidden by default) -->
+                                    <div class="btn-group" id="bulkActionsGroup" style="display: none;">
+                                        <button type="button" class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                            <span id="selectedCount">0</span> Selected
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            <li>
+                                                <a class="dropdown-item" href="#" id="selectAllBtn">
+                                                    <i class="bi bi-check-all"></i> Select All Visible
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item" href="#" id="deselectAllBtn">
+                                                    <i class="bi bi-x-square"></i> Deselect All
+                                                </a>
+                                            </li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li>
+                                                <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#bulkAssignModal">
+                                                    <i class="bi bi-arrow-right-square"></i> Assign to Class
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    
                                     <button id="refreshBtn" class="btn btn-outline-primary" title="Refresh Table">
                                         <i class="bi bi-arrow-repeat"></i> Refresh
                                     </button>
@@ -155,6 +190,9 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                             <div class="col-12">
                                 <small class="text-muted">
                                     Showing <span id="visibleCount"><?= count($students) ?></span> of <span id="totalCount"><?= count($students) ?></span> students
+                                    <span id="selectionStatus" class="ms-2" style="display: none;">
+                                        | <span id="selectedStatus">0</span> selected
+                                    </span>
                                 </small>
                             </div>
                         </div>
@@ -164,19 +202,22 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                         <table class="table table-hover" id="studentsTable">
                             <thead>
                                 <tr>
+                                    <th class="selection-column" style="display: none; width: 40px;">
+                                        <input type="checkbox" id="selectAllCheckbox" class="form-check-input">
+                                    </th>
                                     <th>Name</th>
                                     <th>Age</th>
                                     <th class="mobile-hide">Program</th>
                                     <th class="mobile-hide">Year Group</th>
                                     <th>Teacher</th>
-                                    <th>Class</th> <!-- NEW COLUMN -->
+                                    <th>Class</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="studentsTableBody">
                                 <?php if (empty($students)): ?>
                                     <tr>
-                                        <td colspan="7" class="text-center text-muted py-4">No students found.</td> <!-- Changed colspan from 6 to 7 -->
+                                        <td colspan="8" class="text-center text-muted py-4">No students found.</td>
                                     </tr>
                                 <?php else: ?>
                                     <?php foreach ($students as $student): ?>
@@ -192,6 +233,10 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                                         data-teacher="<?= htmlspecialchars(strtolower($student['teacher_name'] ?? 'Unassigned')) ?>"
                                         data-age="<?= $student['student_age'] ?? '0' ?>"
                                         data-student-id="<?= $student['id'] ?>">
+                                        <!-- Selection checkbox column -->
+                                        <td class="selection-column" style="display: none;">
+                                            <input type="checkbox" class="student-checkbox form-check-input" value="<?= $student['id'] ?>">
+                                        </td>
                                         <td class="fw-semibold">
                                             <?= htmlspecialchars($student['student_first_name'] . ' ' . $student['student_last_name']) ?>
                                         </td>
@@ -210,7 +255,7 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                                                 <span class="text-muted">Unassigned</span>
                                             <?php endif; ?>
                                         </td>
-                                        <td> <!-- NEW CLASS COLUMN -->
+                                        <td>
                                             <?php if (!empty($class['class_name'])): ?>
                                                 <span class="badge bg-info"><?= htmlspecialchars($class['class_name']) ?></span>
                                             <?php else: ?>
@@ -240,9 +285,9 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                                             </div>
                                         </td>
                                     </tr>
-                                    <!-- Student Details Row - Same design as applications page -->
+                                    <!-- Student Details Row -->
                                     <tr class="student-details-row" style="display: none;">
-                                        <td colspan="7"> <!-- Changed colspan from 6 to 7 -->
+                                        <td colspan="8">
                                             <div class="student-details" id="details-<?= $student['id'] ?>">
                                                 <div class="text-center text-muted py-3">
                                                     <i class="bi bi-hourglass-split"></i> Click "View" to load details
@@ -365,6 +410,64 @@ $browser_instance_id = $_SESSION['browser_instance_id'] ?? '';
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                         <button type="button" id="confirmEdit" class="btn btn-primary">Save Changes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bulk Assign Modal -->
+        <div class="modal fade" id="bulkAssignModal" tabindex="-1" aria-labelledby="bulkAssignModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="bulkAssignModalLabel">Assign Students to Class</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i>
+                            You are about to assign <span id="bulkAssignCount" class="fw-bold">0</span> student(s) to a class.
+                        </div>
+                        
+                        <form id="bulkAssignForm">
+                            <div class="mb-3">
+                                <label for="bulkAssignClass" class="form-label">Select Class</label>
+                                <select class="form-select" id="bulkAssignClass" name="class_id" required>
+                                    <option value="">Choose a class...</option>
+                                    <?php foreach ($classes as $class): ?>
+                                        <option value="<?= $class['id'] ?>"><?= htmlspecialchars($class['class_name']) ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                                <small class="form-text text-muted">Students will be assigned to this class and its teacher</small>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Assignment Options</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="removeExistingClass" name="remove_existing" value="1">
+                                    <label class="form-check-label" for="removeExistingClass">
+                                        Remove students from existing classes first
+                                    </label>
+                                    <small class="form-text text-muted d-block">
+                                        If checked, students will be removed from their current classes before assignment
+                                    </small>
+                                </div>
+                            </div>
+                            
+                            <!-- Selected students list -->
+                            <div class="mb-3">
+                                <label class="form-label">Selected Students</label>
+                                <div class="selected-students-list border rounded p-2" style="max-height: 200px; overflow-y: auto;">
+                                    <ul class="list-unstyled mb-0" id="selectedStudentsList">
+                                        <!-- Will be populated by JavaScript -->
+                                    </ul>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" id="confirmBulkAssign" class="btn btn-primary">Assign Students</button>
                     </div>
                 </div>
             </div>

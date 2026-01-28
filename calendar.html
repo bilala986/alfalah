@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Academic Calendar | Al Falah Educational Centre</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="img/favicon-32x32.png">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@400..700&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap CSS -->
+    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" />
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/calendar.css" />
+</head>
+<body class="bg-white">
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-custom fixed-top">
+        <div class="container">
+            <!-- Brand Logo -->
+            <a class="navbar-brand d-flex align-items-center" href="index.html">
+                <img src="img/logo.png" alt="Al Falah Logo" height="50" class="me-2">
+            </a>
+
+            <!-- Toggler -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <!-- Nav Links -->
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">Home</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle active fw-bold" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Our Madrassah <i class="bi bi-chevron-down dropdown-arrow"></i>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="about.html">About Us</a></li>
+                            <li><a class="dropdown-item" href="management.html">Management</a></li>
+                            <li><a class="dropdown-item" href="teachers.html">Teachers</a></li>
+                            <li><a class="dropdown-item" href="policies.html">Policies</a></li>
+                            <li><a class="dropdown-item active bg-success text-white" href="calendar.html">Calendar</a></li>
+                            <li><a class="dropdown-item" href="#">Curriculum</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Newsletters</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="media.html">Media</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="donations.html">Donations</a></li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="contact.html">Contact Us</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="admissions.php">Admissions</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="calendar-hero-section d-flex align-items-center">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <h1 class="display-4 fw-bold text-success">
+                        Academic Calendar 2026
+                    </h1>
+                    <p class="lead text-dark">
+                        Stay informed about all important dates, holidays, events, and academic schedules at Al Falah Educational Centre.
+                    </p>
+                    <div class="mt-4">
+                        <button class="btn btn-success-modern btn-lg me-3" id="viewCurrentMonth">
+                            <i class="bi bi-calendar-check me-2"></i>Current Month
+                        </button>
+                        <button class="btn btn-outline-success btn-lg" id="downloadCalendar">
+                            <i class="bi bi-download me-2"></i>Download Calendar
+                        </button>
+                    </div>
+                </div>
+                <div class="col-lg-4 text-center">
+                    <div class="calendar-hero-icon">
+                        <i class="bi bi-calendar-heart"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Calendar Navigation -->
+    <section class="calendar-navigation py-4 bg-light">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-4 mb-3 mb-lg-0">
+                    <div class="d-flex align-items-center">
+                        <h2 class="text-success mb-0 me-3" id="currentMonthYear">January 2026</h2>
+                        <span class="badge bg-success" id="hijriDate">Rajab 1447</span>
+                    </div>
+                </div>
+                <div class="col-lg-8">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center">
+                        <div class="d-flex gap-2 mb-2 mb-lg-0">
+                            <button class="btn btn-outline-success" id="prevMonth">
+                                <i class="bi bi-chevron-left"></i> Previous
+                            </button>
+                            <button class="btn btn-outline-success" id="today">Today</button>
+                            <button class="btn btn-outline-success" id="nextMonth">
+                                Next <i class="bi bi-chevron-right"></i>
+                            </button>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-success view-toggle active" data-view="month">
+                                <i class="bi bi-calendar-month"></i> Month
+                            </button>
+                            <button class="btn btn-outline-success view-toggle" data-view="list">
+                                <i class="bi bi-list-ul"></i> List
+                            </button>
+                            <button class="btn btn-outline-success view-toggle" data-view="upcoming">
+                                <i class="bi bi-clock"></i> Upcoming
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Calendar Section -->
+    <section class="calendar-main-section py-5">
+        <div class="container">
+            <!-- Month View -->
+            <div class="calendar-view" id="monthView">
+                <!-- Weekday Headers -->
+                <div class="calendar-weekdays mb-3">
+                    <div class="weekday-header">Sunday</div>
+                    <div class="weekday-header">Monday</div>
+                    <div class="weekday-header">Tuesday</div>
+                    <div class="weekday-header">Wednesday</div>
+                    <div class="weekday-header">Thursday</div>
+                    <div class="weekday-header">Friday</div>
+                    <div class="weekday-header">Saturday</div>
+                </div>
+
+                <!-- Calendar Grid -->
+                <div class="calendar-grid" id="calendarGrid">
+                    <!-- Calendar days will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- List View -->
+            <div class="calendar-view d-none" id="listView">
+                <div class="row">
+                    <div class="col-lg-8">
+                        <div class="events-list" id="eventsList">
+                            <!-- Events will be populated by JavaScript -->
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="calendar-sidebar">
+                            <div class="sidebar-card mb-4">
+                                <h5 class="text-success mb-3"><i class="bi bi-filter me-2"></i>Filter Events</h5>
+                                <div class="filter-options">
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input filter-checkbox" type="checkbox" id="filterHolidays" checked data-type="holiday">
+                                        <label class="form-check-label" for="filterHolidays">
+                                            Holidays
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input filter-checkbox" type="checkbox" id="filterExams" checked data-type="exam">
+                                        <label class="form-check-label" for="filterExams">
+                                            Exams
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input filter-checkbox" type="checkbox" id="filterEvents" checked data-type="event">
+                                        <label class="form-check-label" for="filterEvents">
+                                            Events
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input filter-checkbox" type="checkbox" id="filterAcademic" checked data-type="academic">
+                                        <label class="form-check-label" for="filterAcademic">
+                                            Academic Dates
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="sidebar-card">
+                                <h5 class="text-success mb-3"><i class="bi bi-info-circle me-2"></i>Quick Legend</h5>
+                                <div class="legend-list">
+                                    <div class="legend-item mb-2">
+                                        <span class="legend-color holiday"></span>
+                                        <span>Holidays</span>
+                                    </div>
+                                    <div class="legend-item mb-2">
+                                        <span class="legend-color exam"></span>
+                                        <span>Exams</span>
+                                    </div>
+                                    <div class="legend-item mb-2">
+                                        <span class="legend-color event"></span>
+                                        <span>Events</span>
+                                    </div>
+                                    <div class="legend-item mb-2">
+                                        <span class="legend-color academic"></span>
+                                        <span>Academic Dates</span>
+                                    </div>
+                                    <div class="legend-item">
+                                        <span class="legend-color important"></span>
+                                        <span>Important</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Upcoming Events View -->
+            <div class="calendar-view d-none" id="upcomingView">
+                <h3 class="text-success mb-4">Upcoming Events (Next 30 Days)</h3>
+                <div class="row g-4" id="upcomingEvents">
+                    <!-- Upcoming events will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Event Details Modal -->
+    <div class="modal fade" id="eventModal" tabindex="-1" aria-labelledby="eventModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="eventModalLabel">Event Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="event-detail-header mb-4">
+                        <h4 id="eventTitle">Event Title</h4>
+                        <div class="event-date-badge" id="eventDateBadge">
+                            <i class="bi bi-calendar-event me-1"></i>
+                            <span>Date</span>
+                        </div>
+                    </div>
+                    <div class="event-details">
+                        <div class="detail-item mb-3">
+                            <h6><i class="bi bi-clock text-success me-2"></i>Time</h6>
+                            <p id="eventTime" class="mb-0">--:-- -- to --:-- --</p>
+                        </div>
+                        <div class="detail-item mb-3">
+                            <h6><i class="bi bi-geo-alt text-success me-2"></i>Location</h6>
+                            <p id="eventLocation" class="mb-0">Main Hall / Online</p>
+                        </div>
+                        <div class="detail-item mb-3">
+                            <h6><i class="bi bi-tag text-success me-2"></i>Event Type</h6>
+                            <p id="eventType" class="mb-0">Event</p>
+                        </div>
+                        <div class="detail-item">
+                            <h6><i class="bi bi-info-circle text-success me-2"></i>Description</h6>
+                            <p id="eventDescription" class="mb-0">No description available.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-success" id="addToCalendar">
+                        <i class="bi bi-calendar-plus me-1"></i>Add to My Calendar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Important Dates Section -->
+    <section class="important-dates-section py-5 bg-light">
+        <div class="container">
+            <h2 class="text-center text-success mb-5">Important Dates 2026</h2>
+            <div class="row g-4">
+                <div class="col-md-3">
+                    <div class="date-card">
+                        <div class="date-icon">
+                            <i class="bi bi-mortarboard"></i>
+                        </div>
+                        <h5>Spring Term Start</h5>
+                        <p class="date">January 12</p>
+                        <p class="mb-0">Beginning of Spring Term</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="date-card">
+                        <div class="date-icon">
+                            <i class="bi bi-moon-stars"></i>
+                        </div>
+                        <h5>Ramadan Start</h5>
+                        <p class="date">March 1</p>
+                        <p class="mb-0">Special schedule applies</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="date-card">
+                        <div class="date-icon">
+                            <i class="bi bi-stars"></i>
+                        </div>
+                        <h5>Eid al-Fitr</h5>
+                        <p class="date">April 10</p>
+                        <p class="mb-0">Madrassah closed</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="date-card">
+                        <div class="date-icon">
+                            <i class="bi bi-award"></i>
+                        </div>
+                        <h5>Hifdh Ceremony</h5>
+                        <p class="date">May 25</p>
+                        <p class="mb-0">Qur'an graduation ceremony</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Download Section -->
+    <section class="download-section py-5">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <h3 class="text-success mb-3">Download Printable Calendar</h3>
+                    <p class="text-muted mb-4">
+                        Get a printable PDF version of our academic calendar for easy reference. 
+                        Includes all important dates, holidays, and event schedules.
+                    </p>
+                    <div class="d-flex gap-3">
+                        <button class="btn btn-success btn-lg" id="printCalendar">
+                            <i class="bi bi-printer me-2"></i>Print Calendar
+                        </button>
+                        <button class="btn btn-outline-success btn-lg" id="downloadPDF">
+                            <i class="bi bi-file-earmark-pdf me-2"></i>Download PDF
+                        </button>
+                    </div>
+                </div>
+                <div class="col-lg-6 text-center">
+                    <div class="download-illustration">
+                        <i class="bi bi-calendar-week"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer-section bg-dark text-light pt-5">
+        <div class="container">
+            <div class="row g-4">
+                <!-- Brand Column -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="footer-brand mb-4">
+                        <img src="img/logo.png" alt="Al Falah Logo" height="50" class="mb-3">
+                        <h5 class="text-success fw-bold">Al Falah Educational Centre</h5>
+                        <p class="text-light opacity-75 mt-3">
+                            Dedicated to nurturing faith, knowledge, and character through Qur'an, Hifdh, and Islamic education.
+                        </p>
+                        <div class="social-links mt-4">
+                            <a href="#" class="social-link me-3">
+                                <i class="bi bi-facebook"></i>
+                            </a>
+                            <a href="#" class="social-link me-3">
+                                <i class="bi bi-twitter"></i>
+                            </a>
+                            <a href="#" class="social-link me-3">
+                                <i class="bi bi-instagram"></i>
+                            </a>
+                            <a href="#" class="social-link">
+                                <i class="bi bi-youtube"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Links -->
+                <div class="col-lg-2 col-md-6">
+                    <h6 class="text-success fw-bold mb-3">Quick Links</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="index.html" class="footer-link">Home</a></li>
+                        <li class="mb-2"><a href="about.html" class="footer-link">About Us</a></li>
+                        <li class="mb-2"><a href="calendar.html" class="footer-link">Calendar</a></li>
+                        <li class="mb-2"><a href="admissions.php" class="footer-link">Admissions</a></li>
+                        <li class="mb-2"><a href="contact.html" class="footer-link">Contact</a></li>
+                        <li class="mb-2"><a href="admin/" class="footer-link">Admin</a></li>
+                    </ul>
+                </div>
+
+                <!-- Programs -->
+                <div class="col-lg-3 col-md-6">
+                    <h6 class="text-success fw-bold mb-3">Our Programs</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="#" class="footer-link">Qur'an Classes</a></li>
+                        <li class="mb-2"><a href="#" class="footer-link">Hifdh Program</a></li>
+                        <li class="mb-2"><a href="#" class="footer-link">Islamic Studies</a></li>
+                        <li class="mb-2"><a href="#" class="footer-link">Weekend Madrasah</a></li>
+                        <li class="mb-2"><a href="#" class="footer-link">Adult Education</a></li>
+                    </ul>
+                </div>
+
+                <!-- Contact Info -->
+                <div class="col-lg-3 col-md-6">
+                    <h6 class="text-success fw-bold mb-3">Contact Info</h6>
+                    <div class="contact-info">
+                        <div class="d-flex align-items-start mb-3">
+                            <i class="bi bi-geo-alt-fill text-success me-3 mt-1"></i>
+                            <div>
+                                <p class="mb-0 text-light opacity-75">2 Whitefriars Avenue,</p>
+                                <p class="mb-0 text-light opacity-75">Harrow, Middlesex, HA3 5RN</p>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="bi bi-telephone-fill text-success me-3"></i>
+                            <span class="text-light opacity-75">(+44) 208 427 3113</span>
+                        </div>
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="bi bi-envelope-fill text-success me-3"></i>
+                            <span class="text-light opacity-75">info@slmcc.co.uk</span>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-clock-fill text-success me-3"></i>
+                            <div>
+                                <p class="mb-0 text-light opacity-75">Mon-Thu: 5:30pm – 7:30pm</p>
+                                <p class="mb-0 text-light opacity-75">Sat-Sun: 9:00am – 1:00pm</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Divider -->
+            <div class="border-top border-secondary my-4"></div>
+
+            <!-- Bottom Bar -->
+            <div class="row align-items-center py-3">
+                <div class="col-md-6">
+                    <p class="mb-0 text-light opacity-75">
+                        © 2025 Al Falah Educational Centre. All rights reserved.
+                    </p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <div class="footer-links">
+                        <a href="#" class="footer-link me-3">Privacy Policy</a>
+                        <a href="#" class="footer-link">Terms of Service</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="js/script.js"></script>
+    <script src="js/calendar.js"></script>
+</body>
+</html>

@@ -131,7 +131,7 @@ if (isset($_GET['bid']) && $_GET['bid'] !== $browser_instance_id) {
                 <div class="col-md-4 mb-3">
                     <div class="card shadow-sm p-3">
                         <h5><i class="bi bi-calendar-check text-success"></i> Attendance</h5>
-                        <p class="text-muted">View and manage attendance for all classes.</p>
+                        <p class="text-muted">View and manage attendance.</p>
                         <a href="private/attendance.php?bid=<?= $browser_instance_id ?>" class="btn btn-success-modern btn-sm">Manage</a>
                     </div>
                 </div>
@@ -144,12 +144,21 @@ if (isset($_GET['bid']) && $_GET['bid'] !== $browser_instance_id) {
                         <a href="private/parent-accounts.php?bid=<?= $browser_instance_id ?>" class="btn btn-success-modern btn-sm">Open</a>
                     </div>
                 </div>
+                
+                <!-- COMMUNICATIONS CARD -->
+                <div class="col-md-4 mb-3">
+                    <div class="card shadow-sm p-3">
+                        <h5><i class="bi bi-chat-left-text text-success"></i> Communications</h5>
+                        <p class="text-muted">Send bulk SMS/Emails to parents.</p>
+                        <a href="private/communications.php?bid=<?= $browser_instance_id ?>" class="btn btn-success-modern btn-sm">Send Messages</a>
+                    </div>
+                </div>
 
                 <!-- ADMIN ACCOUNTS CARD -->
                 <div class="col-md-4 mb-3">
                     <div class="card shadow-sm p-3">
                         <h5><i class="bi bi-shield-check text-success"></i> Admin Accounts</h5>
-                        <p class="text-muted">Manage admin users and approvals.</p>
+                        <p class="text-muted">Manage admin users.</p>
                         <a href="private/admin-accounts.php?bid=<?= $browser_instance_id ?>" class="btn btn-success-modern btn-sm">Manage</a>
                     </div>
                 </div>

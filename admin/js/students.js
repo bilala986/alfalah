@@ -1,5 +1,16 @@
 // admin/js/students.js
 document.addEventListener('DOMContentLoaded', function() {
+    // Helper function to escape HTML
+    function escapeHtml(unsafe) {
+        if (!unsafe) return '';
+        return unsafe
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
     // Toast notification function
     function showToast(message, type = 'success') {
         const toastEl = document.getElementById('liveToast');
@@ -21,6 +32,20 @@ document.addEventListener('DOMContentLoaded', function() {
     const studentsTableBody = document.getElementById('studentsTableBody');
     const visibleCount = document.getElementById('visibleCount');
     const totalCount = document.getElementById('totalCount');
+    
+    // Bulk selection elements
+    const selectStudentsBtn = document.getElementById('selectStudentsBtn');
+    const bulkActionsGroup = document.getElementById('bulkActionsGroup');
+    const selectedCount = document.getElementById('selectedCount');
+    const selectionStatus = document.getElementById('selectionStatus');
+    const selectedStatus = document.getElementById('selectedStatus');
+    const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+    const selectAllBtn = document.getElementById('selectAllBtn');
+    const deselectAllBtn = document.getElementById('deselectAllBtn');
+    const bulkAssignModal = new bootstrap.Modal(document.getElementById('bulkAssignModal'));
+    const bulkAssignCount = document.getElementById('bulkAssignCount');
+    const selectedStudentsList = document.getElementById('selectedStudentsList');
+    const confirmBulkAssign = document.getElementById('confirmBulkAssign');
     
     // Modal elements
     const removeModal = new bootstrap.Modal(document.getElementById('removeModal'));
@@ -49,6 +74,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Current action state
     let currentActionStudentId = null;
+
+    // Bulk selection state
+    let isSelectionMode = false;
+    let selectedStudentIds = new Set();
+    let studentNameMap = new Map(); // Map of student_id -> student_name
 
     // Get all rows
     let rows = studentsTableBody.querySelectorAll('tr[data-student]');
@@ -87,6 +117,148 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // Initialize student name map
+    function initializeStudentNameMap() {
+        studentNameMap.clear();
+        rows.forEach(row => {
+            const studentId = row.getAttribute('data-student-id');
+            const nameCell = row.querySelector('td.fw-semibold');
+            if (studentId && nameCell) {
+                studentNameMap.set(studentId, nameCell.textContent.trim());
+            }
+        });
+    }
+
+    // Toggle selection mode
+    function toggleSelectionMode() {
+        isSelectionMode = !isSelectionMode;
+        
+        if (isSelectionMode) {
+            // Enter selection mode
+            selectStudentsBtn.innerHTML = '<i class="bi bi-x-square"></i> Cancel Selection';
+            selectStudentsBtn.classList.remove('btn-outline-primary');
+            selectStudentsBtn.classList.add('btn-primary');
+            bulkActionsGroup.style.display = 'inline-flex';
+            selectionStatus.style.display = 'inline';
+            
+            // Show selection columns
+            document.querySelectorAll('.selection-column').forEach(col => {
+                col.style.display = 'table-cell';
+            });
+            
+            // Add selection mode class to table
+            document.getElementById('studentsTable').classList.add('selection-mode-active');
+            
+            // Clear previous selection
+            clearSelection();
+            
+            // Update button states
+            updateBulkActionButtons();
+        } else {
+            // Exit selection mode
+            selectStudentsBtn.innerHTML = '<i class="bi bi-check-square"></i> Select Students';
+            selectStudentsBtn.classList.remove('btn-primary');
+            selectStudentsBtn.classList.add('btn-outline-primary');
+            bulkActionsGroup.style.display = 'none';
+            selectionStatus.style.display = 'none';
+            
+            // Hide selection columns
+            document.querySelectorAll('.selection-column').forEach(col => {
+                col.style.display = 'none';
+            });
+            
+            // Remove selection mode class
+            document.getElementById('studentsTable').classList.remove('selection-mode-active');
+            
+            // Clear selection
+            clearSelection();
+        }
+    }
+
+    // Clear all selections
+    function clearSelection() {
+        selectedStudentIds.clear();
+        updateSelectionDisplay();
+        
+        // Uncheck all checkboxes
+        document.querySelectorAll('.student-checkbox:checked').forEach(cb => {
+            cb.checked = false;
+        });
+        selectAllCheckbox.checked = false;
+        
+        // Remove selected-row class
+        document.querySelectorAll('.selected-row').forEach(row => {
+            row.classList.remove('selected-row');
+        });
+    }
+
+    // Update selection display
+    function updateSelectionDisplay() {
+        const count = selectedStudentIds.size;
+        selectedCount.textContent = count;
+        selectedStatus.textContent = count;
+        
+        // Update bulk assign modal count
+        bulkAssignCount.textContent = count;
+        
+        // Update selected students list
+        updateSelectedStudentsList();
+        
+        // Update button states
+        updateBulkActionButtons();
+    }
+
+    // Update selected students list in modal
+    function updateSelectedStudentsList() {
+        selectedStudentsList.innerHTML = '';
+        
+        if (selectedStudentIds.size === 0) {
+            selectedStudentsList.innerHTML = '<li class="text-muted">No students selected</li>';
+            return;
+        }
+        
+        selectedStudentIds.forEach(studentId => {
+            const studentName = studentNameMap.get(studentId.toString()) || `Student #${studentId}`;
+            const li = document.createElement('li');
+            li.innerHTML = `<i class="bi bi-person-fill me-2"></i>${escapeHtml(studentName)}`;
+            selectedStudentsList.appendChild(li);
+        });
+    }
+
+    // Update bulk action buttons state
+    function updateBulkActionButtons() {
+        const hasSelection = selectedStudentIds.size > 0;
+        
+        // Enable/disable bulk assign button in dropdown
+        const bulkAssignItem = document.querySelector('a[data-bs-target="#bulkAssignModal"]');
+        if (bulkAssignItem) {
+            if (hasSelection) {
+                bulkAssignItem.classList.remove('disabled');
+            } else {
+                bulkAssignItem.classList.add('disabled');
+            }
+        }
+    }
+
+    // Select all visible students
+    function selectAllVisible() {
+        const visibleRows = Array.from(rows).filter(row => row.style.display !== 'none');
+        
+        visibleRows.forEach(row => {
+            const studentId = row.getAttribute('data-student-id');
+            const checkbox = row.querySelector('.student-checkbox');
+            
+            if (studentId && checkbox) {
+                selectedStudentIds.add(studentId);
+                checkbox.checked = true;
+                row.classList.add('selected-row');
+            }
+        });
+        
+        selectAllCheckbox.checked = true;
+        updateSelectionDisplay();
+    }
+
     // Enhanced search function with filtering
     function searchAndFilterStudents(searchTerm) {
         let visibleRows = 0;
@@ -98,7 +270,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const teacher = row.getAttribute('data-teacher');
             const age = parseInt(row.getAttribute('data-age')) || 0;
             // Add class data attribute
-            const classCell = row.cells[5]; // Class column is index 5
+            const classCell = row.cells[isSelectionMode ? 6 : 5]; // Adjust for checkbox column
             const className = classCell ? classCell.textContent.toLowerCase() : '';
 
             // Search matching - ADD CLASS TO SEARCH
@@ -218,10 +390,11 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         if (students.length === 0) {
-            // Fix colspan to 7
-            studentsTableBody.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-4">No students found.</td></tr>';
+            // Fix colspan to 8 (7 columns + checkbox column)
+            studentsTableBody.innerHTML = '<tr><td colspan="8" class="text-center text-muted py-4">No students found.</td></tr>';
             visibleCount.textContent = '0';
             rows = [];
+            studentNameMap.clear();
             return;
         }
 
@@ -243,7 +416,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 `<span class="badge bg-info">${escapeHtml(student.class_name)}</span>` : 
                 '<span class="text-muted">Unassigned</span>';
 
+            // Determine column index offset for selection mode
+            const selectionStyle = isSelectionMode ? '' : 'style="display: none;"';
+
             row.innerHTML = `
+                <td class="selection-column" ${selectionStyle}>
+                    <input type="checkbox" class="student-checkbox form-check-input" value="${student.id}">
+                </td>
                 <td class="fw-semibold">
                     ${escapeHtml(student.student_first_name + ' ' + student.student_last_name)}
                 </td>
@@ -291,7 +470,7 @@ document.addEventListener('DOMContentLoaded', function() {
             detailsRow.className = 'student-details-row';
             detailsRow.style.display = 'none';
             detailsRow.innerHTML = `
-                <td colspan="7"> <!-- Fix colspan to 7 -->
+                <td colspan="8">
                     <div class="student-details" id="details-${student.id}">
                         <div class="text-center text-muted py-3">
                             <i class="bi bi-hourglass-split"></i> Click "View" to load details
@@ -307,6 +486,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Reattach event listeners
         attachEventListeners();
+        
+        // Initialize student name map
+        initializeStudentNameMap();
 
         // Update rows reference
         rows = studentsTableBody.querySelectorAll('tr[data-student]');
@@ -315,8 +497,9 @@ document.addEventListener('DOMContentLoaded', function() {
         searchAndFilterStudents(searchInput.value.toLowerCase());
     }
 
-    // Helper function to escape HTML
+    // Function to generate class name for add modal
     function escapeHtml(unsafe) {
+        if (!unsafe) return '';
         return unsafe
             .replace(/&/g, "&amp;")
             .replace(/</g, "&lt;")
@@ -617,7 +800,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         <i class="bi bi-camera"></i>
                         <span>Photo Permission: ${escapeHtml(student.photo_permission || 'N/A')}</span>
                     </div>
-                    <div class="permission-item">
+                    <div classpermission-item">
                         <i class="bi bi-bus-front"></i>
                         <span>Transport: ${escapeHtml(student.transport_mode || 'N/A')}</span>
                     </div>
@@ -783,6 +966,97 @@ document.addEventListener('DOMContentLoaded', function() {
         removeModal.show();
     }
 
+    // Handle student checkbox click
+    function handleStudentCheckboxClick(event) {
+        const checkbox = event.target;
+        const studentId = checkbox.value;
+        const row = checkbox.closest('tr');
+        
+        if (checkbox.checked) {
+            selectedStudentIds.add(studentId);
+            row.classList.add('selected-row');
+        } else {
+            selectedStudentIds.delete(studentId);
+            row.classList.remove('selected-row');
+            selectAllCheckbox.checked = false;
+        }
+        
+        updateSelectionDisplay();
+    }
+
+    // Handle select all checkbox
+    function handleSelectAllCheckbox() {
+        const isChecked = selectAllCheckbox.checked;
+        
+        document.querySelectorAll('.student-checkbox').forEach(checkbox => {
+            const row = checkbox.closest('tr');
+            if (row.style.display !== 'none') {
+                checkbox.checked = isChecked;
+                const studentId = checkbox.value;
+                
+                if (isChecked) {
+                    selectedStudentIds.add(studentId);
+                    row.classList.add('selected-row');
+                } else {
+                    selectedStudentIds.delete(studentId);
+                    row.classList.remove('selected-row');
+                }
+            }
+        });
+        
+        updateSelectionDisplay();
+    }
+
+    // Process bulk assignment
+    function processBulkAssignment() {
+        const classId = document.getElementById('bulkAssignClass').value;
+        const removeExisting = document.getElementById('removeExistingClass').checked;
+        
+        if (!classId) {
+            showToast('Please select a class', 'error');
+            return;
+        }
+        
+        if (selectedStudentIds.size === 0) {
+            showToast('No students selected', 'error');
+            return;
+        }
+        
+        const studentIds = Array.from(selectedStudentIds);
+        
+        confirmBulkAssign.disabled = true;
+        confirmBulkAssign.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Assigning...';
+        
+        const formData = new FormData();
+        formData.append('class_id', classId);
+        formData.append('remove_existing', removeExisting ? '1' : '0');
+        formData.append('student_ids', JSON.stringify(studentIds));
+        
+        fetch('../php/bulk_assign_students.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                bulkAssignModal.hide();
+                showToast(data.message, 'success');
+                refreshTableData(false);
+                toggleSelectionMode(); // Exit selection mode
+            } else {
+                showToast('Error: ' + data.message, 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Bulk assign error:', error);
+            showToast('Error assigning students', 'error');
+        })
+        .finally(() => {
+            confirmBulkAssign.disabled = false;
+            confirmBulkAssign.innerHTML = 'Assign Students';
+        });
+    }
+
     // Search functionality
     searchInput.addEventListener('input', function() {
         searchAndFilterStudents(this.value.toLowerCase());
@@ -901,6 +1175,28 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
+    // Bulk selection functionality
+    selectStudentsBtn.addEventListener('click', toggleSelectionMode);
+    
+    selectAllBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        selectAllVisible();
+    });
+    
+    deselectAllBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        clearSelection();
+    });
+    
+    selectAllCheckbox.addEventListener('change', handleSelectAllCheckbox);
+    
+    // Bulk assign modal events
+    document.getElementById('bulkAssignModal').addEventListener('show.bs.modal', function() {
+        updateSelectedStudentsList();
+    });
+    
+    confirmBulkAssign.addEventListener('click', processBulkAssignment);
+
     // Attach event listeners
     function attachEventListeners() {
         // View buttons
@@ -917,10 +1213,16 @@ document.addEventListener('DOMContentLoaded', function() {
         document.querySelectorAll('.remove-btn').forEach(button => {
             button.addEventListener('click', handleRemoveClick);
         });
+
+        // Student checkboxes
+        document.querySelectorAll('.student-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', handleStudentCheckboxClick);
+        });
     }
 
     // Initialize
     attachEventListeners();
+    initializeStudentNameMap();
         
     handleUrlSearchParam();
     
