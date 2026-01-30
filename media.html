@@ -1,234 +1,637 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>Media - Al Falah Educational Centre</title>
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Media Gallery - Al Falah Educational Centre</title>
 
-        <!-- Favicon -->
-        <link rel="icon" type="image/png" href="img/favicon-32x32.png">
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="img/favicon-32x32.png">
 
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@400..700&display=swap" rel="stylesheet">
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@400..700&display=swap" rel="stylesheet">
 
-        <!-- Bootstrap CSS -->
-        <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet" />
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" />
-        <link rel="stylesheet" href="css/style.css" />
-        <link rel="stylesheet" href="css/media.css" />
-    </head>
-    <body class="bg-white">
-        <!-- Navbar -->
-        <nav class="navbar navbar-expand-lg navbar-custom fixed-top">
-            <div class="container">
-                <!-- Brand Logo -->
-                <a class="navbar-brand d-flex align-items-center" href="index.html">
-                    <img src="img/logo.png" alt="Al Falah Logo" height="50" class="me-2">
-                </a>
+    <!-- Bootstrap CSS -->
+    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" />
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/media.css" />
+</head>
+<body class="bg-white">
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-custom fixed-top">
+        <div class="container">
+            <!-- Brand Logo -->
+            <a class="navbar-brand d-flex align-items-center" href="">
+                <img src="img/logo.png" alt="Al Falah Logo" height="50" class="me-2">
+            </a>
 
-                <!-- Toggler -->
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
+            <!-- Toggler -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <!-- Nav Links -->
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="../alfalah/">Home</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Our Madrassah <i class="bi bi-chevron-down dropdown-arrow"></i>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="about">About Us</a></li>
+                            <li><a class="dropdown-item" href="management">Management</a></li>
+                            <li><a class="dropdown-item" href="teachers">Teachers</a></li>
+                            <li><a class="dropdown-item" href="policies">Policies</a></li>
+                            <li><a class="dropdown-item" href="calendar">Calendar</a></li>
+                            <li><a class="dropdown-item" href="curriculum">Curriculum</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="newsletters">Newsletters</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active fw-bold" href="media">Media</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="donations">Donations</a></li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="contact">Contact Us</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="https://slmcc.raziil.com/screens/registration.aspx" target="_blank">Admissions</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Updated Hero Section to match newsletters style -->
+    <section class="media-hero-section d-flex align-items-center">
+        <div class="container position-relative z-2">
+            <div class="row justify-content-center text-center">
+                <div class="col-lg-8">
+                    <div class="hero-content">
+                        <h1 class="display-4 fw-bold text-success">
+                            Media Gallery
+                        </h1>
+                        <p class="lead text-dark mb-4">
+                            Explore our collection of videos and images showcasing the vibrant activities, 
+                            memorable moments, and educational journey at Al Falah Educational Centre.
+                        </p>
+                        <div class="media-stats">
+                            <div class="stat-item">
+                                <span class="stat-number">50+</span>
+                                <span class="stat-label">Videos</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-number">200+</span>
+                                <span class="stat-label">Photos</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-number">6</span>
+                                <span class="stat-label">Years of Memories</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Decorative Elements -->
+        <div class="hero-decoration">
+            <i class="bi bi-camera-video decoration-1"></i>
+            <i class="bi bi-images decoration-2"></i>
+            <i class="bi bi-film decoration-3"></i>
+        </div>
+    </section>
+
+    <!-- Media Gallery Section -->
+    <section class="media-gallery py-5">
+        <div class="container">
+            <!-- Tab Buttons -->
+            <div class="row justify-content-center mb-5">
+                <div class="col-lg-6">
+                    <div class="media-tabs d-flex justify-content-center gap-3">
+                        <button class="media-tab-btn active" data-tab="videos">
+                            <i class="bi bi-play-circle-fill me-2"></i>
+                            Videos
+                        </button>
+                        <button class="media-tab-btn" data-tab="images">
+                            <i class="bi bi-images me-2"></i>
+                            Images
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab Content -->
+            <div class="tab-content">
+                <!-- Videos Tab -->
+                <div id="videos" class="tab-pane active">
+                    <div class="row g-4">
+                        <!-- Video 1 -->
+                        <div class="col-lg-4 col-md-6">
+                            <div class="video-card">
+                                <div class="video-thumbnail">
+                                    <div class="ratio ratio-16x9">
+                                        <iframe src="https://www.youtube.com/embed/luxI78vgkR4?rel=0" 
+                                                title="Qur'an Intensive Course Highlights" 
+                                                allowfullscreen
+                                                style="border: none;"></iframe>
+                                    </div>
+                                    <div class="video-overlay">
+                                        <i class="bi bi-play-circle-fill"></i>
+                                    </div>
+                                </div>
+                                <div class="video-content">
+                                    <h4 class="video-title">Qur'an Intensive Course Highlights</h4>
+                                    <p class="video-description">Experience the transformative 10-day Qur'an intensive program where students dedicate 6-8 hours daily to recitation and spiritual growth.</p>
+                                    <div class="video-meta">
+                                        <span class="video-duration">
+                                            <i class="bi bi-clock-fill me-1"></i>
+                                            15:42
+                                        </span>
+                                        <span class="video-date">
+                                            <i class="bi bi-calendar-fill me-1"></i>
+                                            January 2025
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Video 2 -->
+                        <div class="col-lg-4 col-md-6">
+                            <div class="video-card">
+                                <div class="video-thumbnail">
+                                    <div class="ratio ratio-16x9">
+                                        <iframe src="https://www.youtube.com/embed/luxI78vgkR4?rel=0" 
+                                                title="Student Success Stories" 
+                                                allowfullscreen
+                                                style="border: none;"></iframe>
+                                    </div>
+                                    <div class="video-overlay">
+                                        <i class="bi bi-play-circle-fill"></i>
+                                    </div>
+                                </div>
+                                <div class="video-content">
+                                    <h4 class="video-title">Student Success Stories</h4>
+                                    <p class="video-description">Hear from our students about their journey with the Qur'an and how Al Falah has helped strengthen their Islamic identity.</p>
+                                    <div class="video-meta">
+                                        <span class="video-duration">
+                                            <i class="bi bi-clock-fill me-1"></i>
+                                            08:23
+                                        </span>
+                                        <span class="video-date">
+                                            <i class="bi bi-calendar-fill me-1"></i>
+                                            December 2024
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Video 3 -->
+                        <div class="col-lg-4 col-md-6">
+                            <div class="video-card">
+                                <div class="video-thumbnail">
+                                    <div class="ratio ratio-16x9">
+                                        <iframe src="https://www.youtube.com/embed/luxI78vgkR4?rel=0" 
+                                                title="Daily Madrasah Activities" 
+                                                allowfullscreen
+                                                style="border: none;"></iframe>
+                                    </div>
+                                    <div class="video-overlay">
+                                        <i class="bi bi-play-circle-fill"></i>
+                                    </div>
+                                </div>
+                                <div class="video-content">
+                                    <h4 class="video-title">Daily Madrasah Activities</h4>
+                                    <p class="video-description">A glimpse into our daily routine - from Qur'an classes and Islamic studies to character-building activities.</p>
+                                    <div class="video-meta">
+                                        <span class="video-duration">
+                                            <i class="bi bi-clock-fill me-1"></i>
+                                            12:05
+                                        </span>
+                                        <span class="video-date">
+                                            <i class="bi bi-calendar-fill me-1"></i>
+                                            November 2024
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Video 4 -->
+                        <div class="col-lg-4 col-md-6">
+                            <div class="video-card">
+                                <div class="video-thumbnail">
+                                    <div class="ratio ratio-16x9">
+                                        <iframe src="https://www.youtube.com/embed/luxI78vgkR4?rel=0" 
+                                                title="Annual Charity Event" 
+                                                allowfullscreen
+                                                style="border: none;"></iframe>
+                                    </div>
+                                    <div class="video-overlay">
+                                        <i class="bi bi-play-circle-fill"></i>
+                                    </div>
+                                </div>
+                                <div class="video-content">
+                                    <h4 class="video-title">Annual Charity Event</h4>
+                                    <p class="video-description">Our students actively participate in community service and charity events, putting Islamic values into practice.</p>
+                                    <div class="video-meta">
+                                        <span class="video-duration">
+                                            <i class="bi bi-clock-fill me-1"></i>
+                                            09:18
+                                        </span>
+                                        <span class="video-date">
+                                            <i class="bi bi-calendar-fill me-1"></i>
+                                            October 2024
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Video 5 -->
+                        <div class="col-lg-4 col-md-6">
+                            <div class="video-card">
+                                <div class="video-thumbnail">
+                                    <div class="ratio ratio-16x9">
+                                        <iframe src="https://www.youtube.com/embed/luxI78vgkR4?rel=0" 
+                                                title="Parent Testimonials" 
+                                                allowfullscreen
+                                                style="border: none;"></iframe>
+                                    </div>
+                                    <div class="video-overlay">
+                                        <i class="bi bi-play-circle-fill"></i>
+                                    </div>
+                                </div>
+                                <div class="video-content">
+                                    <h4 class="video-title">Parent Testimonials</h4>
+                                    <p class="video-description">Parents share their experiences and how Al Falah has positively impacted their children's spiritual development.</p>
+                                    <div class="video-meta">
+                                        <span class="video-duration">
+                                            <i class="bi bi-clock-fill me-1"></i>
+                                            11:32
+                                        </span>
+                                        <span class="video-date">
+                                            <i class="bi bi-calendar-fill me-1"></i>
+                                            September 2024
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Video 6 -->
+                        <div class="col-lg-4 col-md-6">
+                            <div class="video-card">
+                                <div class="video-thumbnail">
+                                    <div class="ratio ratio-16x9">
+                                        <iframe src="https://www.youtube.com/embed/luxI78vgkR4?rel=0" 
+                                                title="Graduation Ceremony" 
+                                                allowfullscreen
+                                                style="border: none;"></iframe>
+                                    </div>
+                                    <div class="video-overlay">
+                                        <i class="bi bi-play-circle-fill"></i>
+                                    </div>
+                                </div>
+                                <div class="video-content">
+                                    <h4 class="video-title">Graduation Ceremony</h4>
+                                    <p class="video-description">Celebrating the achievements of our students as they complete their Qur'an and Islamic studies programs.</p>
+                                    <div class="video-meta">
+                                        <span class="video-duration">
+                                            <i class="bi bi-clock-fill me-1"></i>
+                                            14:27
+                                        </span>
+                                        <span class="video-date">
+                                            <i class="bi bi-calendar-fill me-1"></i>
+                                            August 2024
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Images Tab -->
+                <div id="images" class="tab-pane">
+                    <div class="row g-4">
+                        <!-- Image 1 -->
+                        <div class="col-lg-4 col-md-6">
+                            <div class="image-card">
+                                <div class="image-container">
+                                    <img src="img/hero2.jpeg" alt="Al Falah Educational Centre" class="img-fluid">
+                                    <div class="image-overlay">
+                                        <a href="img/hero2.jpeg" class="image-enlarge" data-fancybox="gallery" data-caption="Al Falah Educational Centre Campus">
+                                            <i class="bi bi-zoom-in"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="image-content">
+                                    <h4 class="image-title">Our Campus</h4>
+                                    <p class="image-description">The beautiful Al Falah Educational Centre where students learn and grow in an Islamic environment.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Image 2 -->
+                        <div class="col-lg-4 col-md-6">
+                            <div class="image-card">
+                                <div class="image-container">
+                                    <img src="img/hero2.jpeg" alt="Qur'an Class" class="img-fluid">
+                                    <div class="image-overlay">
+                                        <a href="img/hero2.jpeg" class="image-enlarge" data-fancybox="gallery" data-caption="Students engaged in Qur'an recitation class">
+                                            <i class="bi bi-zoom-in"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="image-content">
+                                    <h4 class="image-title">Qur'an Class</h4>
+                                    <p class="image-description">Students engaged in focused Qur'an recitation with guidance from experienced teachers.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Image 3 -->
+                        <div class="col-lg-4 col-md-6">
+                            <div class="image-card">
+                                <div class="image-container">
+                                    <img src="img/hero2.jpeg" alt="Group Activities" class="img-fluid">
+                                    <div class="image-overlay">
+                                        <a href="img/hero2.jpeg" class="image-enlarge" data-fancybox="gallery" data-caption="Students participating in group learning activities">
+                                            <i class="bi bi-zoom-in"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="image-content">
+                                    <h4 class="image-title">Group Learning</h4>
+                                    <p class="image-description">Collaborative learning sessions that foster brotherhood and teamwork among students.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Image 4 -->
+                        <div class="col-lg-4 col-md-6">
+                            <div class="image-card">
+                                <div class="image-container">
+                                    <img src="img/hero2.jpeg" alt="Islamic Studies" class="img-fluid">
+                                    <div class="image-overlay">
+                                        <a href="img/hero2.jpeg" class="image-enlarge" data-fancybox="gallery" data-caption="Islamic studies session in progress">
+                                            <i class="bi bi-zoom-in"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="image-content">
+                                    <h4 class="image-title">Islamic Studies</h4>
+                                    <p class="image-description">Deepening knowledge of Islamic principles, history, and values through interactive lessons.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Image 5 -->
+                        <div class="col-lg-4 col-md-6">
+                            <div class="image-card">
+                                <div class="image-container">
+                                    <img src="img/hero2.jpeg" alt="Sports Activities" class="img-fluid">
+                                    <div class="image-overlay">
+                                        <a href="img/hero2.jpeg" class="image-enlarge" data-fancybox="gallery" data-caption="Students enjoying physical activities and sports">
+                                            <i class="bi bi-zoom-in"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="image-content">
+                                    <h4 class="image-title">Sports & Recreation</h4>
+                                    <p class="image-description">Balancing spiritual growth with physical activities for holistic development.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Image 6 -->
+                        <div class="col-lg-4 col-md-6">
+                            <div class="image-card">
+                                <div class="image-container">
+                                    <img src="img/hero2.jpeg" alt="Community Events" class="img-fluid">
+                                    <div class="image-overlay">
+                                        <a href="img/hero2.jpeg" class="image-enlarge" data-fancybox="gallery" data-caption="Annual community iftar gathering">
+                                            <i class="bi bi-zoom-in"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="image-content">
+                                    <h4 class="image-title">Community Events</h4>
+                                    <p class="image-description">Bringing families together for spiritual and social gatherings throughout the year.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Image 7 -->
+                        <div class="col-lg-4 col-md-6">
+                            <div class="image-card">
+                                <div class="image-container">
+                                    <img src="img/hero2.jpeg" alt="Student Projects" class="img-fluid">
+                                    <div class="image-overlay">
+                                        <a href="img/hero2.jpeg" class="image-enlarge" data-fancybox="gallery" data-caption="Creative Islamic art and project display">
+                                            <i class="bi bi-zoom-in"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="image-content">
+                                    <h4 class="image-title">Creative Projects</h4>
+                                    <p class="image-description">Students showcasing their creative talents through Islamic art and educational projects.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Image 8 -->
+                        <div class="col-lg-4 col-md-6">
+                            <div class="image-card">
+                                <div class="image-container">
+                                    <img src="img/hero2.jpeg" alt="Teacher Training" class="img-fluid">
+                                    <div class="image-overlay">
+                                        <a href="img/hero2.jpeg" class="image-enlarge" data-fancybox="gallery" data-caption="Professional development session for teachers">
+                                            <i class="bi bi-zoom-in"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="image-content">
+                                    <h4 class="image-title">Teacher Training</h4>
+                                    <p class="image-description">Our dedicated teachers participate in continuous professional development workshops.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Image 9 -->
+                        <div class="col-lg-4 col-md-6">
+                            <div class="image-card">
+                                <div class="image-container">
+                                    <img src="img/hero2.jpeg" alt="Award Ceremony" class="img-fluid">
+                                    <div class="image-overlay">
+                                        <a href="img/hero2.jpeg" class="image-enlarge" data-fancybox="gallery" data-caption="Recognizing student achievements and excellence">
+                                            <i class="bi bi-zoom-in"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="image-content">
+                                    <h4 class="image-title">Achievement Awards</h4>
+                                    <p class="image-description">Celebrating student accomplishments and recognizing excellence in Qur'an memorization.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Load More Button -->
+            <div class="text-center mt-5">
+                <button class="btn btn-success-modern btn-lg" id="loadMoreBtn">
+                    <i class="bi bi-plus-circle-fill me-2"></i>
+                    Load More
                 </button>
+            </div>
+        </div>
+    </section>
 
-                <!-- Nav Links -->
-                <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav ms-auto">
-                        <li class="nav-item">
-                            <a class="nav-link" href="index.html">Home</a>
-                        </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                Our Madrassah <i class="bi bi-chevron-down dropdown-arrow"></i>
+    <!-- Newsletter Section -->
+    <section class="newsletter-section py-5 bg-light">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-8 text-center">
+                    <h2 class="text-success fw-bold mb-3">Stay Updated</h2>
+                    <p class="text-muted mb-4">
+                        Subscribe to our newsletter to receive updates on new media content, events, and important announcements.
+                    </p>
+                    <form class="newsletter-form">
+                        <div class="input-group mb-3">
+                            <input type="email" class="form-control" placeholder="Enter your email address" required>
+                            <button class="btn btn-success-modern" type="submit">
+                                Subscribe
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer-section bg-dark text-light pt-5">
+        <div class="container">
+            <div class="row g-4">
+                <!-- Brand Column -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="footer-brand mb-4">
+                        <img src="img/logo.png" alt="Al Falah Logo" height="50" class="mb-3">
+                        <h5 class="text-success fw-bold">Al Falah Educational Centre</h5>
+                        <p class="text-light opacity-75 mt-3">
+                            Dedicated to nurturing faith, knowledge, and character through Qur'an, Hifdh, and Islamic education.
+                        </p>
+                        <div class="social-links mt-4">
+                            <a href="#" class="social-link me-3">
+                                <i class="bi bi-facebook"></i>
                             </a>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="about.html">About Us</a></li>
-                                <li><a class="dropdown-item" href="management.html">Management</a></li>
-                                <li><a class="dropdown-item" href="teachers.html">Teachers</a></li>
-                                <li><a class="dropdown-item" href="policies.html">Policies</a></li>
-                                <li><a class="dropdown-item" href="#">Calendar</a></li>
-                                <li><a class="dropdown-item" href="#">Curriculum</a></li>
-                            </ul>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">Newsletters</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link active fw-bold" href="media.html">Media</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="donations.html">Donations</a></li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="contact.html">Contact Us</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="admissions.php">Admissions</a>
-                        </li>
+                            <a href="#" class="social-link me-3">
+                                <i class="bi bi-twitter"></i>
+                            </a>
+                            <a href="#" class="social-link me-3">
+                                <i class="bi bi-instagram"></i>
+                            </a>
+                            <a href="#" class="social-link">
+                                <i class="bi bi-youtube"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Links -->
+                <div class="col-lg-2 col-md-6">
+                    <h6 class="text-success fw-bold mb-3">Quick Links</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="index" class="footer-link">Home</a></li>
+                        <li class="mb-2"><a href="about" class="footer-link">About Us</a></li>
+                        <li class="mb-2"><a href="admissions.php" class="footer-link">Admissions</a></li>
+                        <li class="mb-2"><a href="calendar" class="footer-link">Calendar</a></li>
+                        <li class="mb-2"><a href="contact" class="footer-link">Contact</a></li>
+                        <li class="mb-2"><a href="admin/" class="footer-link">Admin</a></li>
                     </ul>
                 </div>
-            </div>
-        </nav>
 
-        <!-- Media Hero Section -->
-        <section class="media-hero-section">
-            <div class="hero-content">
-                <div class="container">
-                    <div class="row justify-content-center text-center">
-                        <div class="col-lg-8">
-                            <h1 class="hero-title">Media & Gallery</h1>
-                            <p class="hero-subtitle">
-                                Capturing moments of learning, growth, and community at Al Falah Educational Centre
-                            </p>
-                        </div>
-                    </div>
+                <!-- Programs -->
+                <div class="col-lg-3 col-md-6">
+                    <h6 class="text-success fw-bold mb-3">Our Programs</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="#" class="footer-link">Qur'an Classes</a></li>
+                        <li class="mb-2"><a href="#" class="footer-link">Hifdh Program</a></li>
+                        <li class="mb-2"><a href="#" class="footer-link">Islamic Studies</a></li>
+                        <li class="mb-2"><a href="#" class="footer-link">Weekend Madrasah</a></li>
+                        <li class="mb-2"><a href="#" class="footer-link">Adult Education</a></li>
+                    </ul>
                 </div>
-            </div>
-            <div class="hero-background">
-                <div class="hero-shape-1"></div>
-                <div class="hero-shape-2"></div>
-                <div class="hero-shape-3"></div>
-            </div>
-        </section>
 
-        <!-- In Progress Section -->
-        <section class="media-in-progress-section py-6">
-            <div class="container">
-                <div class="row justify-content-center">
-                    <div class="col-lg-8">
-                        <div class="media-in-progress-card text-center">
-                            <div class="media-in-progress-icon mb-4">
-                                <i class="bi bi-camera-video"></i>
+                <!-- Contact Info -->
+                <div class="col-lg-3 col-md-6">
+                    <h6 class="text-success fw-bold mb-3">Contact Info</h6>
+                    <div class="contact-info">
+                        <div class="d-flex align-items-start mb-3">
+                            <i class="bi bi-geo-alt-fill text-success me-3 mt-1"></i>
+                            <div>
+                                <p class="mb-0 text-light opacity-75">2 Whitefriars Avenue,</p>
+                                <p class="mb-0 text-light opacity-75">Harrow, Middlesex, HA3 5RN</p>
                             </div>
-                            <h2 class="text-success fw-bold mb-3">Media Gallery Coming Soon</h2>
-                            <p class="lead text-muted mb-4">
-                                We are currently organizing our photo and video gallery to showcase 
-                                the vibrant activities, events, and learning experiences at Al Falah 
-                                Educational Centre.
-                            </p>
-                            <p class="text-muted">
-                                Soon you'll be able to browse through pictures from our Qur'an intensive 
-                                courses, community events, educational programs, and special occasions 
-                                that make our centre a thriving hub of Islamic education.
-                            </p>
-                            <div class="mt-5">
-                                <a href="index.html#programs" class="btn btn-success-modern btn-lg">
-                                    <i class="bi bi-play-circle me-2"></i>
-                                    Watch Our Programs Video
-                                </a>
+                        </div>
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="bi bi-telephone-fill text-success me-3"></i>
+                            <span class="text-light opacity-75">(+44) 208 427 3113</span>
+                        </div>
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="bi bi-envelope-fill text-success me-3"></i>
+                            <span class="text-light opacity-75">info@slmcc.co.uk</span>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-clock-fill text-success me-3"></i>
+                            <div>
+                                <p class="mb-0 text-light opacity-75">Mon-Thu: 5:30pm – 7:30pm</p>
+                                <p class="mb-0 text-light opacity-75">Sat-Sun: 9:00am – 1:00pm</p>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </section>
 
-        <!-- Footer -->
-        <footer class="footer-section bg-dark text-light pt-5">
-            <div class="container">
-                <div class="row g-4">
-                    <!-- Brand Column -->
-                    <div class="col-lg-4 col-md-6">
-                        <div class="footer-brand mb-4">
-                            <img src="img/logo.png" alt="Al Falah Logo" height="50" class="mb-3">
-                            <h5 class="text-success fw-bold">Al Falah Educational Centre</h5>
-                            <p class="text-light opacity-75 mt-3">
-                                Dedicated to nurturing faith, knowledge, and character through Qur'an, Hifdh, and Islamic education.
-                            </p>
-                            <div class="social-links mt-4">
-                                <a href="#" class="social-link me-3">
-                                    <i class="bi bi-facebook"></i>
-                                </a>
-                                <a href="#" class="social-link me-3">
-                                    <i class="bi bi-twitter"></i>
-                                </a>
-                                <a href="#" class="social-link me-3">
-                                    <i class="bi bi-instagram"></i>
-                                </a>
-                                <a href="#" class="social-link">
-                                    <i class="bi bi-youtube"></i>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
+            <!-- Divider -->
+            <div class="border-top border-secondary my-4"></div>
 
-                    <!-- Quick Links -->
-                    <div class="col-lg-2 col-md-6">
-                        <h6 class="text-success fw-bold mb-3">Quick Links</h6>
-                        <ul class="list-unstyled">
-                            <li class="mb-2"><a href="index.html" class="footer-link">Home</a></li>
-                            <li class="mb-2"><a href="about.html" class="footer-link">About Us</a></li>
-                            <li class="mb-2"><a href="management.html" class="footer-link">Management</a></li>
-                            <li class="mb-2"><a href="admissions.php" class="footer-link">Admissions</a></li>
-                            <li class="mb-2"><a href="contact.html" class="footer-link">Contact</a></li>
-                            <li class="mb-2"><a href="admin/" class="footer-link">Admin</a></li>
-                        </ul>
-                    </div>
-
-                    <!-- Programs -->
-                    <div class="col-lg-3 col-md-6">
-                        <h6 class="text-success fw-bold mb-3">Our Programs</h6>
-                        <ul class="list-unstyled">
-                            <li class="mb-2"><a href="#" class="footer-link">Qur'an Classes</a></li>
-                            <li class="mb-2"><a href="#" class="footer-link">Hifdh Program</a></li>
-                            <li class="mb-2"><a href="#" class="footer-link">Islamic Studies</a></li>
-                            <li class="mb-2"><a href="#" class="footer-link">Weekend Madrasah</a></li>
-                            <li class="mb-2"><a href="#" class="footer-link">Adult Education</a></li>
-                        </ul>
-                    </div>
-
-                    <!-- Contact Info -->
-                    <div class="col-lg-3 col-md-6">
-                        <h6 class="text-success fw-bold mb-3">Contact Info</h6>
-                        <div class="contact-info">
-                            <div class="d-flex align-items-start mb-3">
-                                <i class="bi bi-geo-alt-fill text-success me-3 mt-1"></i>
-                                <div>
-                                    <p class="mb-0 text-light opacity-75">2 Whitefriars Avenue,</p>
-                                    <p class="mb-0 text-light opacity-75">Harrow, Middlesex, HA3 5RN</p>
-                                </div>
-                            </div>
-                            <div class="d-flex align-items-center mb-3">
-                                <i class="bi bi-telephone-fill text-success me-3"></i>
-                                <span class="text-light opacity-75">(+44) 208 427 3113</span>
-                            </div>
-                            <div class="d-flex align-items-center mb-3">
-                                <i class="bi bi-envelope-fill text-success me-3"></i>
-                                <span class="text-light opacity-75">info@slmcc.co.uk</span>
-                            </div>
-                            <div class="d-flex align-items-center">
-                                <i class="bi bi-clock-fill text-success me-3"></i>
-                                <div>
-                                    <p class="mb-0 text-light opacity-75">Mon-Thu: 5:30pm – 7:30pm</p>
-                                    <p class="mb-0 text-light opacity-75">Sat-Sun: 9:00am – 1:00pm</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+            <!-- Bottom Bar -->
+            <div class="row align-items-center py-3">
+                <div class="col-md-6">
+                    <p class="mb-0 text-light opacity-75">
+                        © 2025 Al Falah Educational Centre. All rights reserved.
+                    </p>
                 </div>
-
-                <!-- Divider -->
-                <div class="border-top border-secondary my-4"></div>
-
-                <!-- Bottom Bar -->
-                <div class="row align-items-center py-3">
-                    <div class="col-md-6">
-                        <p class="mb-0 text-light opacity-75">
-                            © 2025 Al Falah Educational Centre. All rights reserved.
-                        </p>
-                    </div>
-                    <div class="col-md-6 text-md-end">
-                        <div class="footer-links">
-                            <a href="policies.html#privacy" class="footer-link me-3">Privacy Policy</a>
-                            <a href="policies.html#complaints" class="footer-link">Complaints Policy</a>
-                        </div>
+                <div class="col-md-6 text-md-end">
+                    <div class="footer-links">
+                        <a href="#" class="footer-link me-3">Privacy Policy</a>
+                        <a href="#" class="footer-link">Terms of Service</a>
                     </div>
                 </div>
             </div>
-        </footer>
+        </div>
+    </footer>
 
-        <!-- Bootstrap JS -->
-        <script src="bootstrap/js/bootstrap.bundle.min.js"></script>
-        <script src="js/media.js"></script>
-    </body>
+    <!-- Bootstrap JS -->
+    <script src="bootstrap/js/bootstrap.bundle.min.js"></script>
+    <!-- Fancybox for image lightbox -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.css" />
+    <script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.umd.js"></script>
+    <script src="js/media.js"></script>
+</body>
 </html>

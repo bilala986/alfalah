@@ -17,6 +17,7 @@
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" />
         <link rel="stylesheet" href="css/style.css" />
         <link rel="stylesheet" href="css/teachers.css" />
+        <link rel="stylesheet" href="css/navbar.css" />
     </head>
     <body class="bg-white">
         <!-- Navbar -->
@@ -36,7 +37,7 @@
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav ms-auto">
                         <li class="nav-item">
-                            <a class="nav-link" href="index.html">Home</a>
+                            <a class="nav-link" href="../alfalah/">Home</a>
                         </li>
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle active fw-bold" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -47,12 +48,12 @@
                                 <li><a class="dropdown-item" href="management.html">Management</a></li>
                                 <li><a class="dropdown-item active" href="teachers.html">Teachers</a></li>
                                 <li><a class="dropdown-item" href="policies.html">Policies</a></li>
-                                <li><a class="dropdown-item" href="#">Calendar</a></li>
-                                <li><a class="dropdown-item" href="#">Curriculum</a></li>
+                                <li><a class="dropdown-item" href="calendar">Calendar</a></li>
+                                <li><a class="dropdown-item" href="curriculum">Curriculum</a></li>
                             </ul>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#">Newsletters</a>
+                            <a class="nav-link" href="newsletters">Newsletters</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="media.html">Media</a>
@@ -63,7 +64,7 @@
                             <a class="nav-link" href="contact.html">Contact Us</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="admissions.php">Admissions</a>
+                            <a class="nav-link" href="https://slmcc.raziil.com/screens/registration.aspx" target="_blank">Admissions</a>
                         </li>
                     </ul>
                 </div>
@@ -91,30 +92,369 @@
             </div>
         </section>
 
-        <!-- In Progress Section -->
-        <section class="in-progress-section py-6">
+        <!-- Teachers Introduction -->
+        <section class="teachers-intro py-6">
             <div class="container">
-                <div class="row justify-content-center">
-                    <div class="col-lg-8">
-                        <div class="in-progress-card text-center">
-                            <div class="in-progress-icon mb-4">
-                                <i class="bi bi-clock-history"></i>
+                <div class="row justify-content-center mb-6">
+                    <div class="col-lg-8 text-center">
+                        <h2 class="section-title mb-4">Meet Our Teaching Team</h2>
+                        <p class="lead text-muted">
+                            At Al Falah Educational Centre, our teachers are more than just educators – they are mentors, role models, 
+                            and spiritual guides. Each member of our team brings unique expertise and a shared passion for Islamic education.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Search & Filter Bar -->
+                <div class="row mb-5">
+                    <div class="col-lg-8 mx-auto">
+                        <div class="filter-bar">
+                            <div class="input-group">
+                                <span class="input-group-text bg-success text-white border-0">
+                                    <i class="bi bi-search"></i>
+                                </span>
+                                <input type="text" class="form-control border-0" id="teacher-search" placeholder="Search teachers by name or subject...">
                             </div>
-                            <h2 class="text-success fw-bold mb-3">Page Under Construction</h2>
-                            <p class="lead text-muted mb-4">
-                                We are currently working on updating our teachers' profiles and information. 
-                                This page will showcase our qualified and dedicated teaching staff who are 
-                                committed to providing excellent Islamic education.
-                            </p>
-                            <p class="text-muted">
-                                Check back soon to meet our team of experienced educators who make Al Falah 
-                                Educational Centre a nurturing environment for learning and spiritual growth.
-                            </p>
+                            <div class="filter-tags mt-3">
+                                <button class="filter-tag active" data-filter="all">All Teachers</button>
+                                <button class="filter-tag" data-filter="quran">Qur'an Teachers</button>
+                                <button class="filter-tag" data-filter="islamic">Islamic Studies</button>
+                                <button class="filter-tag" data-filter="arabic">Arabic Language</button>
+                                <button class="filter-tag" data-filter="hifdh">Hifdh Program</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Teachers Grid -->
+                <div class="row g-4" id="teachers-grid">
+                    <!-- Teacher 1 -->
+                    <div class="col-lg-4 col-md-6" data-category="quran hifdh">
+                        <div class="teacher-card">
+                            <div class="teacher-image">
+                                <img src="img/contact.png" alt="Ustadh Muhammad" class="teacher-img">
+                                <div class="teacher-badge">Senior Teacher</div>
+                                <div class="teacher-social">
+                                    <a href="#" class="social-icon"><i class="bi bi-envelope"></i></a>
+                                </div>
+                            </div>
+                            <div class="teacher-info">
+                                <h3 class="teacher-name">Ustadh Muhammad Ali</h3>
+                                <p class="teacher-qualification">Qur'an & Tajweed Specialist</p>
+                                <div class="teacher-expertise">
+                                    <span class="expertise-tag">Qur'an</span>
+                                    <span class="expertise-tag">Tajweed</span>
+                                    <span class="expertise-tag">Hifdh</span>
+                                </div>
+                                <p class="teacher-bio">
+                                    With over 15 years of experience in Qur'an teaching, Ustadh Muhammad specializes in 
+                                    Tajweed and Hifdh programs. He holds an Ijazah in Hafs 'an Asim narration.
+                                </p>
+                                <div class="teacher-experience">
+                                    <i class="bi bi-award"></i>
+                                    <span>15+ years experience</span>
+                                </div>
+                                <a href="#" class="btn-view-profile" data-teacher="1">View Profile <i class="bi bi-arrow-right"></i></a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Teacher 2 -->
+                    <div class="col-lg-4 col-md-6" data-category="islamic">
+                        <div class="teacher-card">
+                            <div class="teacher-image">
+                                <img src="img/contact.png" alt="Ustadha Fatima" class="teacher-img">
+                                <div class="teacher-badge">Islamic Studies</div>
+                                <div class="teacher-social">
+                                    <a href="#" class="social-icon"><i class="bi bi-envelope"></i></a>
+                                </div>
+                            </div>
+                            <div class="teacher-info">
+                                <h3 class="teacher-name">Ustadha Fatima Khan</h3>
+                                <p class="teacher-qualification">Islamic Studies Specialist</p>
+                                <div class="teacher-expertise">
+                                    <span class="expertise-tag">Fiqh</span>
+                                    <span class="expertise-tag">Seerah</span>
+                                    <span class="expertise-tag">Aqeedah</span>
+                                </div>
+                                <p class="teacher-bio">
+                                    Specializing in Islamic jurisprudence and Prophetic biography, Ustadha Fatima makes 
+                                    complex concepts accessible to students of all ages.
+                                </p>
+                                <div class="teacher-experience">
+                                    <i class="bi bi-award"></i>
+                                    <span>10+ years experience</span>
+                                </div>
+                                <a href="#" class="btn-view-profile" data-teacher="2">View Profile <i class="bi bi-arrow-right"></i></a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Teacher 3 -->
+                    <div class="col-lg-4 col-md-6" data-category="arabic">
+                        <div class="teacher-card">
+                            <div class="teacher-image">
+                                <img src="img/contact.png" alt="Ustadh Ahmed" class="teacher-img">
+                                <div class="teacher-badge">Arabic Language</div>
+                                <div class="teacher-social">
+                                    <a href="#" class="social-icon"><i class="bi bi-envelope"></i></a>
+                                </div>
+                            </div>
+                            <div class="teacher-info">
+                                <h3 class="teacher-name">Ustadh Ahmed Hassan</h3>
+                                <p class="teacher-qualification">Arabic Language Expert</p>
+                                <div class="teacher-expertise">
+                                    <span class="expertise-tag">Arabic</span>
+                                    <span class="expertise-tag">Grammar</span>
+                                    <span class="expertise-tag">Qur'anic Arabic</span>
+                                </div>
+                                <p class="teacher-bio">
+                                    A native Arabic speaker with a degree in Arabic Literature, Ustadh Ahmed specializes 
+                                    in teaching Qur'anic Arabic to non-native speakers.
+                                </p>
+                                <div class="teacher-experience">
+                                    <i class="bi bi-award"></i>
+                                    <span>12+ years experience</span>
+                                </div>
+                                <a href="#" class="btn-view-profile" data-teacher="3">View Profile <i class="bi bi-arrow-right"></i></a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Teacher 4 -->
+                    <div class="col-lg-4 col-md-6" data-category="quran">
+                        <div class="teacher-card">
+                            <div class="teacher-image">
+                                <img src="img/contact.png" alt="Ustadh Yusuf" class="teacher-img">
+                                <div class="teacher-badge">Qur'an Teacher</div>
+                                <div class="teacher-social">
+                                    <a href="#" class="social-icon"><i class="bi bi-envelope"></i></a>
+                                </div>
+                            </div>
+                            <div class="teacher-info">
+                                <h3 class="teacher-name">Ustadh Yusuf Rahman</h3>
+                                <p class="teacher-qualification">Qur'an Recitation Expert</p>
+                                <div class="teacher-expertise">
+                                    <span class="expertise-tag">Qur'an</span>
+                                    <span class="expertise-tag">Tajweed</span>
+                                    <span class="expertise-tag">Recitation</span>
+                                </div>
+                                <p class="teacher-bio">
+                                    An expert in the rules of Tajweed, Ustadh Yusuf helps students perfect their Qur'an 
+                                    recitation with proper pronunciation and melody.
+                                </p>
+                                <div class="teacher-experience">
+                                    <i class="bi bi-award"></i>
+                                    <span>8+ years experience</span>
+                                </div>
+                                <a href="#" class="btn-view-profile" data-teacher="4">View Profile <i class="bi bi-arrow-right"></i></a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Teacher 5 -->
+                    <div class="col-lg-4 col-md-6" data-category="hifdh">
+                        <div class="teacher-card">
+                            <div class="teacher-image">
+                                <img src="img/contact.png" alt="Ustadha Aisha" class="teacher-img">
+                                <div class="teacher-badge">Hifdh Program</div>
+                                <div class="teacher-social">
+                                    <a href="#" class="social-icon"><i class="bi bi-envelope"></i></a>
+                                </div>
+                            </div>
+                            <div class="teacher-info">
+                                <h3 class="teacher-name">Ustadha Aisha Mohammed</h3>
+                                <p class="teacher-qualification">Hifdh Program Coordinator</p>
+                                <div class="teacher-expertise">
+                                    <span class="expertise-tag">Hifdh</span>
+                                    <span class="expertise-tag">Memorization</span>
+                                    <span class="expertise-tag">Revision</span>
+                                </div>
+                                <p class="teacher-bio">
+                                    As our Hifdh program coordinator, Ustadha Aisha guides students through their 
+                                    memorization journey with proven techniques and spiritual support.
+                                </p>
+                                <div class="teacher-experience">
+                                    <i class="bi bi-award"></i>
+                                    <span>9+ years experience</span>
+                                </div>
+                                <a href="#" class="btn-view-profile" data-teacher="5">View Profile <i class="bi bi-arrow-right"></i></a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Teacher 6 -->
+                    <div class="col-lg-4 col-md-6" data-category="islamic arabic">
+                        <div class="teacher-card">
+                            <div class="teacher-image">
+                                <img src="img/contact.png" alt="Ustadh Ibrahim" class="teacher-img">
+                                <div class="teacher-badge">Islamic Sciences</div>
+                                <div class="teacher-social">
+                                    <a href="#" class="social-icon"><i class="bi bi-envelope"></i></a>
+                                </div>
+                            </div>
+                            <div class="teacher-info">
+                                <h3 class="teacher-name">Ustadh Ibrahim Malik</h3>
+                                <p class="teacher-qualification">Islamic Sciences Scholar</p>
+                                <div class="teacher-expertise">
+                                    <span class="expertise-tag">Tafseer</span>
+                                    <span class="expertise-tag">Hadith</span>
+                                    <span class="expertise-tag">Usul al-Fiqh</span>
+                                </div>
+                                <p class="teacher-bio">
+                                    With advanced studies in Islamic sciences, Ustadh Ibrahim teaches Tafseer and Hadith 
+                                    studies to advanced students and adults.
+                                </p>
+                                <div class="teacher-experience">
+                                    <i class="bi bi-award"></i>
+                                    <span>14+ years experience</span>
+                                </div>
+                                <a href="#" class="btn-view-profile" data-teacher="6">View Profile <i class="bi bi-arrow-right"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- View All Button -->
+                <div class="row mt-5">
+                    <div class="col-12 text-center">
+                        <button class="btn btn-success-modern btn-lg" id="load-more-teachers">
+                            <i class="bi bi-people-fill me-2"></i>View All Teaching Staff
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Teaching Philosophy -->
+        <section class="philosophy-section py-6 bg-light">
+            <div class="container">
+                <div class="row align-items-center">
+                    <div class="col-lg-5">
+                        <div class="philosophy-image">
+                            <img src="img/contact.png" alt="Teaching Philosophy" class="img-fluid rounded-4 shadow">
+                            <div class="image-overlay">
+                                <h4>Quality Education</h4>
+                                <p>Rooted in tradition, relevant for today</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-7">
+                        <div class="philosophy-content">
+                            <h2 class="section-title mb-4">Our Teaching Philosophy</h2>
+                            <div class="philosophy-points">
+                                <div class="point-item">
+                                    <div class="point-icon">
+                                        <i class="bi bi-heart-fill"></i>
+                                    </div>
+                                    <div class="point-content">
+                                        <h5>Nurturing Environment</h5>
+                                        <p>We create a safe, supportive space where students feel valued and encouraged to grow spiritually and academically.</p>
+                                    </div>
+                                </div>
+                                <div class="point-item">
+                                    <div class="point-icon">
+                                        <i class="bi bi-book-fill"></i>
+                                    </div>
+                                    <div class="point-content">
+                                        <h5>Authentic Knowledge</h5>
+                                        <p>Our curriculum is based on authentic Islamic sources, taught with academic rigor and spiritual depth.</p>
+                                    </div>
+                                </div>
+                                <div class="point-item">
+                                    <div class="point-icon">
+                                        <i class="bi bi-person-fill"></i>
+                                    </div>
+                                    <div class="point-content">
+                                        <h5>Individual Attention</h5>
+                                        <p>We recognize each student's unique needs and learning style, providing personalized guidance and support.</p>
+                                    </div>
+                                </div>
+                                <div class="point-item">
+                                    <div class="point-icon">
+                                        <i class="bi bi-award-fill"></i>
+                                    </div>
+                                    <div class="point-content">
+                                        <h5>Continuous Development</h5>
+                                        <p>Our teachers engage in regular professional development to enhance their teaching skills and Islamic knowledge.</p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </section>
+
+        <!-- Teacher Modal -->
+        <div class="modal fade" id="teacherModal" tabindex="-1" aria-labelledby="teacherModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header border-0">
+                        <h5 class="modal-title" id="teacherModalLabel">Teacher Profile</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-0">
+                        <div class="row g-0">
+                            <div class="col-md-5">
+                                <div class="modal-teacher-image">
+                                    <img src="img/contact.png" alt="Teacher" class="img-fluid" id="modal-teacher-img">
+                                    <div class="modal-badge" id="modal-badge"></div>
+                                </div>
+                            </div>
+                            <div class="col-md-7">
+                                <div class="modal-teacher-info p-4">
+                                    <h3 id="modal-teacher-name">Teacher Name</h3>
+                                    <p class="text-success fw-bold" id="modal-teacher-qualification">Qualification</p>
+                                    
+                                    <div class="modal-expertise mb-4" id="modal-expertise"></div>
+                                    
+                                    <div class="modal-details">
+                                        <h5 class="mb-3">About</h5>
+                                        <p id="modal-teacher-bio">Teacher biography...</p>
+                                        
+                                        <div class="row mt-4">
+                                            <div class="col-6">
+                                                <div class="detail-item">
+                                                    <i class="bi bi-award text-success"></i>
+                                                    <span id="modal-experience">Experience</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-6">
+                                                <div class="detail-item">
+                                                    <i class="bi bi-mortarboard text-success"></i>
+                                                    <span id="modal-education">Education</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-6 mt-3">
+                                                <div class="detail-item">
+                                                    <i class="bi bi-translate text-success"></i>
+                                                    <span id="modal-languages">Languages</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-6 mt-3">
+                                                <div class="detail-item">
+                                                    <i class="bi bi-calendar-check text-success"></i>
+                                                    <span id="modal-classes">Classes</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="modal-contact mt-4">
+                                        <h5 class="mb-3">Contact</h5>
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-envelope text-success me-3"></i>
+                                            <span id="modal-email">teacher@alfalah.edu</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <!-- Footer -->
         <footer class="footer-section bg-dark text-light pt-5">
@@ -223,5 +563,6 @@
         <!-- Bootstrap JS -->
         <script src="bootstrap/js/bootstrap.bundle.min.js"></script>
         <script src="js/teachers.js"></script>
+        <script src="js/navbar.js"></script>
     </body>
 </html>

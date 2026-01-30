@@ -1,33 +1,5 @@
 /* ===== ABOUT PAGE STYLES ===== */
 
-/* Style for active dropdown item */
-.navbar-custom .dropdown-item.active {
-    background-color: #003900 !important;
-    color: white !important;
-}
-
-/* Add underline to "Our Madrassah" when About is active */
-.navbar-custom .dropdown.show .dropdown-toggle::after {
-    content: "";
-    position: absolute;
-    left: 50%;
-    bottom: 0;
-    width: 80%;
-    height: 2px;
-    background-color: #003900;
-    transform: translateX(-50%);
-    animation: slideIn 0.3s ease-out;
-}
-
-@keyframes slideIn {
-    from {
-        width: 0;
-    }
-    to {
-        width: 80%;
-    }
-}
-
 /* About Hero Section */
 .about-hero-section {
     position: relative;

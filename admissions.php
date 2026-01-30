@@ -41,7 +41,7 @@
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav ms-auto">
                         <li class="nav-item">
-                            <a class="nav-link" href="index.html">Home</a>
+                            <a class="nav-link" href="../alfalah/">Home</a>
                         </li>
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -68,7 +68,7 @@
                             <a class="nav-link" href="contact.html">Contact Us</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link active fw-bold" href="admissions.php">Admissions</a>
+                            <a class="nav-link active bold" href="https://slmcc.raziil.com/screens/registration.aspx" target="_blank">Admissions</a>
                         </li>
                     </ul>
                 </div>
@@ -635,7 +635,7 @@
                             <li class="mb-2"><a href="index.html" class="footer-link">Home</a></li>
                             <li class="mb-2"><a href="about.html" class="footer-link">About Us</a></li>
                             <li class="mb-2"><a href="admissions.php" class="footer-link">Admissions</a></li>
-                            <li class="mb-2"><a href="#" class="footer-link">Calendar</a></li>
+                            <li class="mb-2"><a href="calendar" class="footer-link">Calendar</a></li>
                             <li class="mb-2"><a href="contact.html" class="footer-link">Contact</a></li>
                             <li class="mb-2"><a href="admin/" class="footer-link">Admin</a></li>
                         </ul>
