@@ -27,7 +27,7 @@ function initMediaTabs() {
             tabButtons.forEach(btn => {
                 btn.classList.remove('active');
                 // Remove inline white color from all buttons
-                btn.style.color = '';
+                btn.style.color = ''; // Keep this to clear inline styles
                 const span = btn.querySelector('span');
                 const icon = btn.querySelector('i');
                 if (span) span.style.color = '';
@@ -38,13 +38,6 @@ function initMediaTabs() {
             // Add active class to clicked button
             button.classList.add('active');
             
-            // Force white color on active button and its children
-            button.style.color = '#ffffff';
-            const activeSpan = button.querySelector('span');
-            const activeIcon = button.querySelector('i');
-            if (activeSpan) activeSpan.style.color = '#ffffff';
-            if (activeIcon) activeIcon.style.color = '#ffffff';
-            
             // Show corresponding tab pane WITHOUT scrolling
             const tabId = button.getAttribute('data-tab');
             const targetPane = document.getElementById(tabId);
@@ -53,16 +46,6 @@ function initMediaTabs() {
             }
         });
     });
-    
-    // Set initial active tab colors
-    const initialActive = document.querySelector('.media-tab-btn.active');
-    if (initialActive) {
-        initialActive.style.color = '#ffffff';
-        const initialSpan = initialActive.querySelector('span');
-        const initialIcon = initialActive.querySelector('i');
-        if (initialSpan) initialSpan.style.color = '#ffffff';
-        if (initialIcon) initialIcon.style.color = '#ffffff';
-    }
 }
 
 // Fancybox Initialization

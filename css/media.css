@@ -95,7 +95,7 @@
     animation-delay: 4s;
 }
 
-/* Media Tabs */
+/* Media Tabs - FIXED */
 .media-tabs {
     background: #ffffff;
     padding: 0.5rem;
@@ -135,17 +135,19 @@
     transform: scale(1);
 }
 
-.media-tab-btn span,
+/* Remove span selector - buttons don't have span tags */
 .media-tab-btn i {
     position: relative;
     z-index: 2;
-    transition: color 0.3s ease;
-    color: #198754; /* Add this line */
+    transition: color 0.3s ease, transform 0.3s ease;
 }
 
-/* White text for active tabs */
-.media-tab-btn.active,
-.media-tab-btn.active span,
+/* FIXED ACTIVE STATE - Button text and icon */
+.media-tab-btn.active {
+    color: #ffffff !important;
+    transform: translateY(-2px);
+}
+
 .media-tab-btn.active i {
     color: #ffffff !important;
 }
@@ -154,10 +156,7 @@
     transform: scale(1.2);
 }
 
-.media-tab-btn.active {
-    transform: translateY(-2px);
-}
-
+/* Move hover rule BEFORE active rule for proper cascade */
 .media-tab-btn:hover:not(.active) {
     color: #28a745;
     transform: translateY(-2px);
@@ -620,7 +619,18 @@
     margin-bottom: 1rem;
 }
 
-/* FORCE WHITE TEXT ON ACTIVE TABS - ADD AT END OF FILE */
-.media-tabs button.media-tab-btn.active * {
+/* ===== FIX FOR ACTIVE TAB TEXT COLOR ===== */
+/* High specificity selector to ensure white text on active tabs */
+.media-tabs button.media-tab-btn.active {
+    color: #ffffff !important;
+}
+
+.media-tabs button.media-tab-btn.active i {
+    color: #ffffff !important;
+}
+
+/* Force all text content in active button to be white */
+button.media-tab-btn.active,
+button.media-tab-btn.active * {
     color: #ffffff !important;
 }

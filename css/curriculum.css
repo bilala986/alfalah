@@ -93,15 +93,10 @@
     animation-delay: 4s;
 }
 
-/* Journey Timeline */
-.curriculum-journey {
-    position: relative;
-    background: #ffffff;
-}
-
+/* Enhanced Journey Timeline Styles */
 .journey-timeline {
     position: relative;
-    max-width: 800px;
+    max-width: 900px;
     margin: 0 auto;
     padding: 3rem 0;
 }
@@ -112,18 +107,24 @@
     top: 0;
     bottom: 0;
     width: 4px;
-    background: linear-gradient(to bottom, #198754, #28a745, #198754);
+    background: linear-gradient(to bottom, 
+        rgba(25, 135, 84, 0.2),
+        rgba(25, 135, 84, 0.6),
+        rgba(25, 135, 84, 0.8),
+        rgba(25, 135, 84, 1)
+    );
     transform: translateX(-50%);
     border-radius: 2px;
+    box-shadow: 0 0 20px rgba(25, 135, 84, 0.3);
 }
 
 .journey-stage {
     position: relative;
     display: flex;
     align-items: center;
-    margin-bottom: 4rem;
+    margin-bottom: 5rem;
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(30px);
     transition: all 0.6s ease;
 }
 
@@ -132,28 +133,168 @@
     transform: translateY(0);
 }
 
+.journey-stage:nth-child(odd) {
+    flex-direction: row;
+}
+
 .journey-stage:nth-child(even) {
     flex-direction: row-reverse;
 }
 
-.journey-stage:nth-child(even) .stage-content {
-    text-align: right;
-    margin-right: 3.5rem;
-    margin-left: 0;
+.stage-marker {
+    position: relative;
+    width: 80px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 2;
+}
+
+.marker-circle {
+    width: 70px;
+    height: 70px;
+    background: white;
+    border: 3px solid #198754;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    color: #198754;
+    box-shadow: 0 4px 15px rgba(25, 135, 84, 0.3);
+    transition: all 0.3s ease;
+}
+
+.journey-stage:hover .marker-circle {
+    transform: scale(1.1);
+    box-shadow: 0 8px 25px rgba(25, 135, 84, 0.4);
+}
+
+.marker-line {
+    width: 2px;
+    height: 100px;
+    background: linear-gradient(to bottom, #198754, transparent);
+    margin-top: 10px;
+}
+
+.stage-hifdh .marker-line {
+    display: none;
 }
 
 .stage-content {
     flex: 1;
-    margin-left: 3.5rem; /* Increased from 3rem to 3.5rem */
-    padding: 2rem;
-    background: #f8f9fa;
-    border-radius: 1rem;
-    border-left: 4px solid #198754;
+    margin: 0 4rem;
+    padding: 2.5rem;
+    background: white;
+    border-radius: 1.5rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e9ecef;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
 }
 
-.journey-stage:nth-child(even) .stage-content {
-    border-left: none;
-    border-right: 4px solid #198754;
+.stage-content::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 5px;
+    height: 100%;
+    background: linear-gradient(to bottom, #198754, #28a745);
+}
+
+.journey-stage:nth-child(even) .stage-content::before {
+    left: auto;
+    right: 0;
+}
+
+.stage-content:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(25, 135, 84, 0.15);
+}
+
+.stage-header {
+    margin-bottom: 1.5rem;
+}
+
+.stage-header h3 {
+    font-size: 1.5rem;
+}
+
+.stage-badges {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.badge {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+    border-radius: 50px;
+}
+
+.bg-success-light {
+    background-color: rgba(25, 135, 84, 0.1);
+}
+
+.bg-info-light {
+    background-color: rgba(13, 202, 240, 0.1);
+}
+
+.bg-warning-light {
+    background-color: rgba(255, 193, 7, 0.1);
+}
+
+.bg-purple-light {
+    background-color: rgba(111, 66, 193, 0.1);
+}
+
+.text-purple {
+    color: #6f42c1;
+}
+
+.stage-features {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+}
+
+.feature-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: #495057;
+    font-size: 0.95rem;
+}
+
+.feature-item i {
+    font-size: 1rem;
+}
+
+/* Stage-specific colors */
+.stage-foundation .marker-circle {
+    border-color: #198754;
+    color: #198754;
+}
+
+.stage-development .marker-circle {
+    border-color: #20c997;
+    color: #20c997;
+}
+
+.stage-mastery .marker-circle {
+    border-color: #0d6efd;
+    color: #0d6efd;
+}
+
+.stage-hifdh .marker-circle {
+    border-color: #6f42c1;
+    color: #6f42c1;
+    background: linear-gradient(135deg, #6f42c1, #d63384);
+    color: white;
 }
 
 /* Year Selection */
@@ -382,6 +523,42 @@
     }
 }
 
+/* Responsive Design - Add to existing media queries */
+@media (max-width: 768px) {
+    .journey-stage {
+        flex-direction: column !important;
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+    
+    .stage-marker {
+        margin-bottom: 1.5rem;
+    }
+    
+    .stage-content {
+        margin: 0;
+        text-align: center;
+    }
+    
+    .stage-content::before {
+        width: 100%;
+        height: 5px;
+        background: linear-gradient(to right, #198754, #28a745);
+    }
+    
+    .stage-features {
+        align-items: center;
+    }
+    
+    .timeline-line {
+        display: none;
+    }
+    
+    .marker-line {
+        display: none;
+    }
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .curriculum-stats {
@@ -392,22 +569,12 @@
         font-size: 2rem;
     }
     
-    .journey-stage {
-        flex-direction: column !important;
-        text-align: center;
-        margin-bottom: 3rem;
-    }
-    
     .stage-content {
         margin: 0;
         text-align: center;
         border-left: none !important;
         border-right: none !important;
         border-top: 4px solid #198754;
-    }
-    
-    .timeline-line {
-        display: none;
     }
     
     .year-btn {
