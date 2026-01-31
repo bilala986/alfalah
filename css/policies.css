@@ -282,23 +282,16 @@
         font-size: 1rem;
     }
     
-    .policies-nav {
-        flex-direction: column;
-        align-items: center;
-    }
-    
     .policy-nav-link {
-        width: 100%;
-        max-width: 250px;
-        flex-direction: row;
-        justify-content: flex-start;
-        text-align: left;
+        flex-direction: column;
+        text-align: center;
+        min-width: 100px;
+        padding: 0.75rem;
     }
     
     .policy-nav-link i {
-        margin-bottom: 0;
-        margin-right: 1rem;
-        font-size: 1.5rem;
+        margin-right: 0;
+        margin-bottom: 0.5rem;
     }
     
     .policy-card {
