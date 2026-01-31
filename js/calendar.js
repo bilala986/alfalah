@@ -434,9 +434,7 @@ class CalendarUI {
             eventType: document.getElementById('eventType'),
             eventDescription: document.getElementById('eventDescription'),
             addToCalendar: document.getElementById('addToCalendar'),
-            filterCheckboxes: document.querySelectorAll('.filter-checkbox'),
-            printCalendar: document.getElementById('printCalendar'),
-            downloadPDF: document.getElementById('downloadPDF')
+            filterCheckboxes: document.querySelectorAll('.filter-checkbox')
         };
     }
 
@@ -463,10 +461,6 @@ class CalendarUI {
 
         // Modal actions
         this.elements.addToCalendar.addEventListener('click', () => this.addToGoogleCalendar());
-
-        // Print/Download
-        this.elements.printCalendar.addEventListener('click', () => this.printCalendar());
-        this.elements.downloadPDF.addEventListener('click', () => this.downloadPDF());
     }
 
     navigateMonth(direction) {
@@ -583,69 +577,101 @@ class CalendarUI {
     addCalendarDay(date, isOtherMonth, isToday = false) {
         const dayElement = document.createElement('div');
         dayElement.className = 'calendar-day';
-        
+
         if (isOtherMonth) {
             dayElement.classList.add('other-month');
         }
-        
+
         if (isToday) {
             dayElement.classList.add('today');
         }
-        
+
         // Add day number
         const dayNumber = document.createElement('div');
         dayNumber.className = 'day-number';
         dayNumber.textContent = date.getDate();
         dayElement.appendChild(dayNumber);
-        
+
         // Add Hijri date
         const hijriDate = this.calendar.getHijriDate(date);
         const hijriElement = document.createElement('div');
         hijriElement.className = 'day-hijri';
         hijriElement.textContent = hijriDate.day;
         dayElement.appendChild(hijriElement);
-        
+
         // Add events
         const eventsContainer = document.createElement('div');
         eventsContainer.className = 'day-events';
-        
+
         const events = this.calendar.getEventsForDate(date);
-        const maxEvents = window.innerWidth < 768 ? 0 : 3;
-        
-        events.slice(0, maxEvents).forEach(event => {
-            const eventElement = document.createElement('div');
-            eventElement.className = `event-item ${event.type}`;
-            eventElement.innerHTML = `
-                <span class="event-indicator ${event.type}"></span>
-                ${event.title}
-            `;
-            eventElement.addEventListener('click', (e) => {
-                e.stopPropagation();
-                this.showEventModal(event);
+        const isMobile = window.innerWidth < 768;
+
+        // For mobile: show only colored dots
+        if (isMobile && events.length > 0) {
+            const dotsContainer = document.createElement('div');
+            dotsContainer.className = 'mobile-dots';
+            dotsContainer.style.display = 'flex';
+            dotsContainer.style.gap = '2px';
+            dotsContainer.style.position = 'absolute';
+            dotsContainer.style.bottom = '5px';
+            dotsContainer.style.left = '5px';
+
+            // Limit to max 3 dots on mobile
+            events.slice(0, 3).forEach(event => {
+                const dot = document.createElement('span');
+                dot.className = `event-indicator ${event.type}`;
+                dot.style.width = '8px';
+                dot.style.height = '8px';
+                dot.style.borderRadius = '50%';
+                dot.style.display = 'inline-block';
+                dotsContainer.appendChild(dot);
             });
-            eventsContainer.appendChild(eventElement);
-        });
-        
-        if (events.length > maxEvents) {
-            const moreElement = document.createElement('div');
-            moreElement.className = 'event-item';
-            moreElement.textContent = `+${events.length - maxEvents} more`;
-            moreElement.addEventListener('click', (e) => {
-                e.stopPropagation();
-                this.showDayEvents(date, events);
-            });
-            eventsContainer.appendChild(moreElement);
+
+            dayElement.appendChild(dotsContainer);
         }
-        
-        dayElement.appendChild(eventsContainer);
-        
-        // Add click handler for day
+        // For desktop/tablet: show event text
+        else if (!isMobile) {
+            const maxEvents = 3; // Show max 3 event texts on desktop
+
+            events.slice(0, maxEvents).forEach(event => {
+                const eventElement = document.createElement('div');
+                eventElement.className = `event-item ${event.type}`;
+                eventElement.innerHTML = `
+                    <span class="event-indicator ${event.type}"></span>
+                    ${event.title}
+                `;
+                eventElement.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.showEventModal(event);
+                });
+                eventsContainer.appendChild(eventElement);
+            });
+
+            // Add "more events" indicator if needed (desktop only)
+            if (events.length > maxEvents) {
+                const moreElement = document.createElement('div');
+                moreElement.className = 'event-item';
+                moreElement.textContent = `+${events.length - maxEvents} more`;
+                moreElement.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.showDayEvents(date, events);
+                });
+                eventsContainer.appendChild(moreElement);
+            }
+        }
+
+        // Only append eventsContainer if we have content (for desktop)
+        if (!isMobile && events.length > 0) {
+            dayElement.appendChild(eventsContainer);
+        }
+
+        // Add click handler for day (works for both mobile and desktop)
         dayElement.addEventListener('click', () => {
             if (events.length > 0) {
                 this.showDayEvents(date, events);
             }
         });
-        
+
         this.elements.calendarGrid.appendChild(dayElement);
     }
 
@@ -843,15 +869,6 @@ class CalendarUI {
         const googleCalendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(event.title)}&dates=${startDate}/${endDateStr}&details=${encodeURIComponent(event.description)}&location=${encodeURIComponent(event.location)}`;
         
         window.open(googleCalendarUrl, '_blank');
-    }
-
-    printCalendar() {
-        window.print();
-    }
-
-    downloadPDF() {
-        // In a real implementation, this would generate a PDF
-        alert('PDF download would be implemented here. For now, please use Print > Save as PDF in your browser.');
     }
 }
 

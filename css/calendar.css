@@ -381,17 +381,6 @@
     font-size: 0.9rem;
 }
 
-/* Download Section */
-.download-section {
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-}
-
-.download-illustration {
-    font-size: 12rem;
-    color: rgba(25, 135, 84, 0.2);
-    animation: pulse 2s ease-in-out infinite;
-}
-
 /* Event Modal */
 .event-date-badge {
     display: inline-flex;
